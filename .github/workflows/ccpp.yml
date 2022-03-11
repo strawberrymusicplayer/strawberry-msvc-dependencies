@@ -1,0 +1,1596 @@
+name: C/C++ CI
+on: [push, pull_request]
+
+jobs:
+
+  build-windows-msvc:
+    name: Build Windows MSVC
+    runs-on: windows-2019
+
+    strategy:
+      matrix:
+       include:
+         - buildtype: "release"
+         - buildtype: "debug"
+
+    steps:
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+          toolset: 14.29
+
+      - uses: actions/checkout@v1.2.0
+      - uses: ilammy/setup-nasm@v1
+      - uses: actions/setup-python@v1
+      #- uses: hendrikmuhs/ccache-action@v1
+
+      - name: Install python dependencies
+        run: pip install meson ninja
+
+      - name: Create sources directory
+        run: mkdir sources
+
+      - name: Create directories
+        shell: bash
+        run: mkdir -p /c/msvc_x86_64/{bin,lib,include}
+
+      - name: Update PATH
+        run: echo "c:\msvc_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+
+      - name: Delete conflicting files
+        shell: bash
+        run: |
+          rm -f /c/programdata/chocolatey/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cc1.exe,cc1plus.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,gdb.exe,gfortran.exe,ld.bfd.exe,ld.exe,ld.gold.exe,nm.exe,ranlib.exe,readelf.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.1.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
+          rm -f /c/strawberry/c/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,ld.exe,nm.exe,ranlib.exe,readelf.exe,widl.exe,windmc.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.3.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
+
+
+      - name: Download yasm
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "yasm [this](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Copy yasm
+        shell: bash
+        working-directory: downloads
+        run: cp yasm-1.3.0-win64.exe /c/msvc_x86_64/bin/yasm.exe
+
+
+      - name: Download win_flex_bison
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Copy win_flex_bison
+        run: |
+          mkdir c:\win_flex_bison
+          cd c:\win_flex_bison
+          7z x ${{github.workspace}}\downloads\win_flex_bison-2.5.25.zip
+
+      - name: Add win_flex_bison to PATH
+        run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+
+      - name: Download Boost
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract Boost
+        shell: bash
+        working-directory: sources
+        run: tar -xf  ../downloads/boost_1_78_0.tar.bz2
+
+      - name: Copy Boost
+        shell: bash
+        working-directory: sources
+        run: cp -r boost_1_78_0/boost /c/msvc_x86_64/include/
+
+
+      - name: Download pkgconf
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-1.8.0.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract pkgconf
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/pkgconf-1.8.0.tar.gz
+
+      - name: Compile pkgconf
+        env:
+          CL: "/MP"
+        working-directory: sources/pkgconf-pkgconf-1.8.0
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 -Dtests=false build
+          cd build
+          ninja
+          ninja install
+          copy c:\msvc_x86_64\bin\pkgconf.exe c:\msvc_x86_64\bin\pkg-config.exe
+
+
+      - name: Download zlib
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "zlib [this](https://zlib.net/zlib-1.2.11.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract zlib
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/zlib-1.2.11.tar.gz
+
+      - name: Compile zlib
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/zlib-1.2.11
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake --build .
+          cmake --install .
+
+      - name: copy zlib (release)
+        if: matrix.buildtype == 'release'
+        shell: bash
+        run: cp /c/msvc_x86_64/lib/zlib.lib /c/msvc_x86_64/lib/z.lib
+
+      - name: copy zlib (debug)
+        if: matrix.buildtype == 'debug'
+        shell: bash
+        run: |
+          cp /c/msvc_x86_64/lib/zlibd.lib /c/msvc_x86_64/lib/z.lib
+          cp /c/msvc_x86_64/lib/zlibd.lib /c/msvc_x86_64/lib/zd.lib
+
+
+      - name: Download openssl
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "openssl [this](https://www.openssl.org/source/openssl-3.0.2.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract openssl
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/openssl-3.0.2.tar.gz
+
+      - name: Configure openssl (release)
+        if: matrix.buildtype == 'release'
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/openssl-3.0.2
+        run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --release --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlib.lib
+
+      - name: Configure openssl (debug)
+        if: matrix.buildtype == 'debug'
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/openssl-3.0.2
+        run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --debug --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlibd.lib
+
+      - name: Compile openssl
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/openssl-3.0.2
+        run: |
+          nmake
+          nmake install
+
+
+      - name: Download GnuTLS
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.3/libgnutls_3.7.3_msvc16.zip)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract GnuTLS
+        run: |
+          mkdir gnutls
+          cd gnutls
+          7z x "../downloads/libgnutls_3.7.3_msvc16.zip"
+          xcopy /s /y bin\x64\*.* c:\msvc_x86_64\bin\
+          xcopy /s /y lib\x64\*.* c:\msvc_x86_64\lib\
+          xcopy /s /y include\* c:\msvc_x86_64\include\
+
+      - name: Create gnutls.pc
+        shell: bash
+        run: |
+          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Name: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Description: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "URL: https://www.gnutls.org/" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Version: 3.7.3" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Libs: -Lc:/msvc_x86_64/lib -lgnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+
+
+      - name: Download libpng
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libpng [this](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libpng
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/libpng-1.6.37.tar.xz
+          cd libpng-1.6.37
+          patch -p1 < ../../patches/libpng-msvc.patch
+
+      - name: Compile libpng
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libpng-1.6.37
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download pcre2
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract pcre2
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/pcre2-10.39.tar.bz2
+
+      - name: Compile pcre2
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/pcre2-10.39
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_PCRE2_8=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_TESTS=OFF
+          cmake --build .
+          cmake --install .
+
+      - name: Remove pcre2 cmake
+        shell: bash
+        working-directory: sources
+        run: rm /c/msvc_x86_64/cmake/*pcre2*.cmake
+
+
+      - name: Download bzip2
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "bzip2 [this](https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract bzip2
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/bzip2-1.0.8.tar.gz
+          cd bzip2-1.0.8
+          patch -p1 < ../../patches/bzip2-cmake.patch
+
+      - name: Compile bzip2
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/bzip2-1.0.8
+        run: |
+          mkdir build2
+          cd build2
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download xz
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "xz [this](https://tukaani.org/xz/xz-5.2.5.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract xz
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/xz-5.2.5.tar.xz
+
+      - name: Compile xz
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/xz-5.2.5/windows/vs2019
+        run: |
+          msbuild xz_win.sln /property:Configuration=${{ matrix.buildtype }}
+          copy ..\..\src\liblzma\api\*.h c:\msvc_x86_64\include\
+          mkdir c:\msvc_x86_64\include\lzma
+          copy ..\..\src\liblzma\api\lzma\*.* c:\msvc_x86_64\include\lzma\
+
+      - name: Copy liblzma (release)
+        if: matrix.buildtype == 'release'
+        working-directory: sources/xz-5.2.5/windows/vs2019
+        run: |
+          copy release\x64\liblzma_dll\*.lib c:\msvc_x86_64\lib\
+          copy release\x64\liblzma_dll\*.dll c:\msvc_x86_64\bin\
+
+      - name: Copy liblzma (debug)
+        if: matrix.buildtype == 'debug'
+        working-directory: sources/xz-5.2.5/windows/vs2019
+        run: |
+          copy debug\x64\liblzma_dll\*.lib c:\msvc_x86_64\lib\
+          copy debug\x64\liblzma_dll\*.dll c:\msvc_x86_64\bin\
+
+
+      - name: Download brotli
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "brotli [this](https://github.com/google/brotli/archive/refs/tags/v1.0.9.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract brotli
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/v1.0.9.tar.gz
+
+      - name: Compile brotli
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/brotli-1.0.9
+        run: |
+          mkdir build2
+          cd build2
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_TESTING=OFF
+          cmake --build .
+          cmake --install .
+
+
+      - name: Compile libiconv
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources
+        run: |
+          git clone https://github.com/pffang/libiconv-for-Windows
+          cd libiconv-for-Windows
+          git checkout 9b7aba8da6e125ef33912fa4412779279f204003
+          msbuild libiconv.sln /property:Configuration=${{ matrix.buildtype }}
+          copy lib64\*.lib c:\msvc_x86_64\lib\
+          copy lib64\*.dll c:\msvc_x86_64\bin\
+          copy include\*.h c:\msvc_x86_64\include\
+
+
+      - name: Download pixman
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "pixman [this](https://www.cairographics.org/releases/pixman-0.40.0.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract pixman
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/pixman-0.40.0.tar.gz
+          cd pixman-0.40.0
+          patch -p1 < ../../patches/pixman.patch
+
+      - name: Compile pixman
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/pixman-0.40.0
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dgtk=disabled -Dlibpng=enabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download libxml2
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.13/libxml2-v2.9.13.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libxml2
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libxml2-v2.9.13.tar.bz2 || true
+
+      - name: Compile libxml2
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libxml2-v2.9.13
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DLIBXML2_WITH_PYTHON=OFF -DLIBXML2_WITH_ZLIB=ON
+          cmake --build .
+          cmake --install .
+
+      - name: copy libxml2 (debug)
+        if: matrix.buildtype == 'debug'
+        shell: bash
+        run: cp /c/msvc_x86_64/lib/libxml2d.lib /c/msvc_x86_64/lib/libxml2.lib
+
+
+      - name: Download nghttp2
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v1.47.0/nghttp2-1.47.0.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract nghttp2
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/nghttp2-1.47.0.tar.xz
+
+      - name: Compile nghttp2
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/nghttp2-1.47.0
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DENABLE_SHARED_LIB=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download SQLite
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-3380100.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract SQLite
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/sqlite-autoconf-3380100.tar.gz
+
+      - name: Compile SQlite
+        env:
+          CL: "/MP"
+        working-directory: sources/sqlite-autoconf-3380100
+        run: |
+          cl -DSQLITE_API="__declspec(dllexport)" sqlite3.c -link -dll -out:sqlite3.dll
+          cl shell.c sqlite3.c -Fe:sqlite3.exe
+
+      - name: Copy SQLite
+        working-directory: sources/sqlite-autoconf-3380100
+        run: |
+          copy *.h c:\msvc_x86_64\include\
+          copy *.lib c:\msvc_x86_64\lib\
+          copy *.dll c:\msvc_x86_64\bin\
+          copy *.exe c:\msvc_x86_64\bin\
+
+      - name: Create sqlite3.pc
+        shell: bash
+        run: |
+          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Name: SQLite" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Description: SQL database engine" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "URL: https://www.sqlite.org/" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Version: 3.38.1" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Libs: -Lc:/msvc_x86_64/lib -lsqlite3" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Libs.private: -lz -ldl" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+
+
+      - name: Download libogg
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libogg [this](https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libogg
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libogg-1.3.5.tar.xz
+
+      - name: Compile libogg
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libogg-1.3.5
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download libvorbis
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libvorbis [this](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libvorbis
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libvorbis-1.3.7.tar.xz
+
+      - name: Compile libvorbis
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libvorbis-1.3.7
+        run: |
+          mkdir build2
+          cd build2
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download flac
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "flac [this](https://ftp.osuosl.org/pub/xiph/releases/flac/flac-1.3.4.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract flac
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/flac-1.3.4.tar.xz
+
+      - name: Compile flac
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/flac-1.3.4
+        run: |
+          mkdir build2
+          cd build2
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_DOCS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_MANPAGES=OFF -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download wavpack
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "wavpack [this](https://www.wavpack.com/wavpack-5.4.0.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract wavpack
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/wavpack-5.4.0.tar.bz2
+          sed -i '/wavpackdll.rc/d' wavpack-5.4.0/CMakeLists.txt
+
+      - name: Compile wavpack
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/wavpack-5.4.0
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DWAVPACK_BUILD_DOCS=OFF -DWAVPACK_BUILD_PROGRAMS=OFF -DWAVPACK_ENABLE_ASM=OFF -DWAVPACK_ENABLE_LEGACY=OFF -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF
+          cmake --build .
+          cmake --install .
+          mkdir c:\msvc_x86_64\include\wavpack
+          copy c:\msvc_x86_64\include\wavpack.h c:\msvc_x86_64\include\wavpack\
+          copy c:\msvc_x86_64\lib\wavpackdll.lib c:\msvc_x86_64\lib\wavpack.lib
+          copy c:\msvc_x86_64\bin\wavpackdll.dll c:\msvc_x86_64\bin\wavpack.dll
+
+
+      - name: Download opus
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "opus [this](https://archive.mozilla.org/pub/opus/opus-1.3.1.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract opus
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/opus-1.3.1.tar.gz
+          sed -i '/include(opus_buildtype.cmake)/d' opus-1.3.1/CMakeLists.txt
+
+      - name: Compile opus
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/opus-1.3.1
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download opusfile
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "opusfile [this](https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-0.12.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract opusfile
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/opusfile-0.12.tar.gz
+          cd opusfile-0.12
+          patch -p1 < ../../patches/opusfile-cmake.patch
+
+      - name: Compile opusfile
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/opusfile-0.12
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download speex
+        shell: bash
+        working-directory: sources
+        run: |
+          git clone https://github.com/xiph/speex
+          cd speex
+          patch -p1 < ../../patches/speex-cmake.patch
+
+      - name: Compile speex
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/speex
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+      - name: Copy speex lib
+        if: matrix.buildtype == 'debug'
+        run: copy c:\msvc_x86_64\lib\libspeexd.lib c:\msvc_x86_64\lib\libspeex.lib
+
+
+      - name: Download mpg123
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/1.29.3/mpg123-1.29.3.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract mpg123
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/mpg123-1.29.3.tar.bz2
+
+      - name: Compile mpg123
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/mpg123-1.29.3
+        run: |
+          mkdir build2
+          cd build2
+          cmake ../ports/cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download lame
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "lame [this](https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract lame
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/lame-3.100.tar.gz
+          sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:Win64/g' lame-3.100/Makefile.MSVC
+
+      - name: Compile lame
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/lame-3.100
+        run: |
+          nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
+          copy include\*.h c:\msvc_x86_64\include\
+          copy output\libmp3lame*.lib c:\msvc_x86_64\lib\
+          copy output\libmp3lame*.dll c:\msvc_x86_64\bin\
+
+      - name: Create mp3lame.pc
+        shell: bash
+        run: |
+          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "Name: lame" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "Description: encoder that converts audio to the MP3 file format." >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "URL: https://lame.sourceforge.io/" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "Version: 3.100" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "Libs: -Lc:/msvc_x86_64/lib -lmp3lame" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+
+
+      - name: Download TagLib
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "TagLib [this](https://taglib.org/releases/taglib-1.12.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract TagLib
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/taglib-1.12.tar.gz
+
+      - name: Compile TagLib
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/taglib-1.12
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download dlfcn-win32
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "dlfcn-win32 [this](https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v1.3.0.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract dlfcn-win32
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/v1.3.0.tar.gz
+
+      - name: Compile dlfcn-win32
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/dlfcn-win32-1.3.0
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download FFTW
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "FFTW [this](https://www.fftw.org/fftw-3.3.10.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract FFTW
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/fftw-3.3.10.tar.gz
+          cd fftw-3.3.10
+          patch -p1 < ../../patches/fftw-fixes.patch
+
+      - name: Compile FFTW
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/fftw-3.3.10
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=ON -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download Chromaprint
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v1.5.1/chromaprint-1.5.1.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract Chromaprint
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/chromaprint-1.5.1.tar.gz
+
+      - name: Compile Chromaprint
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/chromaprint-1.5.1
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=C:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=C:\msvc_x86_64
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download GLib
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "GLib [this](https://download.gnome.org/sources/glib/2.72/glib-2.72.0.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract GLib
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/glib-2.72.0.tar.xz
+
+      - name: Compile GLib
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+
+        working-directory: sources/glib-2.72.0
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download glib-networking
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.70/glib-networking-2.70.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract glib-networking
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/glib-networking-2.70.1.tar.xz
+          cd glib-networking-2.70.1
+          patch -p1 < ../../patches/glib-networking-tests.patch
+
+      - name: Compile glib-networking
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/glib-networking-2.70.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dgnutls=enabled -Dopenssl=enabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download libpsl
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libpsl [this](https://github.com/rockdaboot/libpsl/releases/download/0.21.1/libpsl-0.21.1.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libpsl
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libpsl-0.21.1.tar.gz
+
+      - name: Compile libpsl
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libpsl-0.21.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download libsoup
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libsoup [this](https://download.gnome.org/sources/libsoup/2.74/libsoup-2.74.2.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libsoup
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libsoup-2.74.2.tar.xz
+
+      - name: Compile libsoup
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libsoup-2.74.2
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dtests=false -Dsysprof=disabled -Dtls_check=false -Dgnome=false -Dgtk_doc=false build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download orc
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "orc [this](https://gstreamer.freedesktop.org/src/orc/orc-0.4.32.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract orc
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/orc-0.4.32.tar.xz
+
+      - name: Compile orc
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/orc-0.4.32
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download libcuefile
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libcuefile [this](https://files.musepack.net/source/libcuefile_r475.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libcuefile
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libcuefile_r475.tar.gz
+
+      - name: Compile libcuefile
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libcuefile_r475
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DSHARED=ON
+          cmake --build .
+          cmake --install .
+          mkdir c:\msvc_x86_64\include\cuetools
+          copy ..\include\cuetools\cd.h c:\msvc_x86_64\include\cuetools\
+          copy ..\include\cuetools\cdtext.h c:\msvc_x86_64\include\cuetools\
+          copy ..\include\cuetools\cuefile.h c:\msvc_x86_64\include\cuetools\
+          copy src\*.dll c:\msvc_x86_64\bin\
+
+
+      - name: Download libreplaygain
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libreplaygain [this](https://files.musepack.net/source/libreplaygain_r475.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libreplaygain
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libreplaygain_r475.tar.gz
+
+      - name: Compile libreplaygain
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libreplaygain_r475
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DSHARED=ON
+          cmake --build .
+          cmake --install .
+          mkdir c:\msvc_x86_64\include\replaygain
+          copy ../include/replaygain/gain_analysis.h c:/msvc_x86_64/include/replaygain/
+          copy src\*.dll c:\msvc_x86_64\bin\
+
+
+      - name: Download musepack
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "musepack [this](https://files.musepack.net/source/musepack_src_r475.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract musepack
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/musepack_src_r475.tar.gz
+          cd musepack_src_r475
+          patch -p1 < ../../patches/musepack-fixes.patch
+
+      - name: Compile musepack
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/musepack_src_r475
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DSHARED=ON
+          cmake --build .
+          cmake --install .
+          copy libmpcdec\*.lib c:\msvc_x86_64\lib\
+          copy libmpcdec\*.dll c:\msvc_x86_64\bin\
+
+
+      - name: Download libopenmpt
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-0.6.2+release.msvc.zip)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libopenmpt
+        working-directory: sources
+        run: |
+          mkdir libopenmpt
+          cd libopenmpt
+          7z x ..\..\downloads\libopenmpt-0.6.2+release.msvc.zip
+
+      - name: Patch libopenmpt
+        shell: bash
+        working-directory: sources/libopenmpt
+        run: patch -p1 < ../../patches/libopenmpt-cmake.patch
+
+      - name: Compile libopenmpt
+        env:
+          CL: "/MP"
+        working-directory: sources/libopenmpt
+        run: |
+          mkdir build2
+          cd build2
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download fdk-aac
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "fdk-aac [this](https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-2.0.2.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract fdk-aac
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/fdk-aac-2.0.2.tar.gz
+
+      - name: Compile fdk-aac
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/fdk-aac-2.0.2
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download faad2
+        shell: bash
+        working-directory: sources
+        run: |
+          git clone https://github.com/knik0/faad2
+          cd faad2
+          patch -p1 < ../../patches/faad2-cmake.patch
+
+      - name: Compile faad2
+        env:
+          CL: "/MP"
+        working-directory: sources/faad2
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+          copy ..\include\*.h c:\msvc_x86_64\include\
+
+
+      - name: Download faac
+        shell: bash
+        working-directory: sources
+        run: |
+          git clone https://github.com/knik0/faac
+          cd faac
+          patch -p1 < ../../patches/faac-msvc.patch
+
+      - name: Compile faac
+        env:
+          CL: "/MP"
+        working-directory: sources/faac/project/msvc
+        run: |
+          msbuild faac.sln /property:Configuration=${{ matrix.buildtype }}
+          copy ..\..\include\*.h c:\msvc_x86_64\include\
+
+      - name: copy faac (release)
+        if: matrix.buildtype == 'release'
+        working-directory: sources/faac/project/msvc
+        run: |
+          copy bin\Release\libfaac_dll.lib c:\msvc_x86_64\lib\libfaac.lib
+          copy bin\Release\*.dll c:\msvc_x86_64\bin\
+
+      - name: copy faac (debug)
+        if: matrix.buildtype == 'debug'
+        working-directory: sources/faac/project/msvc
+        run: |
+          copy bin\Debug\libfaac_dll.lib c:\msvc_x86_64\lib\libfaac.lib
+          copy bin\Debug\*.dll c:\msvc_x86_64\bin\
+
+
+      - name: Download libbs2b
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libbs2b [this](https://downloads.sourceforge.net/project/bs2b/libbs2b/3.1.0/libbs2b-3.1.0.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libbs2b
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/libbs2b-3.1.0.tar.bz2
+          cd libbs2b-3.1.0
+          patch -p1 < ../../patches/libbs2b-msvc.patch
+
+      - name: Compile libbs2b
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/libbs2b-3.1.0
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download GStreamer
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract GStreamer
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/gstreamer-1.20.1.tar.xz
+
+      - name: Compile GStreamer
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gstreamer-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download gst-plugins-base
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract gst-plugins-base
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/gst-plugins-base-1.20.1.tar.xz
+
+      - name: Compile gst-plugins-base
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gst-plugins-base-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvert=disabled -Dvideorate=disabled -Dvideoscale=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download gst-plugins-good
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract gst-plugins-good
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/gst-plugins-good-1.20.1.tar.xz
+
+      - name: Compile gst-plugins-good
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gst-plugins-good-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=disabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download gst-plugins-bad
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract gst-plugins-bad
+        shell: bash
+        working-directory: sources
+        run: |
+          tar -xf ../downloads/gst-plugins-bad-1.20.1.tar.xz
+          cd gst-plugins-bad-1.20.1
+          patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
+
+      - name: Compile gst-plugins-bad
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gst-plugins-bad-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=disabled -Dgs=disabled -Dgsm=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=disabled -Dhls-crypto=libgcrypt build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download gst-plugins-ugly
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract gst-plugins-ugly
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/gst-plugins-ugly-1.20.1.tar.xz
+
+      - name: Compile gst-plugins-ugly
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gst-plugins-ugly-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download Protobuf
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protobuf-cpp-3.19.4.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract Protobuf
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/protobuf-cpp-3.19.4.tar.gz
+
+      - name: Compile Protobuf
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/protobuf-3.19.4/cmake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF
+          cmake --build .
+          cmake --install .
+          copy protobuf.pc c:\msvc_x86_64\lib\pkgconfig\
+
+
+      - name: Download qtbase
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "qtbase [this](https://download.qt.io/official_releases/qt/6.2/6.2.4/submodules/qtbase-everywhere-src-6.2.4.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract qtbase
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/qtbase-everywhere-src-6.2.4.tar.xz
+
+      - name: Copy sqlite3
+        shell: bash
+        working-directory: sources
+        run: cp sqlite-*/sqlite3.{c,h} qtbase-everywhere-src-6.2.4/src/3rdparty/sqlite/
+
+      - name: Configure qtbase
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        run: >
+          cmake -S sources/qtbase-everywhere-src-6.2.4 -B sources/qtbase-everywhere-src-6.2.4/build
+          -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }}
+          -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          -DBUILD_SHARED_LIBS=ON
+          -DPKG_CONFIG_EXECUTABLE="c:\msvc_x86_64\bin\pkgconf.exe"
+          -DQT_BUILD_EXAMPLES=OFF
+          -DQT_BUILD_BENCHMARKS=OFF
+          -DQT_BUILD_TESTS=OFF
+          -DQT_BUILD_EXAMPLES_BY_DEFAULT=OFF
+          -DQT_BUILD_TOOLS_BY_DEFAULT=ON
+          -DQT_WILL_BUILD_TOOLS=ON
+          -DBUILD_WITH_PCH=OFF
+          -DFEATURE_rpath=OFF
+          -DFEATURE_pkg_config=ON
+          -DFEATURE_accessibility=ON
+          -DFEATURE_fontconfig=OFF
+          -DFEATURE_harfbuzz=ON
+          -DFEATURE_pcre2=ON
+          -DFEATURE_openssl=ON
+          -DFEATURE_openssl_linked=ON
+          -DFEATURE_opengl=ON
+          -DFEATURE_opengl_dynamic=ON
+          -DFEATURE_use_gold_linker_alias=OFF
+          -DFEATURE_glib=ON
+          -DFEATURE_icu=OFF
+          -DFEATURE_directfb=OFF
+          -DFEATURE_dbus=OFF
+          -DFEATURE_sql=ON
+          -DFEATURE_sql_sqlite=ON
+          -DFEATURE_sql_odbc=OFF
+          -DFEATURE_jpeg=ON
+          -DFEATURE_png=ON
+          -DFEATURE_gif=ON
+          -DFEATURE_style_windows=ON
+          -DFEATURE_style_windowsvista=ON
+          -DFEATURE_system_zlib=ON
+          -DFEATURE_system_png=ON
+          -DFEATURE_system_jpeg=OFF
+          -DFEATURE_system_pcre2=OFF
+          -DFEATURE_system_harfbuzz=OFF
+          -DFEATURE_system_sqlite=OFF
+
+      - name: Build qtbase
+        working-directory: sources/qtbase-everywhere-src-6.2.4/build
+        run: cmake --build .
+
+      - name: Install qtbase
+        working-directory: sources/qtbase-everywhere-src-6.2.4/build
+        run: cmake --install .
+
+
+      - name: Download qttools
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "qttools [this](https://download.qt.io/official_releases/qt/6.2/6.2.4/submodules/qttools-everywhere-src-6.2.4.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract qttools
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/qttools-everywhere-src-6.2.4.tar.xz
+
+      - name: Compile qttools
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/qttools-everywhere-src-6.2.4
+        run: |
+          mkdir build
+          cd build
+          c:\msvc_x86_64\bin\qt-configure-module.bat ..
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download qtsparkle
+        shell: bash
+        working-directory: sources
+        run: |
+          git clone https://github.com/davidsansome/qtsparkle qtsparkle-git
+          cd qtsparkle-git
+          patch -p1 < ../../patches/qtsparkle-msvc.patch
+
+      - name: Compile qtsparkle
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/qtsparkle-git
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH=c:\msvc_x86_64\lib\cmake -DCMAKE_INSTALL_PREFIX="c:/msvc_x86_64"
+          cmake --build .
+          cmake --install .
+
+      - name: Create qtsparkle pkg-config file
+        shell: bash
+        run: |
+          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Name: qtsparkle-qt6" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Version: " >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Description: Qt auto-updater lib" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Libs: -Lc:/msvc_x86_64 -lqtsparkle-qt6" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Cflags: -Ic:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+
+          cat /c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+
+
+      - name: Create archive
+        shell: bash
+        run: |
+          tar -cPJf strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz /c/msvc_x86_64
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: releases
+          path: strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz
+
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    needs:
+      - build-windows-msvc
+    steps:
+      - uses: actions/checkout@v1.2.0
+      - uses: actions/download-artifact@v2
+        with:
+          path: releases
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -x
+          hub release delete "latest" || true
+          hub release create -a releases/releases/strawberry-msvc-dependencies-release.tar.xz -a releases/releases/strawberry-msvc-dependencies-debug.tar.xz -m "Strawberry MSVC Dependencies $GITHUB_SHA" "latest"

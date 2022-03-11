@@ -1,0 +1,13 @@
+diff --git a/project/msvc/faac.sln b/project/msvc/faac.sln
+index 0a2d554..1d78695 100644
+--- a/project/msvc/faac.sln
++++ b/project/msvc/faac.sln
+@@ -10,8 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfaac", "libfaac.vcxproj"
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "faac", "faac.vcxproj", "{92992E74-AEDE-46DC-AD8C-ADEA876F1A4C}"
+ EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "faacgui", "faacgui.vcxproj", "{B4FD0E50-5379-48C3-8D3E-D948A8921CA8}"
+-EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+ 		Debug|Win32 = Debug|Win32
