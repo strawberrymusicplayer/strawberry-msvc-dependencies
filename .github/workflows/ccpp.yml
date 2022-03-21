@@ -1430,7 +1430,10 @@ jobs:
       - name: Extract qtbase
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/qtbase-everywhere-src-6.2.4.tar.xz
+        run: |
+          tar -xf ../downloads/qtbase-everywhere-src-6.2.4.tar.xz
+          cd qtbase-everywhere-src-6.2.4
+          patch -p1 < ../../patches/qtbase-screen.patch
 
       - name: Copy sqlite3
         shell: bash
