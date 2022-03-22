@@ -1,21 +1,20 @@
-diff --git a/meson.build b/meson.build
-index 7c67c94..c732002 100644
---- a/meson.build
-+++ b/meson.build
-@@ -180,7 +180,6 @@ if libproxy_dep.found() or gsettings_desktop_schemas_dep.found()
-     subdir('proxy/gnome')
-   endif
- 
--  subdir('proxy/tests')
+diff --git a/proxy/meson.build b/proxy/meson.build
+index c638452..e989a2a 100644
+--- a/proxy/meson.build
++++ b/proxy/meson.build
+@@ -11,5 +11,3 @@ endif
+ if not ['windows'].contains(host_system)
+   subdir('environment')
  endif
- 
- subdir('tls/base')
-@@ -197,8 +196,6 @@ if backends.contains('openssl')
-   subdir('tls/openssl')
- endif
- 
--subdir('tls/tests')
 -
- # Will automatically pick it up from the cross file if defined
- gio_querymodules = find_program('gio-querymodules', required : false)
- if gio_querymodules.found()
+-subdir('tests')
+diff --git a/tls/meson.build b/tls/meson.build
+index e76e766..b8103cd 100644
+--- a/tls/meson.build
++++ b/tls/meson.build
+@@ -13,5 +13,3 @@ if backends.contains('openssl')
+ 
+   subdir('openssl')
+ endif
+-
+-subdir('tests')

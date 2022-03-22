@@ -928,7 +928,7 @@ jobs:
       - name: Download glib-networking
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.70/glib-networking-2.70.1.tar.xz)!"
+          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.72/glib-networking-2.72.0.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -936,8 +936,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/glib-networking-2.70.1.tar.xz
-          cd glib-networking-2.70.1
+          tar -xf ../downloads/glib-networking-2.72.0.tar.xz
+          cd glib-networking-2.72.0
           patch -p1 < ../../patches/glib-networking-tests.patch
 
       - name: Compile glib-networking
@@ -945,7 +945,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/glib-networking-2.70.1
+        working-directory: sources/glib-networking-2.72.0
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dgnutls=enabled -Dopenssl=enabled build
           cd build
