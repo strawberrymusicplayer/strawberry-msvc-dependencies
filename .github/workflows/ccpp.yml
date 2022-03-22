@@ -717,9 +717,11 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: Copy speex lib
+      - name: Copy speex
         if: matrix.buildtype == 'debug'
-        run: copy c:\msvc_x86_64\lib\libspeexd.lib c:\msvc_x86_64\lib\libspeex.lib
+        run: |
+          copy c:\msvc_x86_64\lib\libspeexd.lib c:\msvc_x86_64\lib\libspeex.lib
+          copy c:\msvc_x86_64\bin\libspeexd.dll c:\msvc_x86_64\bin\libspeex.dll
 
 
       - name: Download mpg123
