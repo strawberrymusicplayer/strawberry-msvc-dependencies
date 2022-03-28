@@ -121,21 +121,21 @@ jobs:
       - name: Download zlib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "zlib [this](https://zlib.net/zlib-1.2.11.tar.gz)!"
+          url: "zlib [this](https://zlib.net/zlib-1.2.12.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract zlib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/zlib-1.2.11.tar.gz
+        run: tar -xf ../downloads/zlib-1.2.12.tar.gz
 
       - name: Compile zlib
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/zlib-1.2.11
+        working-directory: sources/zlib-1.2.12
         run: |
           mkdir build
           cd build
