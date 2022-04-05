@@ -283,11 +283,6 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: Remove pcre2 cmake
-        shell: bash
-        working-directory: sources
-        run: rm /c/msvc_x86_64/cmake/*pcre2*.cmake
-
 
       - name: Download bzip2
         uses: suisei-cn/actions-download-file@v1
@@ -1436,6 +1431,7 @@ jobs:
           tar -xf ../downloads/qtbase-everywhere-src-6.2.4.tar.xz
           cd qtbase-everywhere-src-6.2.4
           patch -p1 < ../../patches/qtbase-screen.patch
+          patch -p1 < ../../patches/qtbase-pcre2.patch
 
       - name: Copy sqlite3
         shell: bash
@@ -1489,7 +1485,7 @@ jobs:
           -DFEATURE_system_zlib=ON
           -DFEATURE_system_png=ON
           -DFEATURE_system_jpeg=OFF
-          -DFEATURE_system_pcre2=OFF
+          -DFEATURE_system_pcre2=ON
           -DFEATURE_system_harfbuzz=OFF
           -DFEATURE_system_sqlite=OFF
 
