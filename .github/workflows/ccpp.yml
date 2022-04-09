@@ -496,7 +496,7 @@ jobs:
           CL: "/MP"
         working-directory: sources/sqlite-autoconf-3380200
         run: |
-          cl -DSQLITE_API="__declspec(dllexport)" sqlite3.c -link -dll -out:sqlite3.dll
+          cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
           cl shell.c sqlite3.c -Fe:sqlite3.exe
 
       - name: Copy SQLite
@@ -1487,7 +1487,7 @@ jobs:
           -DFEATURE_system_jpeg=OFF
           -DFEATURE_system_pcre2=ON
           -DFEATURE_system_harfbuzz=OFF
-          -DFEATURE_system_sqlite=OFF
+          -DFEATURE_system_sqlite=ON
 
       - name: Build qtbase
         working-directory: sources/qtbase-everywhere-src-6.2.4/build
