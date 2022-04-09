@@ -21,7 +21,7 @@ jobs:
           toolset: 14.29
 
       - uses: actions/checkout@v1.2.0
-      - uses: ilammy/setup-nasm@v1
+      #- uses: ilammy/setup-nasm@v1
       - uses: actions/setup-python@v1
       #- uses: hendrikmuhs/ccache-action@v1
 
@@ -44,6 +44,24 @@ jobs:
         run: |
           rm -f /c/programdata/chocolatey/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cc1.exe,cc1plus.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,gdb.exe,gfortran.exe,ld.bfd.exe,ld.exe,ld.gold.exe,nm.exe,ranlib.exe,readelf.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.1.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
           rm -f /c/strawberry/c/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,ld.exe,nm.exe,ranlib.exe,readelf.exe,widl.exe,windmc.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.3.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
+
+
+      - name: Download nasm
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "nasm [this](http://files.jkvinge.net/packages/strawberry-dependencies/nasm-2.15.05-installer-x64.exe)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Install nasm
+        working-directory: downloads
+        run: |
+          mkdir c:\nasm
+          cd c:\nasm
+          7z x ${{github.workspace}}\downloads\nasm-2.15.05-installer-x64.exe
+
+      - name: Add nasm to PATH
+        run: echo "c:\nasm" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
 
       - name: Download yasm
