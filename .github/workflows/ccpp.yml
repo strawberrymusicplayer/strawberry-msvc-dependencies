@@ -21,9 +21,7 @@ jobs:
           toolset: 14.29
 
       - uses: actions/checkout@v1.2.0
-      #- uses: ilammy/setup-nasm@v1
       - uses: actions/setup-python@v1
-      #- uses: hendrikmuhs/ccache-action@v1
 
       - name: Install python dependencies
         run: pip install meson ninja
