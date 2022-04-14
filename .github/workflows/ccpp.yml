@@ -95,19 +95,19 @@ jobs:
       - name: Download Boost
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2)!"
+          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Boost
         shell: bash
         working-directory: sources
-        run: tar -xf  ../downloads/boost_1_78_0.tar.bz2
+        run: tar -xf  ../downloads/boost_1_79_0.tar.bz2
 
       - name: Copy Boost
         shell: bash
         working-directory: sources
-        run: cp -r boost_1_78_0/boost /c/msvc_x86_64/include/
+        run: cp -r boost_1_79_0/boost /c/msvc_x86_64/include/
 
 
       - name: Download pkgconf
