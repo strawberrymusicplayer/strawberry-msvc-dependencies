@@ -277,21 +277,21 @@ jobs:
       - name: Download pcre2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.bz2)!"
+          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.40/pcre2-10.40.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract pcre2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/pcre2-10.39.tar.bz2
+        run: tar -xf ../downloads/pcre2-10.40.tar.bz2
 
       - name: Compile pcre2
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/pcre2-10.39
+        working-directory: sources/pcre2-10.40
         run: |
           mkdir build
           cd build
