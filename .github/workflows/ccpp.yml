@@ -1584,7 +1584,7 @@ jobs:
       - name: Create archive
         shell: bash
         run: |
-          tar -cPJf strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz /c/msvc_x86_64
+          tar -cPJf strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz --transform "s,^c/msvc_x86_64,msvc_x86_64," /c/msvc_x86_64
 
       - uses: actions/upload-artifact@v2
         with:
