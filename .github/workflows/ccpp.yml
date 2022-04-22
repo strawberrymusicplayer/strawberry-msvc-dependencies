@@ -884,32 +884,6 @@ jobs:
           cmake --install .
 
 
-      - name: Download Chromaprint
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v1.5.1/chromaprint-1.5.1.tar.gz)!"
-          target: downloads/
-          auto-match: true
-
-      - name: Extract Chromaprint
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/chromaprint-1.5.1.tar.gz
-
-      - name: Compile Chromaprint
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/chromaprint-1.5.1
-        run: |
-          mkdir build
-          cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=C:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=C:\msvc_x86_64
-          cmake --build .
-          cmake --install .
-
-
       - name: Download GLib
         uses: suisei-cn/actions-download-file@v1
         with:
@@ -1268,6 +1242,52 @@ jobs:
           cmake --install .
 
 
+      - name: Download ffmpeg
+        shell: bash
+        working-directory: sources
+        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
+
+      - name: Compile ffmpeg
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/ffmpeg
+        run: |
+          meson --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Dgpl=enabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download Chromaprint
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v1.5.1/chromaprint-1.5.1.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract Chromaprint
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/chromaprint-1.5.1.tar.gz
+
+      - name: Compile Chromaprint
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/chromaprint-1.5.1
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=C:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=C:\msvc_x86_64
+          cmake --build .
+          cmake --install .
+
+
       - name: Download GStreamer
         uses: suisei-cn/actions-download-file@v1
         with:
@@ -1401,6 +1421,33 @@ jobs:
         working-directory: sources/gst-plugins-ugly-1.20.1
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Download gst-libav
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.20.1.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract gst-libav
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/gst-libav-1.20.1.tar.xz
+
+      - name: Compile gst-libav
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:/msvc_x86_64/include
+          LDFLAGS: -Lc:/msvc_x86_64/lib
+        working-directory: sources/gst-libav-1.20.1
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled build
           cd build
           ninja
           ninja install
