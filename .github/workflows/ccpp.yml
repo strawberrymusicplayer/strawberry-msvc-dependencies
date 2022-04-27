@@ -498,25 +498,25 @@ jobs:
       - name: Download SQLite
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-3380200.tar.gz)!"
+          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-3380300.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract SQLite
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/sqlite-autoconf-3380200.tar.gz
+        run: tar -xf ../downloads/sqlite-autoconf-3380300.tar.gz
 
       - name: Compile SQlite
         env:
           CL: "/MP"
-        working-directory: sources/sqlite-autoconf-3380200
+        working-directory: sources/sqlite-autoconf-3380300
         run: |
           cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
           cl shell.c sqlite3.c -Fe:sqlite3.exe
 
       - name: Copy SQLite
-        working-directory: sources/sqlite-autoconf-3380200
+        working-directory: sources/sqlite-autoconf-3380300
         run: |
           copy *.h c:\msvc_x86_64\include\
           copy *.lib c:\msvc_x86_64\lib\
