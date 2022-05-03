@@ -175,14 +175,14 @@ jobs:
       - name: Download openssl
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "openssl [this](https://www.openssl.org/source/openssl-3.0.2.tar.gz)!"
+          url: "openssl [this](https://www.openssl.org/source/openssl-3.0.3.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract openssl
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/openssl-3.0.2.tar.gz
+        run: tar -xf ../downloads/openssl-3.0.3.tar.gz
 
       - name: Configure openssl (release)
         if: matrix.buildtype == 'release'
@@ -190,7 +190,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/openssl-3.0.2
+        working-directory: sources/openssl-3.0.3
         run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --release --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlib.lib
 
       - name: Configure openssl (debug)
@@ -199,7 +199,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/openssl-3.0.2
+        working-directory: sources/openssl-3.0.3
         run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --debug --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlibd.lib
 
       - name: Compile openssl
@@ -207,7 +207,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/openssl-3.0.2
+        working-directory: sources/openssl-3.0.3
         run: |
           nmake
           nmake install
