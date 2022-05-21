@@ -858,30 +858,43 @@ jobs:
       - name: Download FFTW
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "FFTW [this](https://www.fftw.org/fftw-3.3.10.tar.gz)!"
+          #url: "FFTW [this](https://www.fftw.org/fftw-3.3.10.tar.gz)!"
+          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip)!"
           target: downloads/
           auto-match: true
 
-      - name: Extract FFTW
-        shell: bash
-        working-directory: sources
-        run: |
-          tar -xf ../downloads/fftw-3.3.10.tar.gz
-          cd fftw-3.3.10
-          patch -p1 < ../../patches/fftw-fixes.patch
+      #- name: Extract FFTW
+        #shell: bash
+        #working-directory: sources
+        #run: |
+          #tar -xf ../downloads/fftw-3.3.10.tar.gz
+          #cd fftw-3.3.10
+          #patch -p1 < ../../patches/fftw-fixes.patch
 
-      - name: Compile FFTW
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/fftw-3.3.10
+      #- name: Compile FFTW
+        #env:
+          #CL: "/MP"
+          #PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          #PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        #working-directory: sources/fftw-3.3.10
+        #run: |
+          #mkdir build
+          #cd build
+          #cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON
+          #cmake --build .
+          #cmake --install .
+
+      # Using the prebuilt FFTW binaries is recommended, they are also faster.
+      - name: Extract FFTW
+        working-directory: downloads
         run: |
-          mkdir build
-          cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON
-          cmake --build .
-          cmake --install .
+          mkdir fftw
+          cd fftw
+          7z x "${{github.workspace}}/downloads/fftw-3.3.5-dll64.zip"
+          lib /def:libfftw3-3.def
+          xcopy /s /y libfftw3-3.dll c:\msvc_x86_64\bin\
+          xcopy /s /y libfftw3-3.lib c:\msvc_x86_64\lib\
+          xcopy /s /y fftw3.h c:\msvc_x86_64\include\
 
 
       - name: Download GLib
