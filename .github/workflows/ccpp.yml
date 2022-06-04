@@ -907,7 +907,7 @@ jobs:
       - name: Extract GLib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/glib-2.73.0.tar.xz
+        run: tar -xf ../downloads/glib-2.73.0.tar.xz || true
 
       - name: Compile GLib
         env:
