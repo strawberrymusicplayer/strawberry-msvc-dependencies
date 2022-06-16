@@ -1304,14 +1304,14 @@ jobs:
       - name: Download GStreamer
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.20.2.tar.xz)!"
+          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract GStreamer
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gstreamer-1.20.2.tar.xz
+        run: tar -xf ../downloads/gstreamer-1.20.3.tar.xz
 
       - name: Compile GStreamer
         env:
@@ -1320,7 +1320,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gstreamer-1.20.2
+        working-directory: sources/gstreamer-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
           cd build
@@ -1331,14 +1331,14 @@ jobs:
       - name: Download gst-plugins-base
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.20.2.tar.xz)!"
+          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-base
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-base-1.20.2.tar.xz
+        run: tar -xf ../downloads/gst-plugins-base-1.20.3.tar.xz
 
       - name: Compile gst-plugins-base
         env:
@@ -1347,7 +1347,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gst-plugins-base-1.20.2
+        working-directory: sources/gst-plugins-base-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvert=disabled -Dvideorate=disabled -Dvideoscale=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
           cd build
@@ -1358,14 +1358,14 @@ jobs:
       - name: Download gst-plugins-good
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.20.2.tar.xz)!"
+          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-good
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-good-1.20.2.tar.xz
+        run: tar -xf ../downloads/gst-plugins-good-1.20.3.tar.xz
 
       - name: Compile gst-plugins-good
         env:
@@ -1374,7 +1374,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gst-plugins-good-1.20.2
+        working-directory: sources/gst-plugins-good-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=disabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
           cd build
@@ -1385,7 +1385,7 @@ jobs:
       - name: Download gst-plugins-bad
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.20.2.tar.xz)!"
+          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1393,8 +1393,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/gst-plugins-bad-1.20.2.tar.xz
-          cd gst-plugins-bad-1.20.2
+          tar -xf ../downloads/gst-plugins-bad-1.20.3.tar.xz
+          cd gst-plugins-bad-1.20.3
           patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
 
       - name: Compile gst-plugins-bad
@@ -1404,7 +1404,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gst-plugins-bad-1.20.2
+        working-directory: sources/gst-plugins-bad-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=disabled -Dgs=disabled -Dgsm=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=enabled -Dhls-crypto=openssl build
           cd build
@@ -1415,14 +1415,14 @@ jobs:
       - name: Download gst-plugins-ugly
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.20.2.tar.xz)!"
+          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-ugly
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-ugly-1.20.2.tar.xz
+        run: tar -xf ../downloads/gst-plugins-ugly-1.20.3.tar.xz
 
       - name: Compile gst-plugins-ugly
         env:
@@ -1431,7 +1431,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gst-plugins-ugly-1.20.2
+        working-directory: sources/gst-plugins-ugly-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
           cd build
@@ -1442,14 +1442,14 @@ jobs:
       - name: Download gst-libav
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.20.2.tar.xz)!"
+          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.20.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-libav
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-libav-1.20.2.tar.xz
+        run: tar -xf ../downloads/gst-libav-1.20.3.tar.xz
 
       - name: Compile gst-libav
         env:
@@ -1458,7 +1458,7 @@ jobs:
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
           CFLAGS: -Ic:/msvc_x86_64/include
           LDFLAGS: -Lc:/msvc_x86_64/lib
-        working-directory: sources/gst-libav-1.20.2
+        working-directory: sources/gst-libav-1.20.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled build
           cd build
