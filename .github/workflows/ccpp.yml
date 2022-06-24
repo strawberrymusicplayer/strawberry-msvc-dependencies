@@ -472,21 +472,21 @@ jobs:
       - name: Download nghttp2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v1.47.0/nghttp2-1.47.0.tar.xz)!"
+          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v1.48.0/nghttp2-1.48.0.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract nghttp2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/nghttp2-1.47.0.tar.xz
+        run: tar -xf ../downloads/nghttp2-1.48.0.tar.xz
 
       - name: Compile nghttp2
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/nghttp2-1.47.0
+        working-directory: sources/nghttp2-1.48.0
         run: |
           mkdir build
           cd build
