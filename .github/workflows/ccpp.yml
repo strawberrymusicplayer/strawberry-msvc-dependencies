@@ -1469,21 +1469,21 @@ jobs:
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.2/protobuf-cpp-3.21.2.tar.gz)!"
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.1/protobuf-cpp-3.21.1.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Protobuf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/protobuf-cpp-3.21.2.tar.gz
+        run: tar -xf ../downloads/protobuf-cpp-3.21.1.tar.gz
 
       - name: Compile Protobuf
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/protobuf-3.21.2/cmake
+        working-directory: sources/protobuf-3.21.1/cmake
         run: |
           mkdir build
           cd build
