@@ -738,21 +738,21 @@ jobs:
       - name: Download mpg123
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/1.29.3/mpg123-1.29.3.tar.bz2)!"
+          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/1.30.0/mpg123-1.30.0.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract mpg123
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/mpg123-1.29.3.tar.bz2
+        run: tar -xf ../downloads/mpg123-1.30.0.tar.bz2
 
       - name: Compile mpg123
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/mpg123-1.29.3
+        working-directory: sources/mpg123-1.30.0
         run: |
           mkdir build2
           cd build2
