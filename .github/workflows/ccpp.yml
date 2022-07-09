@@ -18,7 +18,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
-          toolset: 14.29
+          toolset: 14.XX
 
       - uses: actions/checkout@v1.2.0
       - uses: actions/setup-python@v1
@@ -216,7 +216,7 @@ jobs:
       - name: Download GnuTLS
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.5/libgnutls_3.7.5_msvc16.zip)!"
+          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.5/libgnutls_3.7.5_msvc17.zip)!"
           target: downloads/
           auto-match: true
 
@@ -224,7 +224,7 @@ jobs:
         run: |
           mkdir gnutls
           cd gnutls
-          7z x "../downloads/libgnutls_3.7.5_msvc16.zip"
+          7z x "../downloads/libgnutls_3.7.5_msvc17.zip"
           xcopy /s /y bin\x64\*.* c:\msvc_x86_64\bin\
           xcopy /s /y lib\x64\*.* c:\msvc_x86_64\lib\
           xcopy /s /y include\* c:\msvc_x86_64\include\
@@ -407,7 +407,6 @@ jobs:
         run: |
           git clone https://github.com/pffang/libiconv-for-Windows
           cd libiconv-for-Windows
-          git checkout 9b7aba8da6e125ef33912fa4412779279f204003
           msbuild libiconv.sln /property:Configuration=${{ matrix.buildtype }}
           copy lib64\*.lib c:\msvc_x86_64\lib\
           copy lib64\*.dll c:\msvc_x86_64\bin\
