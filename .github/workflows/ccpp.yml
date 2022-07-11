@@ -621,7 +621,7 @@ jobs:
       - name: Download wavpack
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "wavpack [this](https://www.wavpack.com/wavpack-5.4.0.tar.bz2)!"
+          url: "wavpack [this](https://www.wavpack.com/wavpack-5.5.0.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -629,15 +629,15 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/wavpack-5.4.0.tar.bz2
-          sed -i '/wavpackdll.rc/d' wavpack-5.4.0/CMakeLists.txt
+          tar -xf ../downloads/wavpack-5.5.0.tar.bz2
+          sed -i '/wavpackdll.rc/d' wavpack-5.5.0/CMakeLists.txt
 
       - name: Compile wavpack
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/wavpack-5.4.0
+        working-directory: sources/wavpack-5.5.0
         run: |
           mkdir build
           cd build
