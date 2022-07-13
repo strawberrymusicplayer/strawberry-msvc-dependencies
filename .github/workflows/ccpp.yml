@@ -299,6 +299,10 @@ jobs:
           cmake --build .
           cmake --install .
 
+      - name: copy pcre2 lib (debug)
+        if: matrix.buildtype == 'debug'
+        run: copy "c:\msvc_x86_64\lib\pcre2-8d.lib" "c:\msvc_x86_64\lib\pcre2-8.lib"
+
 
       - name: Download bzip2
         uses: suisei-cn/actions-download-file@v1
@@ -914,6 +918,9 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
           PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          CFLAGS: -Ic:\msvc_x86_64\include
+          CXXFLAGS: -Ic:\msvc_x86_64\include
+          LDFLAGS: -Lc:\msvc_x86_64\lib
 
         working-directory: sources/glib-2.73.2
         run: |
