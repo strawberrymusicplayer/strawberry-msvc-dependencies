@@ -1510,7 +1510,10 @@ jobs:
       - name: Extract qtbase
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/qtbase-everywhere-src-6.3.1.tar.xz
+        run: |
+          tar -xf ../downloads/qtbase-everywhere-src-6.3.1.tar.xz
+          cd qtbase-everywhere-src-6.3.1
+          patch -p1 < ../../patches/qt6-qtbase-columnalignment.patch
 
       - name: Copy sqlite3
         shell: bash
