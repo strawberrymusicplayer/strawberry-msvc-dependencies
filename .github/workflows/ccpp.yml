@@ -807,6 +807,64 @@ jobs:
           echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
 
 
+      - name: Download twolame
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "twolame [this](https://downloads.sourceforge.net/twolame/twolame-0.4.0.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract twolame
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/twolame-0.4.0.tar.gz
+
+      - name: Patch twolame source
+        shell: bash
+        working-directory: sources/twolame-0.4.0
+        run: patch -p1 < ../../patches/twolame.patch
+
+      - name: Upgrade twolame project
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/twolame-0.4.0/win32
+        run: start /w devenv.exe libtwolame_dll.sln /upgrade
+
+      - name: Patch twolame project
+        shell: bash
+        working-directory: sources/twolame-0.4.0/win32
+        run: |
+          sed -i 's/Win32/x64/g' *.sln *.vcproj *.vcxproj
+          sed -i 's/MachineX86/MachineX64/g' *.sln *.vcxproj
+
+      - name: Compile twolame
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/twolame-0.4.0/win32
+        run: |
+          msbuild libtwolame_dll.sln /property:Configuration=${{ matrix.buildtype }}
+          copy ..\libtwolame\twolame.h c:\msvc_x86_64\include\
+          copy lib\*.lib c:\msvc_x86_64\lib\
+          copy lib\*.dll c:\msvc_x86_64\bin\
+
+      - name: Create twolame.pc
+        shell: bash
+        run: |
+          echo "prefix=c:/msvc_x86_64" >/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "Name: lame" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "URL: https://www.twolame.org/" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "Version: 0.4.0" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "Libs: -Lc:/msvc_x86_64/lib -ltwolame_dll" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+
+
       - name: Download TagLib
         uses: suisei-cn/actions-download-file@v1
         with:
@@ -1383,7 +1441,7 @@ jobs:
           LDFLAGS: -Lc:/msvc_x86_64/lib
         working-directory: sources/gst-plugins-good-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=disabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
+          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=enabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
           cd build
           ninja
           ninja install
