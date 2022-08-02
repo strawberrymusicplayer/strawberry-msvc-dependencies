@@ -21,6 +21,19 @@ index 2e633bd..b3f4d09 100644
  
  if faad_dep.found() and have_faad_2_7
    gstfaad = library('gstfaad',
+diff --git a/ext/gme/meson.build b/ext/gme/meson.build
+index dd02be8..34e5dab 100644
+--- a/ext/gme/meson.build
++++ b/ext/gme/meson.build
+@@ -4,7 +4,7 @@ endif
+ 
+ have_gme = cc.has_header ('gme/gme.h')
+ if have_gme
+-  gme_dep = cc.find_library('gme', required: get_option('gme'))
++  gme_dep = cc.find_library('gme', dirs: 'c:\msvc_x86_64\lib', required: get_option('gme'))
+   have_gme = gme_dep.found()
+ endif
+ 
 diff --git a/ext/musepack/meson.build b/ext/musepack/meson.build
 index 128871f..3881433 100644
 --- a/ext/musepack/meson.build
