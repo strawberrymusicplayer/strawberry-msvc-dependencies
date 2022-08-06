@@ -43,6 +43,12 @@ jobs:
           rm -f /c/programdata/chocolatey/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cc1.exe,cc1plus.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,gdb.exe,gfortran.exe,ld.bfd.exe,ld.exe,ld.gold.exe,nm.exe,ranlib.exe,readelf.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.1.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
           rm -f /c/strawberry/c/bin/{addr2line.exe,ar.exe,as.exe,c++.exe,c++filt.exe,cpp.exe,g++.exe,gcc-ar.exe,gcc-nm.exe,gcc-ranlib.exe,gcc.exe,ld.exe,nm.exe,ranlib.exe,readelf.exe,widl.exe,windmc.exe,windres.exe,x86_64-w64-mingw32-c++.exe,x86_64-w64-mingw32-g++.exe,x86_64-w64-mingw32-gcc-8.3.0.exe,x86_64-w64-mingw32-gcc-ar.exe,x86_64-w64-mingw32-gcc-nm.exe,x86_64-w64-mingw32-gcc-ranlib.exe,x86_64-w64-mingw32-gcc.exe,x86_64-w64-mingw32-gfortran.exe}
 
+      - name: Delete conflicting icu
+        shell: bash
+        run: |
+          find "/c/program files (x86)/windows kits/" -name 'icu*.lib' -delete
+          find "/c/program files (x86)/windows kits/" -name 'icu*.h' -delete
+
 
       - name: Download nasm
         uses: suisei-cn/actions-download-file@v1
@@ -1556,6 +1562,139 @@ jobs:
           ninja install
 
 
+      - name: Download icu
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-71_1-src.zip)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract icu
+        shell: bash
+        working-directory: sources
+        run: 7z x ../downloads/icu4c-71_1-src.zip
+
+      - name: Compile icu
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/icu/source/allinone
+        run: msbuild allinone.sln /property:Configuration=${{ matrix.buildtype }} /p:Platform=x64 || goto end
+
+      - name: Install icu
+        shell: bash
+        working-directory: sources/icu
+        run: |
+          cp -r include/unicode /c/msvc_x86_64/include/
+          cp lib64/{*.lib,*.pdb,*.exp} /c/msvc_x86_64/lib/
+          cp bin64/{*.dll,*.exe} /c/msvc_x86_64/bin/
+
+
+      - name: Download expat
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "expat [this](https://jztkft.dl.sourceforge.net/project/expat/expat/2.4.8/expat-2.4.8.tar.bz2)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract expat
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/expat-2.4.8.tar.bz2
+
+      - name: Compile expat
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/expat-2.4.8
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download freetype
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "freetype [this](https://netix.dl.sourceforge.net/project/freetype/freetype2/2.12.1/freetype-2.12.1.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract freetype (boostrap)
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/freetype-2.12.1.tar.gz
+
+      - name: Compile freetype (boostrap)
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/freetype-2.12.1
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
+      - name: Download harfbuzz
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "harfbuzz [this](https://github.com/harfbuzz/harfbuzz/releases/download/5.1.0/harfbuzz-5.1.0.tar.xz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract harfbuzz
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/harfbuzz-5.1.0.tar.xz
+
+      - name: Compile harfbuzz
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/harfbuzz-5.1.0
+        run: |
+          meson --buildtype=${{ matrix.buildtype }} --prefix="c:\msvc_x86_64" --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
+          cd build
+          ninja
+          ninja install
+
+
+      - name: Delete freetype bootstrap
+        shell: bash
+        working-directory: sources
+        run: rm -rf freetype-2.12.1
+
+      - name: Extract freetype
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/freetype-2.12.1.tar.gz
+
+      - name: Compile freetype
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
+          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+        working-directory: sources/freetype-2.12.1
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake --build .
+          cmake --install .
+
+
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
@@ -1628,6 +1767,7 @@ jobs:
           -DFEATURE_pkg_config=ON
           -DFEATURE_accessibility=ON
           -DFEATURE_fontconfig=OFF
+          -DFEATURE_freetype=ON
           -DFEATURE_harfbuzz=ON
           -DFEATURE_pcre2=ON
           -DFEATURE_openssl=ON
@@ -1651,7 +1791,8 @@ jobs:
           -DFEATURE_system_png=ON
           -DFEATURE_system_jpeg=OFF
           -DFEATURE_system_pcre2=ON
-          -DFEATURE_system_harfbuzz=OFF
+          -DFEATURE_system_freetype=ON
+          -DFEATURE_system_harfbuzz=ON
           -DFEATURE_system_sqlite=ON
 
       - name: Build qtbase
