@@ -1776,7 +1776,7 @@ jobs:
           -DFEATURE_opengl_dynamic=ON
           -DFEATURE_use_gold_linker_alias=OFF
           -DFEATURE_glib=ON
-          -DFEATURE_icu=OFF
+          -DFEATURE_icu=ON
           -DFEATURE_directfb=OFF
           -DFEATURE_dbus=OFF
           -DFEATURE_sql=ON
@@ -1794,6 +1794,7 @@ jobs:
           -DFEATURE_system_freetype=ON
           -DFEATURE_system_harfbuzz=ON
           -DFEATURE_system_sqlite=ON
+          -DICU_ROOT="c:\msvc_x86_64"
 
       - name: Build qtbase
         working-directory: sources/qtbase-everywhere-src-6.3.1/build
