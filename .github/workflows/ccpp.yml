@@ -222,7 +222,7 @@ jobs:
       - name: Download GnuTLS
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.5/libgnutls_3.7.5_msvc16.zip)!"
+          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.6/libgnutls_3.7.6_msvc16.zip)!"
           target: downloads/
           auto-match: true
 
@@ -230,7 +230,7 @@ jobs:
         run: |
           mkdir gnutls
           cd gnutls
-          7z x "../downloads/libgnutls_3.7.5_msvc16.zip"
+          7z x "../downloads/libgnutls_3.7.6_msvc16.zip"
           xcopy /s /y bin\x64\*.* c:\msvc_x86_64\bin\
           xcopy /s /y lib\x64\*.* c:\msvc_x86_64\lib\
           xcopy /s /y include\* c:\msvc_x86_64\include\
@@ -246,7 +246,7 @@ jobs:
           echo "Name: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
           echo "Description: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
           echo "URL: https://www.gnutls.org/" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Version: 3.7.5" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "Version: 3.7.6" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
           echo "Libs: -Lc:/msvc_x86_64/lib -lgnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
           echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
 
