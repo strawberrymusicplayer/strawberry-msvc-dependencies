@@ -968,14 +968,14 @@ jobs:
       - name: Download GLib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GLib [this](https://download.gnome.org/sources/glib/2.73/glib-2.73.2.tar.xz)!"
+          url: "GLib [this](https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract GLib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/glib-2.73.2.tar.xz || true
+        run: tar -xf ../downloads/glib-2.73.3.tar.xz || true
 
       - name: Compile GLib
         env:
@@ -986,7 +986,7 @@ jobs:
           CXXFLAGS: -Ic:\msvc_x86_64\include
           LDFLAGS: -Lc:\msvc_x86_64\lib
 
-        working-directory: sources/glib-2.73.2
+        working-directory: sources/glib-2.73.3
         run: |
           meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
           cd build
