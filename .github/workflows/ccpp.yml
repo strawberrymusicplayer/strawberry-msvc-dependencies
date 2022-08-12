@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Build
 on: [push, pull_request]
 
 jobs:
@@ -9,32 +9,78 @@ jobs:
 
     strategy:
       matrix:
+       arch: [ x86_64, x86 ]
+       buildtype: [ release, debug ]
        include:
-         - buildtype: "release"
-         - buildtype: "debug"
+         - description: "x86 debug"
+           arch: x86
+           buildtype: debug
+           prefix_path_backslash: c:\strawberry_msvc_x86_debug
+           prefix_path_backslash2: c:\\strawberry_msvc_x86_debug
+           prefix_path_forwardslash: c:/strawberry_msvc_x86_debug
+           prefix_path_unix: /c/strawberry_msvc_x86_debug
+           openssl_platform: "VC-WIN32"
+           msbuild_platform: "win32"
+           libdir: "lib"
+           bindir: "bin"
+         - description: "x86 release"
+           arch: x86
+           buildtype: release
+           prefix_path_backslash: c:\strawberry_msvc_x86_release
+           prefix_path_backslash2: c:\\strawberry_msvc_x86_release
+           prefix_path_forwardslash: c:/strawberry_msvc_x86_release
+           prefix_path_unix: /c/strawberry_msvc_x86_release
+           openssl_platform: "VC-WIN32"
+           msbuild_platform: "win32"
+           libdir: "lib"
+           bindir: "bin"
+         - description: "x86_64 debug"
+           arch: x86_64
+           buildtype: debug
+           prefix_path_backslash: c:\strawberry_msvc_x86_64_debug
+           prefix_path_backslash2: c:\\strawberry_msvc_x86_64_debug
+           prefix_path_forwardslash: c:/strawberry_msvc_x86_64_debug
+           prefix_path_unix: /c/strawberry_msvc_x86_64_debug
+           openssl_platform: "VC-WIN64A"
+           msbuild_platform: "x64"
+           libdir: "lib64"
+           bindir: "bin64"
+         - description: "x86_64 release"
+           arch: x86_64
+           buildtype: release
+           prefix_path_backslash: c:\strawberry_msvc_x86_64_release
+           prefix_path_backslash2: c:\\strawberry_msvc_x86_64_release
+           prefix_path_forwardslash: c:/strawberry_msvc_x86_64_release
+           prefix_path_unix: /c/strawberry_msvc_x86_64_release
+           openssl_platform: "VC-WIN64A"
+           msbuild_platform: "x64"
+           libdir: "lib64"
+           bindir: "bin64"
 
     steps:
 
       - uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86_64
+          arch: ${{matrix.arch}}
           toolset: 14.29
 
-      - uses: actions/checkout@v1.2.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v1
 
       - name: Install python dependencies
+        shell: cmd
         run: pip install meson ninja
 
       - name: Create sources directory
+        shell: cmd
         run: mkdir sources
 
       - name: Create directories
         shell: bash
-        run: mkdir -p /c/msvc_x86_64/{bin,lib,include}
+        run: mkdir -p ${{matrix.prefix_path_unix}}/{bin,lib,include}
 
       - name: Update PATH
-        run: echo "c:\msvc_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: echo "${{matrix.prefix_path_backslash}}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
 
       - name: Delete conflicting files
@@ -50,19 +96,43 @@ jobs:
           find "/c/program files (x86)/windows kits/" -name 'icu*.h' -delete
 
 
-      - name: Download nasm
+      - name: Download nasm (x86)
+        if: matrix.arch == 'x86'
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "nasm [this](http://files.jkvinge.net/packages/strawberry-dependencies/nasm-2.15.05-installer-x64.exe)!"
+          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win32/nasm-2.15.05-installer-x86.exe)!"
           target: downloads/
           auto-match: true
 
-      - name: Install nasm
+      - name: Download nasm (x86_64)
+        if: matrix.arch == 'x86_64'
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-installer-x64.exe)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Install nasm (x86)
+        if: matrix.arch == 'x86'
+        shell: pwsh
+        working-directory: downloads
+        run: |
+          mkdir c:\nasm
+          cd c:\nasm
+          7z x ${{github.workspace}}\downloads\nasm-2.15.05-installer-x86.exe
+
+      - name: Install nasm (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: pwsh
         working-directory: downloads
         run: |
           mkdir c:\nasm
           cd c:\nasm
           7z x ${{github.workspace}}\downloads\nasm-2.15.05-installer-x64.exe
+
+      - name: Copy nasm
+        shell: bash
+        run: cp /c/nasm/nasm.exe /c/nasm/nasmw.exe
 
       - name: Add nasm to PATH
         run: echo "c:\nasm" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -78,7 +148,7 @@ jobs:
       - name: Copy yasm
         shell: bash
         working-directory: downloads
-        run: cp yasm-1.3.0-win64.exe /c/msvc_x86_64/bin/yasm.exe
+        run: cp yasm-1.3.0-win64.exe ${{matrix.prefix_path_unix}}/bin/yasm.exe
 
 
       - name: Download win_flex_bison
@@ -89,6 +159,7 @@ jobs:
           auto-match: true
 
       - name: Copy win_flex_bison
+        shell: pwsh
         run: |
           mkdir c:\win_flex_bison
           cd c:\win_flex_bison
@@ -101,19 +172,19 @@ jobs:
       - name: Download Boost
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2)!"
+          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Boost
         shell: bash
         working-directory: sources
-        run: tar -xf  ../downloads/boost_1_79_0.tar.bz2
+        run: tar -xf  ../downloads/boost_1_80_0.tar.bz2
 
       - name: Copy Boost
         shell: bash
         working-directory: sources
-        run: cp -r boost_1_79_0/boost /c/msvc_x86_64/include/
+        run: cp -r boost_1_80_0/boost ${{matrix.prefix_path_unix}}/include/
 
 
       - name: Download pkgconf
@@ -129,15 +200,16 @@ jobs:
         run: tar -xf ../downloads/pkgconf-1.9.2.tar.gz
 
       - name: Compile pkgconf
+        shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/pkgconf-pkgconf-1.9.2
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 -Dtests=false build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} -Dtests=false build
           cd build
           ninja
           ninja install
-          copy c:\msvc_x86_64\bin\pkgconf.exe c:\msvc_x86_64\bin\pkg-config.exe
+          copy ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe ${{matrix.prefix_path_backslash}}\bin\pkg-config.exe
 
 
       - name: Download zlib
@@ -153,29 +225,30 @@ jobs:
         run: tar -xf ../downloads/zlib-1.2.12.tar.gz
 
       - name: Compile zlib
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/zlib-1.2.12
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
 
       - name: copy zlib (release)
         if: matrix.buildtype == 'release'
         shell: bash
-        run: cp /c/msvc_x86_64/lib/zlib.lib /c/msvc_x86_64/lib/z.lib
+        run: cp ${{matrix.prefix_path_unix}}/lib/zlib.lib ${{matrix.prefix_path_unix}}/lib/z.lib
 
       - name: copy zlib (debug)
         if: matrix.buildtype == 'debug'
         shell: bash
         run: |
-          cp /c/msvc_x86_64/lib/zlibd.lib /c/msvc_x86_64/lib/z.lib
-          cp /c/msvc_x86_64/lib/zlibd.lib /c/msvc_x86_64/lib/zd.lib
+          cp ${{matrix.prefix_path_unix}}/lib/zlibd.lib ${{matrix.prefix_path_unix}}/lib/z.lib
+          cp ${{matrix.prefix_path_unix}}/lib/zlibd.lib ${{matrix.prefix_path_unix}}/lib/zd.lib
 
 
       - name: Download openssl
@@ -192,27 +265,30 @@ jobs:
 
       - name: Configure openssl (release)
         if: matrix.buildtype == 'release'
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/openssl-3.0.5
-        run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --release --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlib.lib
+        run: perl Configure ${{matrix.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{matrix.prefix_path_backslash}} --libdir=lib --openssldir=${{matrix.prefix_path_backslash}}\ssl --release --with-zlib-include=${{matrix.prefix_path_backslash}}\include --with-zlib-lib=${{matrix.prefix_path_backslash}}\lib\zlib.lib
 
       - name: Configure openssl (debug)
         if: matrix.buildtype == 'debug'
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/openssl-3.0.5
-        run: perl Configure VC-WIN64A shared zlib no-capieng no-tests --prefix=c:\msvc_x86_64 --libdir=lib --openssldir=c:\msvc_x86_64\ssl --debug --with-zlib-include=c:\msvc_x86_64\include --with-zlib-lib=c:\msvc_x86_64\lib\zlibd.lib
+        run: perl Configure ${{matrix.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{matrix.prefix_path_backslash}} --libdir=lib --openssldir=${{matrix.prefix_path_backslash}}\ssl --debug --with-zlib-include=${{matrix.prefix_path_backslash}}\include --with-zlib-lib=${{matrix.prefix_path_backslash}}\lib\zlibd.lib
 
       - name: Compile openssl
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/openssl-3.0.5
         run: |
           nmake
@@ -227,28 +303,43 @@ jobs:
           auto-match: true
 
       - name: Extract GnuTLS
+        shell: pwsh
         run: |
           mkdir gnutls
           cd gnutls
           7z x "../downloads/libgnutls_3.7.6_msvc16.zip"
-          xcopy /s /y bin\x64\*.* c:\msvc_x86_64\bin\
-          xcopy /s /y lib\x64\*.* c:\msvc_x86_64\lib\
-          xcopy /s /y include\* c:\msvc_x86_64\include\
+          xcopy /s /y include\* ${{matrix.prefix_path_backslash}}\include\
+
+      - name: Copy GnuTLS (x86)
+        if: matrix.arch == 'x86'
+        shell: cmd
+        run: |
+          cd gnutls
+          xcopy /s /y bin\x86\*.* ${{matrix.prefix_path_backslash}}\bin\
+          xcopy /s /y lib\x86\*.* ${{matrix.prefix_path_backslash}}\lib\
+
+      - name: Copy GnuTLS (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        run: |
+          cd gnutls
+          xcopy /s /y bin\x64\*.* ${{matrix.prefix_path_backslash}}\bin\
+          xcopy /s /y lib\x64\*.* ${{matrix.prefix_path_backslash}}\lib\
 
       - name: Create gnutls.pc
         shell: bash
         run: |
-          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Name: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Description: gnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "URL: https://www.gnutls.org/" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Version: 3.7.6" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Libs: -Lc:/msvc_x86_64/lib -lgnutls" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
-          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/gnutls.pc
+          echo "prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "exec_prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "libdir=${{matrix.prefix_path_forwardslash}}/lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "includedir=${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Name: gnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Description: gnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "URL: https://www.gnutls.org/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Version: 3.7.6" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -lgnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
 
       - name: Download libpng
@@ -267,15 +358,16 @@ jobs:
           patch -p1 < ../../patches/libpng-msvc.patch
 
       - name: Compile libpng
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libpng-1.6.37
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
 
@@ -293,21 +385,23 @@ jobs:
         run: tar -xf ../downloads/pcre2-10.40.tar.bz2
 
       - name: Compile pcre2
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/pcre2-10.40
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_PCRE2_8=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_TESTS=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_PCRE2_8=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_TESTS=OFF
           cmake --build .
           cmake --install .
 
       - name: copy pcre2 lib (debug)
         if: matrix.buildtype == 'debug'
-        run: copy "c:\msvc_x86_64\lib\pcre2-8d.lib" "c:\msvc_x86_64\lib\pcre2-8.lib"
+        shell: cmd
+        run: copy "${{matrix.prefix_path_backslash}}\lib\pcre2-8d.lib" "${{matrix.prefix_path_backslash}}\lib\pcre2-8.lib"
 
 
       - name: Download bzip2
@@ -326,15 +420,16 @@ jobs:
           patch -p1 < ../../patches/bzip2-cmake.patch
 
       - name: Compile bzip2
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/bzip2-1.0.8
         run: |
           mkdir build2
           cd build2
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
 
@@ -352,30 +447,27 @@ jobs:
         run: tar -xf ../downloads/xz-5.2.5.tar.xz
 
       - name: Compile xz
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/xz-5.2.5/windows/vs2019
-        run: |
-          msbuild xz_win.sln /property:Configuration=${{ matrix.buildtype }}
-          copy ..\..\src\liblzma\api\*.h c:\msvc_x86_64\include\
-          mkdir c:\msvc_x86_64\include\lzma
-          copy ..\..\src\liblzma\api\lzma\*.* c:\msvc_x86_64\include\lzma\
+        run: msbuild xz_win.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}}
 
-      - name: Copy liblzma (release)
-        if: matrix.buildtype == 'release'
+      - name: Install xz
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/xz-5.2.5/windows/vs2019
         run: |
-          copy release\x64\liblzma_dll\*.lib c:\msvc_x86_64\lib\
-          copy release\x64\liblzma_dll\*.dll c:\msvc_x86_64\bin\
-
-      - name: Copy liblzma (debug)
-        if: matrix.buildtype == 'debug'
-        working-directory: sources/xz-5.2.5/windows/vs2019
-        run: |
-          copy debug\x64\liblzma_dll\*.lib c:\msvc_x86_64\lib\
-          copy debug\x64\liblzma_dll\*.dll c:\msvc_x86_64\bin\
+          copy ${{matrix.buildtype}}\${{matrix.msbuild_platform}}\liblzma_dll\*.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy ${{matrix.buildtype}}\${{matrix.msbuild_platform}}\liblzma_dll\*.dll ${{matrix.prefix_path_backslash}}\bin\
+          copy ..\..\src\liblzma\api\*.h ${{matrix.prefix_path_backslash}}\include\
+          mkdir ${{matrix.prefix_path_backslash}}\include\lzma
+          copy ..\..\src\liblzma\api\lzma\*.* ${{matrix.prefix_path_backslash}}\include\lzma\
 
 
       - name: Download brotli
@@ -391,33 +483,40 @@ jobs:
         run: tar -xf ../downloads/v1.0.9.tar.gz
 
       - name: Compile brotli
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/brotli-1.0.9
         run: |
           mkdir build2
           cd build2
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_TESTING=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
 
       - name: Compile libiconv
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources
         run: |
           git clone https://github.com/pffang/libiconv-for-Windows
           cd libiconv-for-Windows
           git checkout 9b7aba8da6e125ef33912fa4412779279f204003
-          msbuild libiconv.sln /property:Configuration=${{ matrix.buildtype }}
-          copy lib64\*.lib c:\msvc_x86_64\lib\
-          copy lib64\*.dll c:\msvc_x86_64\bin\
-          copy include\*.h c:\msvc_x86_64\include\
+          msbuild libiconv.sln /property:Configuration=${{matrix.buildtype}}
+
+      - name: Install libiconv
+        shell: cmd
+        working-directory: sources/libiconv-for-Windows
+        run: |
+          copy include\*.h ${{matrix.prefix_path_backslash}}\include\
+          copy ${{matrix.libdir}}\*.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy ${{matrix.libdir}}\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
 
       - name: Download pixman
@@ -436,13 +535,14 @@ jobs:
           patch -p1 < ../../patches/pixman.patch
 
       - name: Compile pixman
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/pixman-0.40.0
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dgtk=disabled -Dlibpng=enabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dgtk=disabled -Dlibpng=enabled build
           cd build
           ninja
           ninja install
@@ -461,22 +561,23 @@ jobs:
         run: tar -xf ../downloads/libxml2-v2.9.14.tar.bz2 || true
 
       - name: Compile libxml2
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libxml2-v2.9.14
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DLIBXML2_WITH_PYTHON=OFF -DLIBXML2_WITH_ZLIB=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DLIBXML2_WITH_PYTHON=OFF -DLIBXML2_WITH_ZLIB=ON
           cmake --build .
           cmake --install .
 
       - name: copy libxml2 (debug)
         if: matrix.buildtype == 'debug'
         shell: bash
-        run: cp /c/msvc_x86_64/lib/libxml2d.lib /c/msvc_x86_64/lib/libxml2.lib
+        run: cp ${{matrix.prefix_path_unix}}/lib/libxml2d.lib ${{matrix.prefix_path_unix}}/lib/libxml2.lib
 
 
       - name: Download nghttp2
@@ -492,15 +593,16 @@ jobs:
         run: tar -xf ../downloads/nghttp2-1.48.0.tar.xz
 
       - name: Compile nghttp2
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/nghttp2-1.48.0
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DENABLE_SHARED_LIB=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DENABLE_SHARED_LIB=ON
           cmake --build .
           cmake --install .
 
@@ -518,6 +620,7 @@ jobs:
         run: tar -xf ../downloads/sqlite-autoconf-3390200.tar.gz
 
       - name: Compile SQlite
+        shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/sqlite-autoconf-3390200
@@ -526,28 +629,29 @@ jobs:
           cl shell.c sqlite3.c -Fe:sqlite3.exe
 
       - name: Copy SQLite
+        shell: cmd
         working-directory: sources/sqlite-autoconf-3390200
         run: |
-          copy *.h c:\msvc_x86_64\include\
-          copy *.lib c:\msvc_x86_64\lib\
-          copy *.dll c:\msvc_x86_64\bin\
-          copy *.exe c:\msvc_x86_64\bin\
+          copy *.h ${{matrix.prefix_path_backslash}}\include\
+          copy *.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy *.dll ${{matrix.prefix_path_backslash}}\bin\
+          copy *.exe ${{matrix.prefix_path_backslash}}\bin\
 
       - name: Create sqlite3.pc
         shell: bash
         run: |
-          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Name: SQLite" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Description: SQL database engine" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "URL: https://www.sqlite.org/" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Version: 3.38.1" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Libs: -Lc:/msvc_x86_64/lib -lsqlite3" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Libs.private: -lz -ldl" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
-          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/sqlite3.pc
+          echo "prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "exec_prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "libdir=${{matrix.prefix_path_forwardslash}}/lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "includedir=${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Name: SQLite" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Description: SQL database engine" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "URL: https://www.sqlite.org/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Version: 3.38.1" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -lsqlite3" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Libs.private: -lz -ldl" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
 
 
       - name: Download libogg
@@ -563,15 +667,16 @@ jobs:
         run: tar -xf ../downloads/libogg-1.3.5.tar.xz
 
       - name: Compile libogg
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libogg-1.3.5
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF
           cmake --build .
           cmake --install .
 
@@ -589,15 +694,16 @@ jobs:
         run: tar -xf ../downloads/libvorbis-1.3.7.tar.xz
 
       - name: Compile libvorbis
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libvorbis-1.3.7
         run: |
           mkdir build2
           cd build2
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -614,19 +720,27 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/flac-1.3.4.tar.xz
 
+      - name: Move nasm.exe
+        shell: bash
+        run: mv /c/nasm/nasm.exe /c/nasm/nasm.exe_
+
       - name: Compile flac
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/flac-1.3.4
         run: |
           mkdir build2
           cd build2
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_DOCS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_MANPAGES=OFF -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_DOCS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_MANPAGES=OFF -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF
           cmake --build .
           cmake --install .
 
+      - name: Move nasm.exe
+        shell: bash
+        run: mv /c/nasm/nasm.exe_ /c/nasm/nasm.exe
 
       - name: Download wavpack
         uses: suisei-cn/actions-download-file@v1
@@ -643,21 +757,22 @@ jobs:
           sed -i '/wavpackdll.rc/d' wavpack-5.5.0/CMakeLists.txt
 
       - name: Compile wavpack
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/wavpack-5.5.0
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DWAVPACK_BUILD_DOCS=OFF -DWAVPACK_BUILD_PROGRAMS=OFF -DWAVPACK_ENABLE_ASM=OFF -DWAVPACK_ENABLE_LEGACY=OFF -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DWAVPACK_BUILD_DOCS=OFF -DWAVPACK_BUILD_PROGRAMS=OFF -DWAVPACK_ENABLE_ASM=OFF -DWAVPACK_ENABLE_LEGACY=OFF -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF
           cmake --build .
           cmake --install .
-          mkdir c:\msvc_x86_64\include\wavpack
-          copy c:\msvc_x86_64\include\wavpack.h c:\msvc_x86_64\include\wavpack\
-          copy c:\msvc_x86_64\lib\wavpackdll.lib c:\msvc_x86_64\lib\wavpack.lib
-          copy c:\msvc_x86_64\bin\wavpackdll.dll c:\msvc_x86_64\bin\wavpack.dll
+          mkdir ${{matrix.prefix_path_backslash}}\include\wavpack
+          copy ${{matrix.prefix_path_backslash}}\include\wavpack.h ${{matrix.prefix_path_backslash}}\include\wavpack\
+          copy ${{matrix.prefix_path_backslash}}\lib\wavpackdll.lib ${{matrix.prefix_path_backslash}}\lib\wavpack.lib
+          copy ${{matrix.prefix_path_backslash}}\bin\wavpackdll.dll ${{matrix.prefix_path_backslash}}\bin\wavpack.dll
 
 
       - name: Download opus
@@ -675,15 +790,16 @@ jobs:
           sed -i '/include(opus_buildtype.cmake)/d' opus-1.3.1/CMakeLists.txt
 
       - name: Compile opus
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/opus-1.3.1
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -704,15 +820,16 @@ jobs:
           patch -p1 < ../../patches/opusfile-cmake.patch
 
       - name: Compile opusfile
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/opusfile-0.12
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -726,23 +843,25 @@ jobs:
           patch -p1 < ../../patches/speex-cmake.patch
 
       - name: Compile speex
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/speex
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
       - name: Copy speex
         if: matrix.buildtype == 'debug'
+        shell: cmd
         run: |
-          copy c:\msvc_x86_64\lib\libspeexd.lib c:\msvc_x86_64\lib\libspeex.lib
-          copy c:\msvc_x86_64\bin\libspeexd.dll c:\msvc_x86_64\bin\libspeex.dll
+          copy ${{matrix.prefix_path_backslash}}\lib\libspeexd.lib ${{matrix.prefix_path_backslash}}\lib\libspeex.lib
+          copy ${{matrix.prefix_path_backslash}}\bin\libspeexd.dll ${{matrix.prefix_path_backslash}}\bin\libspeex.dll
 
 
       - name: Download mpg123
@@ -758,15 +877,16 @@ jobs:
         run: tar -xf ../downloads/mpg123-1.30.2.tar.bz2
 
       - name: Compile mpg123
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/mpg123-1.30.2
         run: |
           mkdir build2
           cd build2
-          cmake ../ports/cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
+          cmake ../ports/cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
           cmake --build .
           cmake --install .
 
@@ -781,36 +901,66 @@ jobs:
       - name: Extract lame
         shell: bash
         working-directory: sources
-        run: |
-          tar -xf ../downloads/lame-3.100.tar.gz
-          sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:Win64/g' lame-3.100/Makefile.MSVC
+        run: tar -xf ../downloads/lame-3.100.tar.gz
 
-      - name: Compile lame
+      - name: Patch lame (x86)
+        if: matrix.arch == 'x86'
+        shell: bash
+        working-directory: sources
+        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X86/g' lame-3.100/Makefile.MSVC
+
+      - name: Patch lame (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: sources
+        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' lame-3.100/Makefile.MSVC
+
+      - name: Compile lame (x86)
+        if: matrix.arch == 'x86'
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/lame-3.100
+        run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
+
+      - name: Compile lame (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/lame-3.100
+        run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
+
+      - name: Install lame
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/lame-3.100
         run: |
-          nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
-          copy include\*.h c:\msvc_x86_64\include\
-          copy output\libmp3lame*.lib c:\msvc_x86_64\lib\
-          copy output\libmp3lame*.dll c:\msvc_x86_64\bin\
+          copy include\*.h ${{matrix.prefix_path_backslash}}\include\
+          copy output\libmp3lame*.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy output\libmp3lame*.dll ${{matrix.prefix_path_backslash}}\bin\
 
       - name: Create mp3lame.pc
         shell: bash
         run: |
-          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "Name: lame" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "Description: encoder that converts audio to the MP3 file format." >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "URL: https://lame.sourceforge.io/" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "Version: 3.100" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "Libs: -Lc:/msvc_x86_64/lib -lmp3lame" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
-          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/mp3lame.pc
+          echo "prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "exec_prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "libdir=${{matrix.prefix_path_forwardslash}}/lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "includedir=${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Name: lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Description: encoder that converts audio to the MP3 file format." >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "URL: https://lame.sourceforge.io/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Version: 3.100" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -lmp3lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
 
 
       - name: Download twolame
@@ -837,7 +987,8 @@ jobs:
         working-directory: sources/twolame-0.4.0/win32
         run: start /w devenv.exe libtwolame_dll.sln /upgrade
 
-      - name: Patch twolame project
+      - name: Patch twolame project for x86_64
+        if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: sources/twolame-0.4.0/win32
         run: |
@@ -850,25 +1001,25 @@ jobs:
           CL: "/MP"
         working-directory: sources/twolame-0.4.0/win32
         run: |
-          msbuild libtwolame_dll.sln /property:Configuration=${{ matrix.buildtype }}
-          copy ..\libtwolame\twolame.h c:\msvc_x86_64\include\
-          copy lib\*.lib c:\msvc_x86_64\lib\
-          copy lib\*.dll c:\msvc_x86_64\bin\
+          msbuild libtwolame_dll.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}}
+          copy ..\libtwolame\twolame.h ${{matrix.prefix_path_backslash}}\include\
+          copy lib\*.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy lib\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
       - name: Create twolame.pc
         shell: bash
         run: |
-          echo "prefix=c:/msvc_x86_64" >/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "Name: lame" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "URL: https://www.twolame.org/" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "Version: 0.4.0" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "Libs: -Lc:/msvc_x86_64/lib -ltwolame_dll" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
-          echo "Cflags: -Ic:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/twolame.pc
+          echo "prefix=${{matrix.prefix_path_forwardslash}}" >${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "exec_prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "libdir=${{matrix.prefix_path_forwardslash}}/lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "includedir=${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Name: lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "URL: https://www.twolame.org/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Version: 0.4.0" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -ltwolame_dll" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
 
 
       - name: Download TagLib
@@ -884,15 +1035,16 @@ jobs:
         run: tar -xf ../downloads/taglib-1.12.tar.gz
 
       - name: Compile TagLib
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/taglib-1.12
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -910,23 +1062,30 @@ jobs:
         run: tar -xf ../downloads/v1.3.1.tar.gz
 
       - name: Compile dlfcn-win32
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/dlfcn-win32-1.3.1
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
 
 
-      - name: Download FFTW
+      - name: Download FFTW (x86)
         uses: suisei-cn/actions-download-file@v1
         with:
-          #url: "FFTW [this](https://www.fftw.org/fftw-3.3.10.tar.gz)!"
+          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-3.3.5-dll32.zip)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Download FFTW (x86_64)
+        uses: suisei-cn/actions-download-file@v1
+        with:
           url: "FFTW [this](https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip)!"
           target: downloads/
           auto-match: true
@@ -942,27 +1101,43 @@ jobs:
       #- name: Compile FFTW
         #env:
           #CL: "/MP"
-          #PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          #PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          #PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          #PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         #working-directory: sources/fftw-3.3.10
         #run: |
           #mkdir build
           #cd build
-          #cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON
+          #cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON
           #cmake --build .
           #cmake --install .
 
       # Using the prebuilt FFTW binaries is recommended, they are also faster.
-      - name: Extract FFTW
+
+      - name: Extract FFTW (x86)
+        if: matrix.arch == 'x86'
+        shell: pwsh
+        working-directory: downloads
+        run: |
+          mkdir fftw
+          cd fftw
+          7z x "${{github.workspace}}/downloads/fftw-3.3.5-dll32.zip"
+
+      - name: Extract FFTW (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: pwsh
         working-directory: downloads
         run: |
           mkdir fftw
           cd fftw
           7z x "${{github.workspace}}/downloads/fftw-3.3.5-dll64.zip"
+
+      - name: Install FFTW
+        working-directory: downloads/fftw
+        run: |          
           lib /def:libfftw3-3.def
-          xcopy /s /y libfftw3-3.dll c:\msvc_x86_64\bin\
-          xcopy /s /y libfftw3-3.lib c:\msvc_x86_64\lib\
-          xcopy /s /y fftw3.h c:\msvc_x86_64\include\
+          xcopy /s /y libfftw3-3.dll ${{matrix.prefix_path_backslash}}\bin\
+          xcopy /s /y libfftw3-3.lib ${{matrix.prefix_path_backslash}}\lib\
+          xcopy /s /y fftw3.h ${{matrix.prefix_path_backslash}}\include\
 
 
       - name: Download GLib
@@ -978,17 +1153,18 @@ jobs:
         run: tar -xf ../downloads/glib-2.73.3.tar.xz || true
 
       - name: Compile GLib
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:\msvc_x86_64\include
-          CXXFLAGS: -Ic:\msvc_x86_64\include
-          LDFLAGS: -Lc:\msvc_x86_64\lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_backslash}}\include
+          CXXFLAGS: -I${{matrix.prefix_path_backslash}}\include
+          LDFLAGS: -L${{matrix.prefix_path_backslash}}\lib
 
         working-directory: sources/glib-2.73.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
           ninja
           ninja install
@@ -1010,13 +1186,14 @@ jobs:
           patch -p1 < ../../patches/glib-networking-tests.patch
 
       - name: Compile glib-networking
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/glib-networking-2.72.2
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dgnutls=enabled -Dopenssl=enabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dgnutls=enabled -Dopenssl=enabled build
           cd build
           ninja
           ninja install
@@ -1035,13 +1212,14 @@ jobs:
         run: tar -xf ../downloads/libpsl-0.21.1.tar.gz
 
       - name: Compile libpsl
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libpsl-0.21.1
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
           ninja
           ninja install
@@ -1060,13 +1238,14 @@ jobs:
         run: tar -xf ../downloads/libsoup-2.74.2.tar.xz
 
       - name: Compile libsoup
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libsoup-2.74.2
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dtests=false -Dsysprof=disabled -Dtls_check=false -Dgnome=false -Dgtk_doc=false build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dtests=false -Dsysprof=disabled -Dtls_check=false -Dgnome=false -Dgtk_doc=false build
           cd build
           ninja
           ninja install
@@ -1085,13 +1264,14 @@ jobs:
         run: tar -xf ../downloads/orc-0.4.32.tar.xz
 
       - name: Compile orc
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/orc-0.4.32
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
           ninja
           ninja install
@@ -1110,22 +1290,23 @@ jobs:
         run: tar -xf ../downloads/libcuefile_r475.tar.gz
 
       - name: Compile libcuefile
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libcuefile_r475
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DSHARED=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DSHARED=ON
           cmake --build .
           cmake --install .
-          mkdir c:\msvc_x86_64\include\cuetools
-          copy ..\include\cuetools\cd.h c:\msvc_x86_64\include\cuetools\
-          copy ..\include\cuetools\cdtext.h c:\msvc_x86_64\include\cuetools\
-          copy ..\include\cuetools\cuefile.h c:\msvc_x86_64\include\cuetools\
-          copy src\*.dll c:\msvc_x86_64\bin\
+          mkdir ${{matrix.prefix_path_backslash}}\include\cuetools
+          copy ..\include\cuetools\cd.h ${{matrix.prefix_path_backslash}}\include\cuetools\
+          copy ..\include\cuetools\cdtext.h ${{matrix.prefix_path_backslash}}\include\cuetools\
+          copy ..\include\cuetools\cuefile.h ${{matrix.prefix_path_backslash}}\include\cuetools\
+          copy src\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
 
       - name: Download libreplaygain
@@ -1141,20 +1322,21 @@ jobs:
         run: tar -xf ../downloads/libreplaygain_r475.tar.gz
 
       - name: Compile libreplaygain
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libreplaygain_r475
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DSHARED=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DSHARED=ON
           cmake --build .
           cmake --install .
-          mkdir c:\msvc_x86_64\include\replaygain
-          copy ../include/replaygain/gain_analysis.h c:/msvc_x86_64/include/replaygain/
-          copy src\*.dll c:\msvc_x86_64\bin\
+          mkdir ${{matrix.prefix_path_backslash}}\include\replaygain
+          copy ../include/replaygain/gain_analysis.h ${{matrix.prefix_path_forwardslash}}/include/replaygain/
+          copy src\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
 
       - name: Download musepack
@@ -1173,19 +1355,20 @@ jobs:
           patch -p1 < ../../patches/musepack-fixes.patch
 
       - name: Compile musepack
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/musepack_src_r475
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DSHARED=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
           cmake --build .
           cmake --install .
-          copy libmpcdec\*.lib c:\msvc_x86_64\lib\
-          copy libmpcdec\*.dll c:\msvc_x86_64\bin\
+          copy libmpcdec\*.lib ${{matrix.prefix_path_backslash}}\lib\
+          copy libmpcdec\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
 
       - name: Download libopenmpt
@@ -1196,6 +1379,7 @@ jobs:
           auto-match: true
 
       - name: Extract libopenmpt
+        shell: pwsh
         working-directory: sources
         run: |
           mkdir libopenmpt
@@ -1208,13 +1392,14 @@ jobs:
         run: patch -p1 < ../../patches/libopenmpt-cmake.patch
 
       - name: Compile libopenmpt
+        shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/libopenmpt
         run: |
           mkdir build2
           cd build2
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -1239,7 +1424,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
 
@@ -1257,15 +1442,16 @@ jobs:
         run: tar -xf ../downloads/fdk-aac-2.0.2.tar.gz
 
       - name: Compile fdk-aac
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/fdk-aac-2.0.2
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
           cmake --build .
           cmake --install .
 
@@ -1279,16 +1465,17 @@ jobs:
           patch -p1 < ../../patches/faad2-cmake.patch
 
       - name: Compile faad2
+        shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/faad2
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
-          copy ..\include\*.h c:\msvc_x86_64\include\
+          copy ..\include\*.h ${{matrix.prefix_path_backslash}}\include\
 
 
       - name: Download faac
@@ -1300,26 +1487,29 @@ jobs:
           patch -p1 < ../../patches/faac-msvc.patch
 
       - name: Compile faac
+        shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/faac/project/msvc
         run: |
-          msbuild faac.sln /property:Configuration=${{ matrix.buildtype }}
-          copy ..\..\include\*.h c:\msvc_x86_64\include\
+          msbuild faac.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}}
+          copy ..\..\include\*.h ${{matrix.prefix_path_backslash}}\include\
 
       - name: copy faac (release)
         if: matrix.buildtype == 'release'
+        shell: cmd
         working-directory: sources/faac/project/msvc
         run: |
-          copy bin\Release\libfaac_dll.lib c:\msvc_x86_64\lib\libfaac.lib
-          copy bin\Release\*.dll c:\msvc_x86_64\bin\
+          copy bin\Release\libfaac_dll.lib ${{matrix.prefix_path_backslash}}\lib\libfaac.lib
+          copy bin\Release\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
       - name: copy faac (debug)
         if: matrix.buildtype == 'debug'
+        shell: cmd
         working-directory: sources/faac/project/msvc
         run: |
-          copy bin\Debug\libfaac_dll.lib c:\msvc_x86_64\lib\libfaac.lib
-          copy bin\Debug\*.dll c:\msvc_x86_64\bin\
+          copy bin\Debug\libfaac_dll.lib ${{matrix.prefix_path_backslash}}\lib\libfaac.lib
+          copy bin\Debug\*.dll ${{matrix.prefix_path_backslash}}\bin\
 
 
       - name: Download libbs2b
@@ -1338,15 +1528,16 @@ jobs:
           patch -p1 < ../../patches/libbs2b-msvc.patch
 
       - name: Compile libbs2b
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libbs2b-3.1.0
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=c:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -1357,15 +1548,16 @@ jobs:
         run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
 
       - name: Compile ffmpeg
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/ffmpeg
         run: |
-          meson --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Dgpl=enabled build
+          meson --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Dgpl=enabled build
           cd build
           ninja
           ninja install
@@ -1384,15 +1576,16 @@ jobs:
         run: tar -xf ../downloads/chromaprint-1.5.1.tar.gz
 
       - name: Compile Chromaprint
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/chromaprint-1.5.1
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX=C:\msvc_x86_64 -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=C:\msvc_x86_64
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=${{matrix.prefix_path_backslash}}
           cmake --build .
           cmake --install .
 
@@ -1410,15 +1603,16 @@ jobs:
         run: tar -xf ../downloads/gstreamer-1.20.3.tar.xz
 
       - name: Compile GStreamer
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gstreamer-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
           cd build
           ninja
           ninja install
@@ -1437,15 +1631,16 @@ jobs:
         run: tar -xf ../downloads/gst-plugins-base-1.20.3.tar.xz
 
       - name: Compile gst-plugins-base
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include -I${{matrix.prefix_path_forwardslash}}/include/opus
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gst-plugins-base-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvert=disabled -Dvideorate=disabled -Dvideoscale=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvert=disabled -Dvideorate=disabled -Dvideoscale=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
           cd build
           ninja
           ninja install
@@ -1464,15 +1659,16 @@ jobs:
         run: tar -xf ../downloads/gst-plugins-good-1.20.3.tar.xz
 
       - name: Compile gst-plugins-good
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gst-plugins-good-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=enabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=enabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
           cd build
           ninja
           ninja install
@@ -1492,17 +1688,22 @@ jobs:
           tar -xf ../downloads/gst-plugins-bad-1.20.3.tar.xz
           cd gst-plugins-bad-1.20.3
           patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
+          sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/faad/meson.build
+          sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/faac/meson.build
+          sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/musepack/meson.build
+          sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/gme/meson.build
 
       - name: Compile gst-plugins-bad
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include -Ic:/msvc_x86_64/include/opus
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include -I${{matrix.prefix_path_forwardslash}}/include/opus
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gst-plugins-bad-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=enabled -Dgs=disabled -Dgsm=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=enabled -Dhls-crypto=openssl build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=enabled -Dgs=disabled -Dgsm=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=enabled -Dhls-crypto=openssl build
           cd build
           ninja
           ninja install
@@ -1523,13 +1724,13 @@ jobs:
       - name: Compile gst-plugins-ugly
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gst-plugins-ugly-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
           cd build
           ninja
           ninja install
@@ -1548,15 +1749,16 @@ jobs:
         run: tar -xf ../downloads/gst-libav-1.20.3.tar.xz
 
       - name: Compile gst-libav
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/gst-libav-1.20.3
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix=c:\msvc_x86_64 --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddoc=disabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddoc=disabled build
           cd build
           ninja
           ninja install
@@ -1579,15 +1781,15 @@ jobs:
         env:
           CL: "/MP"
         working-directory: sources/icu/source/allinone
-        run: msbuild allinone.sln /property:Configuration=${{ matrix.buildtype }} /p:Platform=x64 || goto end
+        run: msbuild allinone.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}} || goto end
 
       - name: Install icu
         shell: bash
         working-directory: sources/icu
         run: |
-          cp -r include/unicode /c/msvc_x86_64/include/
-          cp lib64/{*.lib,*.pdb,*.exp} /c/msvc_x86_64/lib/
-          cp bin64/{*.dll,*.exe} /c/msvc_x86_64/bin/
+          cp -r include/unicode ${{matrix.prefix_path_unix}}/include/
+          cp ${{matrix.libdir}}/{*.lib,*.pdb,*.exp} ${{matrix.prefix_path_unix}}/lib/
+          cp ${{matrix.bindir}}/{*.dll,*.exe} ${{matrix.prefix_path_unix}}/bin/
 
 
       - name: Download expat
@@ -1606,13 +1808,13 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/expat-2.4.8
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
           cmake --build .
           cmake --install .
 
@@ -1633,13 +1835,13 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/freetype-2.12.1
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -1660,11 +1862,11 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/harfbuzz-5.1.0
         run: |
-          meson --buildtype=${{ matrix.buildtype }} --prefix="c:\msvc_x86_64" --pkg-config-path=c:\msvc_x86_64\lib\pkgconfig -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix="${{matrix.prefix_path_backslash}}" --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
           cd build
           ninja
           ninja install
@@ -1684,13 +1886,13 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/freetype-2.12.1
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -DBUILD_SHARED_LIBS=ON
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
@@ -1698,28 +1900,28 @@ jobs:
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz)!"
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.5/protobuf-cpp-3.21.5.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Protobuf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/protobuf-cpp-3.21.4.tar.gz
+        run: tar -xf ../downloads/protobuf-cpp-3.21.5.tar.gz
 
       - name: Compile Protobuf
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-        working-directory: sources/protobuf-3.21.4/cmake
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/protobuf-3.21.5/cmake
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64" -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF
           cmake --build .
           cmake --install .
-          copy protobuf.pc c:\msvc_x86_64\lib\pkgconfig\
+          copy protobuf.pc ${{matrix.prefix_path_backslash}}\lib\pkgconfig\
 
 
       - name: Download qtbase
@@ -1743,19 +1945,20 @@ jobs:
         run: cp sqlite-*/sqlite3.{c,h} qtbase-everywhere-src-6.3.1/src/3rdparty/sqlite/
 
       - name: Configure qtbase
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         run: >
           cmake -S sources/qtbase-everywhere-src-6.3.1 -B sources/qtbase-everywhere-src-6.3.1/build
           -G Ninja
-          -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }}
-          -DCMAKE_INSTALL_PREFIX="c:\msvc_x86_64"
+          -DCMAKE_BUILD_TYPE=${{matrix.buildtype}}
+          -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           -DBUILD_SHARED_LIBS=ON
-          -DPKG_CONFIG_EXECUTABLE="c:\msvc_x86_64\bin\pkgconf.exe"
+          -DPKG_CONFIG_EXECUTABLE="${{matrix.prefix_path_backslash}}\bin\pkgconf.exe"
           -DQT_BUILD_EXAMPLES=OFF
           -DQT_BUILD_BENCHMARKS=OFF
           -DQT_BUILD_TESTS=OFF
@@ -1782,6 +1985,8 @@ jobs:
           -DFEATURE_sql=ON
           -DFEATURE_sql_sqlite=ON
           -DFEATURE_sql_odbc=OFF
+          -DFEATURE_sql_mysql=OFF
+          -DFEATURE_sql_psql=OFF
           -DFEATURE_jpeg=ON
           -DFEATURE_png=ON
           -DFEATURE_gif=ON
@@ -1794,13 +1999,15 @@ jobs:
           -DFEATURE_system_freetype=ON
           -DFEATURE_system_harfbuzz=ON
           -DFEATURE_system_sqlite=ON
-          -DICU_ROOT="c:\msvc_x86_64"
+          -DICU_ROOT="${{matrix.prefix_path_backslash}}"
 
       - name: Build qtbase
+        shell: cmd
         working-directory: sources/qtbase-everywhere-src-6.3.1/build
         run: cmake --build .
 
       - name: Install qtbase
+        shell: cmd
         working-directory: sources/qtbase-everywhere-src-6.3.1/build
         run: cmake --install .
 
@@ -1817,20 +2024,29 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/qttools-everywhere-src-6.3.1.tar.xz
 
-      - name: Compile qttools
+      - name: Configure qttools
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/qttools-everywhere-src-6.3.1
         run: |
           mkdir build
           cd build
-          c:\msvc_x86_64\bin\qt-configure-module.bat ..
-          cmake --build .
-          cmake --install .
+          ${{matrix.prefix_path_backslash}}\bin\qt-configure-module.bat ..
+
+      - name: Compile qttools
+        shell: cmd
+        working-directory: sources/qttools-everywhere-src-6.3.1/build
+        run: cmake --build .
+
+      - name: Install qttools
+        shell: cmd
+        working-directory: sources/qttools-everywhere-src-6.3.1/build
+        run: cmake --install .
 
 
       - name: Download qtsparkle
@@ -1842,46 +2058,46 @@ jobs:
           patch -p1 < ../../patches/qtsparkle-msvc.patch
 
       - name: Compile qtsparkle
+        shell: cmd
         env:
           CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: c:\msvc_x86_64\bin\pkgconf.exe
-          PKG_CONFIG_PATH: c:\msvc_x86_64\lib\pkgconfig
-          CFLAGS: -Ic:/msvc_x86_64/include
-          LDFLAGS: -Lc:/msvc_x86_64/lib
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         working-directory: sources/qtsparkle-git
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.buildtype }} -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH=c:\msvc_x86_64\lib\cmake -DCMAKE_INSTALL_PREFIX="c:/msvc_x86_64"
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH=${{matrix.prefix_path_backslash}}\lib\cmake -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_forwardslash}}"
           cmake --build .
           cmake --install .
 
       - name: Create qtsparkle pkg-config file
         shell: bash
         run: |
-          echo "prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "exec_prefix=c:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "libdir=c:/msvc_x86_64/lib" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "includedir=c:/msvc_x86_64/include" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Name: qtsparkle-qt6" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Version: " >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Description: Qt auto-updater lib" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Libs: -Lc:/msvc_x86_64 -lqtsparkle-qt6" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Cflags: -Ic:/msvc_x86_64" >>/c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "exec_prefix=${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "libdir=${{matrix.prefix_path_forwardslash}}/lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "includedir=${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Name: qtsparkle-qt6" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Version: " >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Description: Qt auto-updater lib" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Libs: -L${{matrix.prefix_path_forwardslash}} -lqtsparkle-qt6" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Cflags: -I${{matrix.prefix_path_forwardslash}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
 
-          cat /c/msvc_x86_64/lib/pkgconfig/qtsparkle-qt6.pc
+          cat ${{matrix.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
 
 
       - name: Create archive
         shell: bash
-        run: |
-          tar -cPJf strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz --transform "s,^c/msvc_x86_64,msvc_x86_64," /c/msvc_x86_64
+        run: tar -cJf strawberry-msvc-${{matrix.arch}}-${{matrix.buildtype}}.tar.xz --transform "s,^c/strawberry_msvc_${{matrix.arch}}_${{matrix.buildtype}},strawberry_msvc_${{matrix.arch}}_${{matrix.buildtype}}," ${{matrix.prefix_path_unix}}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: releases
-          path: strawberry-msvc-dependencies-${{ matrix.buildtype }}.tar.xz
+          path: strawberry-msvc-${{matrix.arch}}-${{matrix.buildtype}}.tar.xz
 
 
   create-release:
@@ -1891,8 +2107,8 @@ jobs:
     needs:
       - build-windows-msvc
     steps:
-      - uses: actions/checkout@v1.2.0
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           path: releases
       - name: Create Release
@@ -1901,4 +2117,9 @@ jobs:
         run: |
           set -x
           hub release delete "latest" || true
-          hub release create -a releases/releases/strawberry-msvc-dependencies-release.tar.xz -a releases/releases/strawberry-msvc-dependencies-debug.tar.xz -m "Strawberry MSVC Dependencies $GITHUB_SHA" "latest"
+          hub release create \
+            -a releases/releases/strawberry-msvc-x86-debug.tar.xz \
+            -a releases/releases/strawberry-msvc-x86-release.tar.xz \
+            -a releases/releases/strawberry-msvc-x86_64-debug.tar.xz \
+            -a releases/releases/strawberry-msvc-x86_64-release.tar.xz \
+            -m "Strawberry MSVC Dependencies $GITHUB_SHA" "latest"
