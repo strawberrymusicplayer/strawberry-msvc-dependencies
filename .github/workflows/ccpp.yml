@@ -190,20 +190,20 @@ jobs:
       - name: Download pkgconf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-1.9.2.tar.gz)!"
+          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-1.9.3.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract pkgconf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/pkgconf-1.9.2.tar.gz
+        run: tar -xf ../downloads/pkgconf-1.9.3.tar.gz
 
       - name: Compile pkgconf
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pkgconf-pkgconf-1.9.2
+        working-directory: sources/pkgconf-pkgconf-1.9.3
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} -Dtests=false build
           cd build
