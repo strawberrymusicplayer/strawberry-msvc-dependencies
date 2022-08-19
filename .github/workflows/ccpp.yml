@@ -551,14 +551,14 @@ jobs:
       - name: Download libxml2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.14/libxml2-v2.9.14.tar.bz2)!"
+          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.10.0/libxml2-v2.10.0.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libxml2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libxml2-v2.9.14.tar.bz2 || true
+        run: tar -xf ../downloads/libxml2-v2.10.0.tar.bz2 || true
 
       - name: Compile libxml2
         shell: cmd
@@ -566,7 +566,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libxml2-v2.9.14
+        working-directory: sources/libxml2-v2.10.0
         run: |
           mkdir build
           cd build
