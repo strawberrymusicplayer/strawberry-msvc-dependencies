@@ -1374,7 +1374,7 @@ jobs:
       - name: Download libopenmpt
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-0.6.4+release.msvc.zip)!"
+          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-0.6.5+release.msvc.zip)!"
           target: downloads/
           auto-match: true
 
@@ -1384,7 +1384,7 @@ jobs:
         run: |
           mkdir libopenmpt
           cd libopenmpt
-          7z x ..\..\downloads\libopenmpt-0.6.4+release.msvc.zip
+          7z x ..\..\downloads\libopenmpt-0.6.5+release.msvc.zip
 
       - name: Patch libopenmpt
         shell: bash
