@@ -1,6 +1,50 @@
 name: Build
 on: [push, pull_request]
 
+env:
+  nasm_version: '2.15.05'
+  yasm_version: '1.3.0'
+  win_flex_bison: '2.5.25'
+  boost_version: '1.80.0'
+  pkgconf_version: '1.9.3'
+  zlib_version: '1.2.12'
+  openssl_version: '3.0.5'
+  gnutls_version: '3.7.6'
+  libpng_version: '1.6.37'
+  pcre2_version: '10.40'
+  bzip2_version: '1.0.8'
+  xz_version: '5.2.5'
+  brotli_version: '1.0.9'
+  pixmap_version: '0.40.0'
+  libxml2_version: '2.10.0'
+  nghttp2_version: '1.49.0'
+  sqlite3_version: '3390200'
+  libogg_version: '1.3.5'
+  libvorbis_version: '1.3.7'
+  flac_version: '1.3.4'
+  wavpack_version: '5.5.0'
+  opus_version: '1.3.1'
+  dlfcn_version: '1.3.1'
+  fftw_version: '3.3.5'
+  glib_version: '2.73.3'
+  glib_networking_version: '2.72.2'
+  libpsl_version: '0.21.1'
+  libsoup_version: '2.74.2'
+  orc_version: '0.4.32'
+  musepack_version: '475'
+  libopenmpt_version: '0.6.5'
+  libgme_version: '0.6.3'
+  fdk_aac_version: '2.0.2'
+  libbs2b_version: '3.1.0'
+  chromaprint_version: '1.5.1'
+  gstreamer_version: '1.20.3'
+  icu4c_version: '71.1'
+  expat_version: '2.4.8'
+  freetype_version: '2.12.1'
+  harfbuzz_version: '5.1.0'
+  protobuf_version: '3.21.5'
+  qt_version: '6.3.1'
+
 jobs:
 
   build-windows-msvc:
@@ -82,6 +126,11 @@ jobs:
       - name: Update PATH
         run: echo "${{matrix.prefix_path_backslash}}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+      - name: Set extra version variables
+        shell: bash
+        run: |
+          echo "boost_version_underscore=$(echo ${{env.boost_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
+          echo "icu4c_version_underscore=$(echo ${{env.icu4c_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
 
       - name: Delete conflicting files
         shell: bash
@@ -100,7 +149,7 @@ jobs:
         if: matrix.arch == 'x86'
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win32/nasm-2.15.05-installer-x86.exe)!"
+          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe)!"
           target: downloads/
           auto-match: true
 
@@ -108,7 +157,7 @@ jobs:
         if: matrix.arch == 'x86_64'
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-installer-x64.exe)!"
+          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe)!"
           target: downloads/
           auto-match: true
 
@@ -119,7 +168,7 @@ jobs:
         run: |
           mkdir c:\nasm
           cd c:\nasm
-          7z x ${{github.workspace}}\downloads\nasm-2.15.05-installer-x86.exe
+          7z x ${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-x86.exe
 
       - name: Install nasm (x86_64)
         if: matrix.arch == 'x86_64'
@@ -128,7 +177,7 @@ jobs:
         run: |
           mkdir c:\nasm
           cd c:\nasm
-          7z x ${{github.workspace}}\downloads\nasm-2.15.05-installer-x64.exe
+          7z x ${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-x64.exe
 
       - name: Copy nasm
         shell: bash
@@ -141,20 +190,20 @@ jobs:
       - name: Download yasm
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "yasm [this](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)!"
+          url: "yasm [this](http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe)!"
           target: downloads/
           auto-match: true
 
       - name: Copy yasm
         shell: bash
         working-directory: downloads
-        run: cp yasm-1.3.0-win64.exe ${{matrix.prefix_path_unix}}/bin/yasm.exe
+        run: cp yasm-${{env.yasm_version}}-win64.exe ${{matrix.prefix_path_unix}}/bin/yasm.exe
 
 
       - name: Download win_flex_bison
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip)!"
+          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison}}/win_flex_bison-${{env.win_flex_bison}}.zip)!"
           target: downloads/
           auto-match: true
 
@@ -163,7 +212,7 @@ jobs:
         run: |
           mkdir c:\win_flex_bison
           cd c:\win_flex_bison
-          7z x ${{github.workspace}}\downloads\win_flex_bison-2.5.25.zip
+          7z x ${{github.workspace}}\downloads\win_flex_bison-${{env.win_flex_bison}}.zip
 
       - name: Add win_flex_bison to PATH
         run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -172,38 +221,38 @@ jobs:
       - name: Download Boost
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2)!"
+          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Boost
         shell: bash
         working-directory: sources
-        run: tar -xf  ../downloads/boost_1_80_0.tar.bz2
+        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.bz2
 
       - name: Copy Boost
         shell: bash
         working-directory: sources
-        run: cp -r boost_1_80_0/boost ${{matrix.prefix_path_unix}}/include/
+        run: cp -r boost_${{env.boost_version_underscore}}/boost ${{matrix.prefix_path_unix}}/include/
 
 
       - name: Download pkgconf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-1.9.3.tar.gz)!"
+          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${{env.pkgconf_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract pkgconf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/pkgconf-1.9.3.tar.gz
+        run: tar -xf ../downloads/pkgconf-${{env.pkgconf_version}}.tar.gz
 
       - name: Compile pkgconf
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pkgconf-pkgconf-1.9.3
+        working-directory: sources/pkgconf-pkgconf-${{env.pkgconf_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} -Dtests=false build
           cd build
@@ -215,14 +264,14 @@ jobs:
       - name: Download zlib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "zlib [this](https://zlib.net/zlib-1.2.12.tar.gz)!"
+          url: "zlib [this](https://zlib.net/zlib-${{env.zlib_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract zlib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/zlib-1.2.12.tar.gz
+        run: tar -xf ../downloads/zlib-${{env.zlib_version}}.tar.gz
 
       - name: Compile zlib
         shell: cmd
@@ -230,7 +279,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/zlib-1.2.12
+        working-directory: sources/zlib-${{env.zlib_version}}
         run: |
           mkdir build
           cd build
@@ -254,14 +303,14 @@ jobs:
       - name: Download openssl
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "openssl [this](https://www.openssl.org/source/openssl-3.0.5.tar.gz)!"
+          url: "openssl [this](https://www.openssl.org/source/openssl-${{env.openssl_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract openssl
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/openssl-3.0.5.tar.gz
+        run: tar -xf ../downloads/openssl-${{env.openssl_version}}.tar.gz
 
       - name: Configure openssl (release)
         if: matrix.buildtype == 'release'
@@ -270,7 +319,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/openssl-3.0.5
+        working-directory: sources/openssl-${{env.openssl_version}}
         run: perl Configure ${{matrix.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{matrix.prefix_path_backslash}} --libdir=lib --openssldir=${{matrix.prefix_path_backslash}}\ssl --release --with-zlib-include=${{matrix.prefix_path_backslash}}\include --with-zlib-lib=${{matrix.prefix_path_backslash}}\lib\zlib.lib
 
       - name: Configure openssl (debug)
@@ -280,7 +329,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/openssl-3.0.5
+        working-directory: sources/openssl-${{env.openssl_version}}
         run: perl Configure ${{matrix.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{matrix.prefix_path_backslash}} --libdir=lib --openssldir=${{matrix.prefix_path_backslash}}\ssl --debug --with-zlib-include=${{matrix.prefix_path_backslash}}\include --with-zlib-lib=${{matrix.prefix_path_backslash}}\lib\zlibd.lib
 
       - name: Compile openssl
@@ -289,7 +338,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/openssl-3.0.5
+        working-directory: sources/openssl-${{env.openssl_version}}
         run: |
           nmake
           nmake install_sw
@@ -298,7 +347,7 @@ jobs:
       - name: Download GnuTLS
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/3.7.6/libgnutls_3.7.6_msvc16.zip)!"
+          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc16.zip)!"
           target: downloads/
           auto-match: true
 
@@ -307,7 +356,7 @@ jobs:
         run: |
           mkdir gnutls
           cd gnutls
-          7z x "../downloads/libgnutls_3.7.6_msvc16.zip"
+          7z x "../downloads/libgnutls_${{env.gnutls_version}}_msvc16.zip"
           xcopy /s /y include\* ${{matrix.prefix_path_backslash}}\include\
 
       - name: Copy GnuTLS (x86)
@@ -337,7 +386,7 @@ jobs:
           echo "Name: gnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Description: gnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "URL: https://www.gnutls.org/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Version: 3.7.6" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Version: ${{env.gnutls_version}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -lgnutls" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
@@ -345,7 +394,7 @@ jobs:
       - name: Download libpng
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libpng [this](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)!"
+          url: "libpng [this](https://downloads.sourceforge.net/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -353,8 +402,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/libpng-1.6.37.tar.xz
-          cd libpng-1.6.37
+          tar -xf ../downloads/libpng-${{env.libpng_version}}.tar.xz
+          cd libpng-${{env.libpng_version}}
           patch -p1 < ../../patches/libpng-msvc.patch
 
       - name: Compile libpng
@@ -363,7 +412,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libpng-1.6.37
+        working-directory: sources/libpng-${{env.libpng_version}}
         run: |
           mkdir build
           cd build
@@ -375,14 +424,14 @@ jobs:
       - name: Download pcre2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.40/pcre2-10.40.tar.bz2)!"
+          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract pcre2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/pcre2-10.40.tar.bz2
+        run: tar -xf ../downloads/pcre2-${{env.pcre2_version}}.tar.bz2
 
       - name: Compile pcre2
         shell: cmd
@@ -390,7 +439,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/pcre2-10.40
+        working-directory: sources/pcre2-${{env.pcre2_version}}
         run: |
           mkdir build
           cd build
@@ -407,7 +456,7 @@ jobs:
       - name: Download bzip2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "bzip2 [this](https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz)!"
+          url: "bzip2 [this](https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -415,8 +464,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/bzip2-1.0.8.tar.gz
-          cd bzip2-1.0.8
+          tar -xf ../downloads/bzip2-${{env.bzip2_version}}.tar.gz
+          cd bzip2-${{env.bzip2_version}}
           patch -p1 < ../../patches/bzip2-cmake.patch
 
       - name: Compile bzip2
@@ -425,7 +474,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/bzip2-1.0.8
+        working-directory: sources/bzip2-${{env.bzip2_version}}
         run: |
           mkdir build2
           cd build2
@@ -437,14 +486,14 @@ jobs:
       - name: Download xz
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "xz [this](https://tukaani.org/xz/xz-5.2.5.tar.xz)!"
+          url: "xz [this](https://tukaani.org/xz/xz-${{env.xz_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract xz
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/xz-5.2.5.tar.xz
+        run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
 
       - name: Compile xz
         shell: cmd
@@ -452,7 +501,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/xz-5.2.5/windows/vs2019
+        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
         run: msbuild xz_win.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}}
 
       - name: Install xz
@@ -461,7 +510,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/xz-5.2.5/windows/vs2019
+        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
         run: |
           copy ${{matrix.buildtype}}\${{matrix.msbuild_platform}}\liblzma_dll\*.lib ${{matrix.prefix_path_backslash}}\lib\
           copy ${{matrix.buildtype}}\${{matrix.msbuild_platform}}\liblzma_dll\*.dll ${{matrix.prefix_path_backslash}}\bin\
@@ -473,14 +522,14 @@ jobs:
       - name: Download brotli
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "brotli [this](https://github.com/google/brotli/archive/refs/tags/v1.0.9.tar.gz)!"
+          url: "brotli [this](https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract brotli
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/v1.0.9.tar.gz
+        run: tar -xf ../downloads/v${{env.brotli_version}}.tar.gz
 
       - name: Compile brotli
         shell: cmd
@@ -488,7 +537,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/brotli-1.0.9
+        working-directory: sources/brotli-${{env.brotli_version}}
         run: |
           mkdir build2
           cd build2
@@ -522,7 +571,7 @@ jobs:
       - name: Download pixman
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "pixman [this](https://www.cairographics.org/releases/pixman-0.40.0.tar.gz)!"
+          url: "pixman [this](https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -530,8 +579,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/pixman-0.40.0.tar.gz
-          cd pixman-0.40.0
+          tar -xf ../downloads/pixman-${{env.pixmap_version}}.tar.gz
+          cd pixman-${{env.pixmap_version}}
           patch -p1 < ../../patches/pixman.patch
 
       - name: Compile pixman
@@ -540,7 +589,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/pixman-0.40.0
+        working-directory: sources/pixman-${{env.pixmap_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dgtk=disabled -Dlibpng=enabled build
           cd build
@@ -551,14 +600,14 @@ jobs:
       - name: Download libxml2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.10.0/libxml2-v2.10.0.tar.bz2)!"
+          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${{env.libxml2_version}}/libxml2-v${{env.libxml2_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libxml2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libxml2-v2.10.0.tar.bz2 || true
+        run: tar -xf ../downloads/libxml2-v${{env.libxml2_version}}.tar.bz2 || true
 
       - name: Compile libxml2
         shell: cmd
@@ -566,7 +615,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libxml2-v2.10.0
+        working-directory: sources/libxml2-v${{env.libxml2_version}}
         run: |
           mkdir build
           cd build
@@ -583,14 +632,14 @@ jobs:
       - name: Download nghttp2
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v1.49.0/nghttp2-1.49.0.tar.xz)!"
+          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v${{env.nghttp2_version}}/nghttp2-${{env.nghttp2_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract nghttp2
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/nghttp2-1.49.0.tar.xz
+        run: tar -xf ../downloads/nghttp2-${{env.nghttp2_version}}.tar.xz
 
       - name: Compile nghttp2
         shell: cmd
@@ -598,7 +647,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/nghttp2-1.49.0
+        working-directory: sources/nghttp2-${{env.nghttp2_version}}
         run: |
           mkdir build
           cd build
@@ -610,27 +659,27 @@ jobs:
       - name: Download SQLite
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-3390200.tar.gz)!"
+          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract SQLite
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/sqlite-autoconf-3390200.tar.gz
+        run: tar -xf ../downloads/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Compile SQlite
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/sqlite-autoconf-3390200
+        working-directory: sources/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
           cl shell.c sqlite3.c -Fe:sqlite3.exe
 
       - name: Copy SQLite
         shell: cmd
-        working-directory: sources/sqlite-autoconf-3390200
+        working-directory: sources/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           copy *.h ${{matrix.prefix_path_backslash}}\include\
           copy *.lib ${{matrix.prefix_path_backslash}}\lib\
@@ -657,14 +706,14 @@ jobs:
       - name: Download libogg
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libogg [this](https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz)!"
+          url: "libogg [this](https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libogg
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libogg-1.3.5.tar.xz
+        run: tar -xf ../downloads/libogg-${{env.libogg_version}}.tar.xz
 
       - name: Compile libogg
         shell: cmd
@@ -672,7 +721,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libogg-1.3.5
+        working-directory: sources/libogg-${{env.libogg_version}}
         run: |
           mkdir build
           cd build
@@ -684,14 +733,14 @@ jobs:
       - name: Download libvorbis
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libvorbis [this](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)!"
+          url: "libvorbis [this](https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libvorbis
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libvorbis-1.3.7.tar.xz
+        run: tar -xf ../downloads/libvorbis-${{env.libvorbis_version}}.tar.xz
 
       - name: Compile libvorbis
         shell: cmd
@@ -699,7 +748,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libvorbis-1.3.7
+        working-directory: sources/libvorbis-${{env.libvorbis_version}}
         run: |
           mkdir build2
           cd build2
@@ -711,14 +760,14 @@ jobs:
       - name: Download flac
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "flac [this](https://ftp.osuosl.org/pub/xiph/releases/flac/flac-1.3.4.tar.xz)!"
+          url: "flac [this](https://ftp.osuosl.org/pub/xiph/releases/flac/flac-${{env.flac_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract flac
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/flac-1.3.4.tar.xz
+        run: tar -xf ../downloads/flac-${{env.flac_version}}.tar.xz
 
       - name: Move nasm.exe
         shell: bash
@@ -730,7 +779,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/flac-1.3.4
+        working-directory: sources/flac-${{env.flac_version}}
         run: |
           mkdir build2
           cd build2
@@ -745,7 +794,7 @@ jobs:
       - name: Download wavpack
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "wavpack [this](https://www.wavpack.com/wavpack-5.5.0.tar.bz2)!"
+          url: "wavpack [this](https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -753,8 +802,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/wavpack-5.5.0.tar.bz2
-          sed -i '/wavpackdll.rc/d' wavpack-5.5.0/CMakeLists.txt
+          tar -xf ../downloads/wavpack-${{env.wavpack_version}}.tar.bz2
+          sed -i '/wavpackdll.rc/d' wavpack-${{env.wavpack_version}}/CMakeLists.txt
 
       - name: Compile wavpack
         shell: cmd
@@ -762,7 +811,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/wavpack-5.5.0
+        working-directory: sources/wavpack-${{env.wavpack_version}}
         run: |
           mkdir build
           cd build
@@ -778,7 +827,7 @@ jobs:
       - name: Download opus
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "opus [this](https://archive.mozilla.org/pub/opus/opus-1.3.1.tar.gz)!"
+          url: "opus [this](https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -786,8 +835,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/opus-1.3.1.tar.gz
-          sed -i '/include(opus_buildtype.cmake)/d' opus-1.3.1/CMakeLists.txt
+          tar -xf ../downloads/opus-${{env.opus_version}}.tar.gz
+          sed -i '/include(opus_buildtype.cmake)/d' opus-${{env.opus_version}}/CMakeLists.txt
 
       - name: Compile opus
         shell: cmd
@@ -795,7 +844,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/opus-1.3.1
+        working-directory: sources/opus-${{env.opus_version}}
         run: |
           mkdir build
           cd build
@@ -1052,14 +1101,14 @@ jobs:
       - name: Download dlfcn-win32
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "dlfcn-win32 [this](https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v1.3.1.tar.gz)!"
+          url: "dlfcn-win32 [this](https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract dlfcn-win32
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/v1.3.1.tar.gz
+        run: tar -xf ../downloads/v${{env.dlfcn_version}}.tar.gz
 
       - name: Compile dlfcn-win32
         shell: cmd
@@ -1067,7 +1116,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/dlfcn-win32-1.3.1
+        working-directory: sources/dlfcn-win32-${{env.dlfcn_version}}
         run: |
           mkdir build
           cd build
@@ -1079,14 +1128,14 @@ jobs:
       - name: Download FFTW (x86)
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-3.3.5-dll32.zip)!"
+          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip)!"
           target: downloads/
           auto-match: true
 
       - name: Download FFTW (x86_64)
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip)!"
+          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip)!"
           target: downloads/
           auto-match: true
 
@@ -1120,7 +1169,7 @@ jobs:
         run: |
           mkdir fftw
           cd fftw
-          7z x "${{github.workspace}}/downloads/fftw-3.3.5-dll32.zip"
+          7z x "${{github.workspace}}/downloads/fftw-${{env.fftw_version}}-dll32.zip"
 
       - name: Extract FFTW (x86_64)
         if: matrix.arch == 'x86_64'
@@ -1129,7 +1178,7 @@ jobs:
         run: |
           mkdir fftw
           cd fftw
-          7z x "${{github.workspace}}/downloads/fftw-3.3.5-dll64.zip"
+          7z x "${{github.workspace}}/downloads/fftw-${{env.fftw_version}}-dll64.zip"
 
       - name: Install FFTW
         working-directory: downloads/fftw
@@ -1143,14 +1192,14 @@ jobs:
       - name: Download GLib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GLib [this](https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz)!"
+          url: "GLib [this](https://download.gnome.org/sources/glib/2.73/glib-${{env.glib_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract GLib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/glib-2.73.3.tar.xz || true
+        run: tar -xf ../downloads/glib-${{env.glib_version}}.tar.xz || true
 
       - name: Compile GLib
         shell: cmd
@@ -1162,7 +1211,7 @@ jobs:
           CXXFLAGS: -I${{matrix.prefix_path_backslash}}\include
           LDFLAGS: -L${{matrix.prefix_path_backslash}}\lib
 
-        working-directory: sources/glib-2.73.3
+        working-directory: sources/glib-${{env.glib_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
@@ -1173,7 +1222,7 @@ jobs:
       - name: Download glib-networking
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.72/glib-networking-2.72.2.tar.xz)!"
+          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.72/glib-networking-${{env.glib_networking_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1181,8 +1230,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/glib-networking-2.72.2.tar.xz
-          cd glib-networking-2.72.2
+          tar -xf ../downloads/glib-networking-${{env.glib_networking_version}}.tar.xz
+          cd glib-networking-${{env.glib_networking_version}}
           patch -p1 < ../../patches/glib-networking-tests.patch
 
       - name: Compile glib-networking
@@ -1191,7 +1240,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/glib-networking-2.72.2
+        working-directory: sources/glib-networking-${{env.glib_networking_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dgnutls=enabled -Dopenssl=enabled build
           cd build
@@ -1202,14 +1251,14 @@ jobs:
       - name: Download libpsl
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libpsl [this](https://github.com/rockdaboot/libpsl/releases/download/0.21.1/libpsl-0.21.1.tar.gz)!"
+          url: "libpsl [this](https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libpsl
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libpsl-0.21.1.tar.gz
+        run: tar -xf ../downloads/libpsl-${{env.libpsl_version}}.tar.gz
 
       - name: Compile libpsl
         shell: cmd
@@ -1217,7 +1266,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libpsl-0.21.1
+        working-directory: sources/libpsl-${{env.libpsl_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
@@ -1228,14 +1277,14 @@ jobs:
       - name: Download libsoup
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libsoup [this](https://download.gnome.org/sources/libsoup/2.74/libsoup-2.74.2.tar.xz)!"
+          url: "libsoup [this](https://download.gnome.org/sources/libsoup/2.74/libsoup-${{env.libsoup_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libsoup
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/libsoup-2.74.2.tar.xz
+        run: tar -xf ../downloads/libsoup-${{env.libsoup_version}}.tar.xz
 
       - name: Compile libsoup
         shell: cmd
@@ -1243,7 +1292,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libsoup-2.74.2
+        working-directory: sources/libsoup-${{env.libsoup_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dtests=false -Dsysprof=disabled -Dtls_check=false -Dgnome=false -Dgtk_doc=false build
           cd build
@@ -1254,14 +1303,14 @@ jobs:
       - name: Download orc
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "orc [this](https://gstreamer.freedesktop.org/src/orc/orc-0.4.32.tar.xz)!"
+          url: "orc [this](https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract orc
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/orc-0.4.32.tar.xz
+        run: tar -xf ../downloads/orc-${{env.orc_version}}.tar.xz
 
       - name: Compile orc
         shell: cmd
@@ -1269,7 +1318,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/orc-0.4.32
+        working-directory: sources/orc-${{env.orc_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig build
           cd build
@@ -1342,7 +1391,7 @@ jobs:
       - name: Download musepack
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "musepack [this](https://files.musepack.net/source/musepack_src_r475.tar.gz)!"
+          url: "musepack [this](https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1350,8 +1399,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/musepack_src_r475.tar.gz
-          cd musepack_src_r475
+          tar -xf ../downloads/musepack_src_r${{env.musepack_version}}.tar.gz
+          cd musepack_src_r${{env.musepack_version}}
           patch -p1 < ../../patches/musepack-fixes.patch
 
       - name: Compile musepack
@@ -1360,7 +1409,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/musepack_src_r475
+        working-directory: sources/musepack_src_r${{env.musepack_version}}
         run: |
           mkdir build
           cd build
@@ -1374,7 +1423,7 @@ jobs:
       - name: Download libopenmpt
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-0.6.5+release.msvc.zip)!"
+          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip)!"
           target: downloads/
           auto-match: true
 
@@ -1384,7 +1433,7 @@ jobs:
         run: |
           mkdir libopenmpt
           cd libopenmpt
-          7z x ..\..\downloads\libopenmpt-0.6.5+release.msvc.zip
+          7z x ..\..\downloads\libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
 
       - name: Patch libopenmpt
         shell: bash
@@ -1407,20 +1456,20 @@ jobs:
       - name: Download libgme
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libgme [this](https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-0.6.3.tar.xz)!"
+          url: "libgme [this](https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract libgme
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/game-music-emu-0.6.3.tar.xz
+        run: tar -xf ../downloads/game-music-emu-${{env.libgme_version}}.tar.xz
 
       - name: Compile libgme
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/game-music-emu-0.6.3
+        working-directory: sources/game-music-emu-${{env.libgme_version}}
         run: |
           mkdir build
           cd build
@@ -1432,14 +1481,14 @@ jobs:
       - name: Download fdk-aac
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "fdk-aac [this](https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-2.0.2.tar.gz)!"
+          url: "fdk-aac [this](https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract fdk-aac
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/fdk-aac-2.0.2.tar.gz
+        run: tar -xf ../downloads/fdk-aac-${{env.fdk_aac_version}}.tar.gz
 
       - name: Compile fdk-aac
         shell: cmd
@@ -1447,7 +1496,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/fdk-aac-2.0.2
+        working-directory: sources/fdk-aac-${{env.fdk_aac_version}}
         run: |
           mkdir build
           cd build
@@ -1515,7 +1564,7 @@ jobs:
       - name: Download libbs2b
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libbs2b [this](https://downloads.sourceforge.net/project/bs2b/libbs2b/3.1.0/libbs2b-3.1.0.tar.bz2)!"
+          url: "libbs2b [this](https://downloads.sourceforge.net/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -1523,8 +1572,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/libbs2b-3.1.0.tar.bz2
-          cd libbs2b-3.1.0
+          tar -xf ../downloads/libbs2b-${{env.libbs2b_version}}.tar.bz2
+          cd libbs2b-${{env.libbs2b_version}}
           patch -p1 < ../../patches/libbs2b-msvc.patch
 
       - name: Compile libbs2b
@@ -1533,7 +1582,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libbs2b-3.1.0
+        working-directory: sources/libbs2b-${{env.libbs2b_version}}
         run: |
           mkdir build
           cd build
@@ -1566,14 +1615,14 @@ jobs:
       - name: Download Chromaprint
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v1.5.1/chromaprint-1.5.1.tar.gz)!"
+          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v${{env.chromaprint_version}}/chromaprint-${{env.chromaprint_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Chromaprint
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/chromaprint-1.5.1.tar.gz
+        run: tar -xf ../downloads/chromaprint-${{env.chromaprint_version}}.tar.gz
 
       - name: Compile Chromaprint
         shell: cmd
@@ -1581,7 +1630,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/chromaprint-1.5.1
+        working-directory: sources/chromaprint-${{env.chromaprint_version}}
         run: |
           mkdir build
           cd build
@@ -1593,14 +1642,14 @@ jobs:
       - name: Download GStreamer
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.20.3.tar.xz)!"
+          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract GStreamer
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gstreamer-1.20.3.tar.xz
+        run: tar -xf ../downloads/gstreamer-${{env.gstreamer_version}}.tar.xz
 
       - name: Compile GStreamer
         shell: cmd
@@ -1610,7 +1659,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gstreamer-1.20.3
+        working-directory: sources/gstreamer-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
           cd build
@@ -1621,14 +1670,14 @@ jobs:
       - name: Download gst-plugins-base
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.20.3.tar.xz)!"
+          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-base
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-base-1.20.3.tar.xz
+        run: tar -xf ../downloads/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
 
       - name: Compile gst-plugins-base
         shell: cmd
@@ -1638,7 +1687,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include -I${{matrix.prefix_path_forwardslash}}/include/opus
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gst-plugins-base-1.20.3
+        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvert=disabled -Dvideorate=disabled -Dvideoscale=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
           cd build
@@ -1649,14 +1698,14 @@ jobs:
       - name: Download gst-plugins-good
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.20.3.tar.xz)!"
+          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-good
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-good-1.20.3.tar.xz
+        run: tar -xf ../downloads/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
 
       - name: Compile gst-plugins-good
         shell: cmd
@@ -1666,7 +1715,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gst-plugins-good-1.20.3
+        working-directory: sources/gst-plugins-good-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=enabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled build
           cd build
@@ -1677,7 +1726,7 @@ jobs:
       - name: Download gst-plugins-bad
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.20.3.tar.xz)!"
+          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1685,8 +1734,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/gst-plugins-bad-1.20.3.tar.xz
-          cd gst-plugins-bad-1.20.3
+          tar -xf ../downloads/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
+          cd gst-plugins-bad-${{env.gstreamer_version}}
           patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
           sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/faad/meson.build
           sed -i 's/c:\\msvc_x86_64\\lib/${{matrix.prefix_path_backslash2}}\\lib/g' ext/faac/meson.build
@@ -1701,7 +1750,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include -I${{matrix.prefix_path_forwardslash}}/include/opus
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gst-plugins-bad-1.20.3
+        working-directory: sources/gst-plugins-bad-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=enabled -Dgs=disabled -Dgsm=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=enabled -Dhls-crypto=openssl build
           cd build
@@ -1712,14 +1761,14 @@ jobs:
       - name: Download gst-plugins-ugly
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.20.3.tar.xz)!"
+          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-plugins-ugly
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-plugins-ugly-1.20.3.tar.xz
+        run: tar -xf ../downloads/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
 
       - name: Compile gst-plugins-ugly
         env:
@@ -1728,7 +1777,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gst-plugins-ugly-1.20.3
+        working-directory: sources/gst-plugins-ugly-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Dxingmux=enabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
           cd build
@@ -1739,14 +1788,14 @@ jobs:
       - name: Download gst-libav
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.20.3.tar.xz)!"
+          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${{env.gstreamer_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract gst-libav
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/gst-libav-1.20.3.tar.xz
+        run: tar -xf ../downloads/gst-libav-${{env.gstreamer_version}}.tar.xz
 
       - name: Compile gst-libav
         shell: cmd
@@ -1756,7 +1805,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/gst-libav-1.20.3
+        working-directory: sources/gst-libav-${{env.gstreamer_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddoc=disabled build
           cd build
@@ -1767,14 +1816,14 @@ jobs:
       - name: Download icu
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-71_1-src.zip)!"
+          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-${{env.icu4c_version_underscore}}-src.zip)!"
           target: downloads/
           auto-match: true
 
       - name: Extract icu
         shell: bash
         working-directory: sources
-        run: 7z x ../downloads/icu4c-71_1-src.zip
+        run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
 
       - name: Compile icu
         shell: cmd
@@ -1795,14 +1844,14 @@ jobs:
       - name: Download expat
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "expat [this](https://jztkft.dl.sourceforge.net/project/expat/expat/2.4.8/expat-2.4.8.tar.bz2)!"
+          url: "expat [this](https://jztkft.dl.sourceforge.net/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract expat
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/expat-2.4.8.tar.bz2
+        run: tar -xf ../downloads/expat-${{env.expat_version}}.tar.bz2
 
       - name: Compile expat
         shell: cmd
@@ -1810,7 +1859,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/expat-2.4.8
+        working-directory: sources/expat-${{env.expat_version}}
         run: |
           mkdir build
           cd build
@@ -1822,14 +1871,14 @@ jobs:
       - name: Download freetype
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "freetype [this](https://netix.dl.sourceforge.net/project/freetype/freetype2/2.12.1/freetype-2.12.1.tar.gz)!"
+          url: "freetype [this](https://netix.dl.sourceforge.net/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract freetype (boostrap)
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/freetype-2.12.1.tar.gz
+        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
 
       - name: Compile freetype (boostrap)
         shell: cmd
@@ -1837,7 +1886,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/freetype-2.12.1
+        working-directory: sources/freetype-${{env.freetype_version}}
         run: |
           mkdir build
           cd build
@@ -1849,14 +1898,14 @@ jobs:
       - name: Download harfbuzz
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "harfbuzz [this](https://github.com/harfbuzz/harfbuzz/releases/download/5.1.0/harfbuzz-5.1.0.tar.xz)!"
+          url: "harfbuzz [this](https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract harfbuzz
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/harfbuzz-5.1.0.tar.xz
+        run: tar -xf ../downloads/harfbuzz-${{env.harfbuzz_version}}.tar.xz
 
       - name: Compile harfbuzz
         shell: cmd
@@ -1864,7 +1913,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/harfbuzz-5.1.0
+        working-directory: sources/harfbuzz-${{env.harfbuzz_version}}
         run: |
           meson --buildtype=${{matrix.buildtype}} --prefix="${{matrix.prefix_path_backslash}}" --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
           cd build
@@ -1875,12 +1924,12 @@ jobs:
       - name: Delete freetype bootstrap
         shell: bash
         working-directory: sources
-        run: rm -rf freetype-2.12.1
+        run: rm -rf freetype-${{env.freetype_version}}
 
       - name: Extract freetype
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/freetype-2.12.1.tar.gz
+        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
 
       - name: Compile freetype
         shell: cmd
@@ -1888,7 +1937,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/freetype-2.12.1
+        working-directory: sources/freetype-${{env.freetype_version}}
         run: |
           mkdir build
           cd build
@@ -1900,21 +1949,21 @@ jobs:
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.5/protobuf-cpp-3.21.5.tar.gz)!"
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.5/protobuf-cpp-${{env.protobuf_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Protobuf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/protobuf-cpp-3.21.5.tar.gz
+        run: tar -xf ../downloads/protobuf-cpp-${{env.protobuf_version}}.tar.gz
 
       - name: Compile Protobuf
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/protobuf-3.21.5/cmake
+        working-directory: sources/protobuf-${{env.protobuf_version}}/cmake
         run: |
           mkdir build
           cd build
@@ -1927,7 +1976,7 @@ jobs:
       - name: Download qtbase
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "qtbase [this](https://download.qt.io/official_releases/qt/6.3/6.3.1/submodules/qtbase-everywhere-src-6.3.1.tar.xz)!"
+          url: "qtbase [this](https://download.qt.io/official_releases/qt/6.3/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1935,14 +1984,14 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/qtbase-everywhere-src-6.3.1.tar.xz
-          cd qtbase-everywhere-src-6.3.1
+          tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
+          cd qtbase-everywhere-src-${{env.qt_version}}
           patch -p1 < ../../patches/qt6-qtbase-columnalignment.patch
 
       - name: Copy sqlite3
         shell: bash
         working-directory: sources
-        run: cp sqlite-*/sqlite3.{c,h} qtbase-everywhere-src-6.3.1/src/3rdparty/sqlite/
+        run: cp sqlite-*/sqlite3.{c,h} qtbase-everywhere-src-${{env.qt_version}}/src/3rdparty/sqlite/
 
       - name: Configure qtbase
         shell: cmd
@@ -1953,7 +2002,7 @@ jobs:
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
         run: >
-          cmake -S sources/qtbase-everywhere-src-6.3.1 -B sources/qtbase-everywhere-src-6.3.1/build
+          cmake -S sources/qtbase-everywhere-src-${{env.qt_version}} -B sources/qtbase-everywhere-src-${{env.qt_version}}/build
           -G Ninja
           -DCMAKE_BUILD_TYPE=${{matrix.buildtype}}
           -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
@@ -2003,26 +2052,26 @@ jobs:
 
       - name: Build qtbase
         shell: cmd
-        working-directory: sources/qtbase-everywhere-src-6.3.1/build
+        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
       - name: Install qtbase
         shell: cmd
-        working-directory: sources/qtbase-everywhere-src-6.3.1/build
+        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --install .
 
 
       - name: Download qttools
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "qttools [this](https://download.qt.io/official_releases/qt/6.3/6.3.1/submodules/qttools-everywhere-src-6.3.1.tar.xz)!"
+          url: "qttools [this](https://download.qt.io/official_releases/qt/6.3/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract qttools
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/qttools-everywhere-src-6.3.1.tar.xz
+        run: tar -xf ../downloads/qttools-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Configure qttools
         shell: cmd
@@ -2032,7 +2081,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
           LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
-        working-directory: sources/qttools-everywhere-src-6.3.1
+        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}
         run: |
           mkdir build
           cd build
@@ -2040,12 +2089,12 @@ jobs:
 
       - name: Compile qttools
         shell: cmd
-        working-directory: sources/qttools-everywhere-src-6.3.1/build
+        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
       - name: Install qttools
         shell: cmd
-        working-directory: sources/qttools-everywhere-src-6.3.1/build
+        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --install .
 
 
