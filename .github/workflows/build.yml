@@ -24,6 +24,11 @@ env:
   flac_version: '1.3.4'
   wavpack_version: '5.5.0'
   opus_version: '1.3.1'
+  opusfile_version: '0.12'
+  mpg123_version: '1.30.2'
+  lame_version: '3.100'
+  twolame_version: '0.4.0'
+  taglib_version: '1.12'
   dlfcn_version: '1.3.1'
   fftw_version: '3.3.5'
   glib_version: '2.73.3'
@@ -133,6 +138,12 @@ jobs:
         run: |
           echo "boost_version_underscore=$(echo ${{env.boost_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
           echo "icu4c_version_underscore=$(echo ${{env.icu4c_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
+          echo "icu4c_version_dash=$(echo ${{env.icu4c_version}} | sed 's/\./\-/g')" >> $GITHUB_ENV
+          echo "glib_version_short=$(echo ${{env.glib_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
+          echo "glib_networking_version_short=$(echo ${{env.glib_networking_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
+          echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
+          echo "protobuf_version_short=$(echo ${{env.protobuf_version}} | cut -d '.' -f 2-3)" >> $GITHUB_ENV
+          echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
 
       - name: Delete conflicting files
         shell: bash
@@ -858,7 +869,7 @@ jobs:
       - name: Download opusfile
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "opusfile [this](https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-0.12.tar.gz)!"
+          url: "opusfile [this](https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -866,8 +877,8 @@ jobs:
         shell: bash
         working-directory: sources
         run: |
-          tar -xf ../downloads/opusfile-0.12.tar.gz
-          cd opusfile-0.12
+          tar -xf ../downloads/opusfile-${{env.opusfile_version}}.tar.gz
+          cd opusfile-${{env.opusfile_version}}
           patch -p1 < ../../patches/opusfile-cmake.patch
 
       - name: Compile opusfile
@@ -876,7 +887,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/opusfile-0.12
+        working-directory: sources/opusfile-${{env.opusfile_version}}
         run: |
           mkdir build
           cd build
@@ -918,14 +929,14 @@ jobs:
       - name: Download mpg123
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/1.30.2/mpg123-1.30.2.tar.bz2)!"
+          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
       - name: Extract mpg123
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/mpg123-1.30.2.tar.bz2
+        run: tar -xf ../downloads/mpg123-${{env.mpg123_version}}.tar.bz2
 
       - name: Compile mpg123
         shell: cmd
@@ -933,7 +944,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/mpg123-1.30.2
+        working-directory: sources/mpg123-${{env.mpg123_version}}
         run: |
           mkdir build2
           cd build2
@@ -945,26 +956,26 @@ jobs:
       - name: Download lame
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "lame [this](https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz)!"
+          url: "lame [this](https://downloads.sourceforge.net/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract lame
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/lame-3.100.tar.gz
+        run: tar -xf ../downloads/lame-${{env.lame_version}}.tar.gz
 
       - name: Patch lame (x86)
         if: matrix.arch == 'x86'
         shell: bash
         working-directory: sources
-        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X86/g' lame-3.100/Makefile.MSVC
+        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X86/g' lame-${{env.lame_version}}/Makefile.MSVC
 
       - name: Patch lame (x86_64)
         if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: sources
-        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' lame-3.100/Makefile.MSVC
+        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' lame-${{env.lame_version}}/Makefile.MSVC
 
       - name: Compile lame (x86)
         if: matrix.arch == 'x86'
@@ -973,7 +984,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/lame-3.100
+        working-directory: sources/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
 
       - name: Compile lame (x86_64)
@@ -983,7 +994,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/lame-3.100
+        working-directory: sources/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
 
       - name: Install lame
@@ -992,7 +1003,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/lame-3.100
+        working-directory: sources/lame-${{env.lame_version}}
         run: |
           copy include\*.h ${{matrix.prefix_path_backslash}}\include\
           copy output\libmp3lame*.lib ${{matrix.prefix_path_backslash}}\lib\
@@ -1009,7 +1020,7 @@ jobs:
           echo "Name: lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "Description: encoder that converts audio to the MP3 file format." >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "URL: https://lame.sourceforge.io/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Version: 3.100" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Version: ${{env.lame_version}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -lmp3lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
 
@@ -1017,31 +1028,31 @@ jobs:
       - name: Download twolame
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "twolame [this](https://downloads.sourceforge.net/twolame/twolame-0.4.0.tar.gz)!"
+          url: "twolame [this](https://downloads.sourceforge.net/twolame/twolame-${{env.twolame_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract twolame
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/twolame-0.4.0.tar.gz
+        run: tar -xf ../downloads/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Patch twolame source
         shell: bash
-        working-directory: sources/twolame-0.4.0
+        working-directory: sources/twolame-${{env.twolame_version}}
         run: patch -p1 < ../../patches/twolame.patch
 
       - name: Upgrade twolame project
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/twolame-0.4.0/win32
+        working-directory: sources/twolame-${{env.twolame_version}}/win32
         run: start /w devenv.exe libtwolame_dll.sln /upgrade
 
       - name: Patch twolame project for x86_64
         if: matrix.arch == 'x86_64'
         shell: bash
-        working-directory: sources/twolame-0.4.0/win32
+        working-directory: sources/twolame-${{env.twolame_version}}/win32
         run: |
           sed -i 's/Win32/x64/g' *.sln *.vcproj *.vcxproj
           sed -i 's/MachineX86/MachineX64/g' *.sln *.vcxproj
@@ -1050,7 +1061,7 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/twolame-0.4.0/win32
+        working-directory: sources/twolame-${{env.twolame_version}}/win32
         run: |
           msbuild libtwolame_dll.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{matrix.msbuild_platform}}
           copy ..\libtwolame\twolame.h ${{matrix.prefix_path_backslash}}\include\
@@ -1068,7 +1079,7 @@ jobs:
           echo "Name: lame" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "URL: https://www.twolame.org/" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Version: 0.4.0" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Version: ${{env.twolame_version}}" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Libs: -L${{matrix.prefix_path_forwardslash}}/lib -ltwolame_dll" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Cflags: -I${{matrix.prefix_path_forwardslash}}/include" >>${{matrix.prefix_path_unix}}/lib/pkgconfig/twolame.pc
 
@@ -1076,14 +1087,14 @@ jobs:
       - name: Download TagLib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "TagLib [this](https://taglib.org/releases/taglib-1.12.tar.gz)!"
+          url: "TagLib [this](https://taglib.org/releases/taglib-${{env.taglib_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract TagLib
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/taglib-1.12.tar.gz
+        run: tar -xf ../downloads/taglib-${{env.taglib_version}}.tar.gz
 
       - name: Compile TagLib
         shell: cmd
@@ -1091,7 +1102,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/taglib-1.12
+        working-directory: sources/taglib-${{env.taglib_version}}
         run: |
           mkdir build
           cd build
@@ -1194,7 +1205,7 @@ jobs:
       - name: Download GLib
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "GLib [this](https://download.gnome.org/sources/glib/2.73/glib-${{env.glib_version}}.tar.xz)!"
+          url: "GLib [this](https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1224,7 +1235,7 @@ jobs:
       - name: Download glib-networking
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/2.72/glib-networking-${{env.glib_networking_version}}.tar.xz)!"
+          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1279,7 +1290,7 @@ jobs:
       - name: Download libsoup
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libsoup [this](https://download.gnome.org/sources/libsoup/2.74/libsoup-${{env.libsoup_version}}.tar.xz)!"
+          url: "libsoup [this](https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -1818,7 +1829,7 @@ jobs:
       - name: Download icu
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-${{env.icu4c_version_underscore}}-src.zip)!"
+          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip)!"
           target: downloads/
           auto-match: true
 
@@ -1951,7 +1962,7 @@ jobs:
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v21.5/protobuf-cpp-${{env.protobuf_version}}.tar.gz)!"
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version_short}}/protobuf-cpp-${{env.protobuf_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1978,7 +1989,7 @@ jobs:
       - name: Download qtbase
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "qtbase [this](https://download.qt.io/official_releases/qt/6.3/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz)!"
+          url: "qtbase [this](https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -2066,7 +2077,7 @@ jobs:
       - name: Download qttools
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "qttools [this](https://download.qt.io/official_releases/qt/6.3/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz)!"
+          url: "qttools [this](https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
