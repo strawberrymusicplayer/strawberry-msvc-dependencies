@@ -13,7 +13,7 @@ env:
   libpng_version: '1.6.37'
   pcre2_version: '10.40'
   bzip2_version: '1.0.8'
-  xz_version: '5.2.5'
+  xz_version: '5.2.6'
   brotli_version: '1.0.9'
   pixmap_version: '0.40.0'
   libxml2_version: '2.10.2'
@@ -507,6 +507,11 @@ jobs:
         shell: bash
         working-directory: sources
         run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
+
+      - name: Patch xz
+        shell: bash
+        working-directory: sources/xz-${{env.xz_version}}
+        run: patch -p1 < ../../patches/xz-config.patch
 
       - name: Compile xz
         shell: cmd
