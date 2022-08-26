@@ -102,6 +102,21 @@ function update_package() {
     "opus")
       package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -Vr | head -1)
       ;;
+    "opusfile")
+      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -Vr | head -1)
+      ;;
+    "mpg123")
+      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/mpg123/files/mpg123/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | head -1)
+      ;;
+    "lame")
+      package_version_latest=$(wget -q -O- 'https://sourceforge.net/p/lame/svn/HEAD/tree/tags' | grep RELEASE_ | sed -n 's,.*RELEASE__\([0-9_][^<]*\)<.*,\1,p' | tr '_' '.' | sort -V | tail -1)
+      ;;
+    "twolame")
+      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/twolame/files/twolame/' | sed -n 's,^.*twolame/\([0-9][^"]*\)/".*,\1,p' | head -n 1)
+      ;;
+    "taglib")
+      package_version_latest=$(wget -q -O- 'https://github.com/taglib/taglib/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
+      ;;
     "dlfcn")
       package_version_latest=$(wget -q -O- 'https://github.com/dlfcn-win32/dlfcn-win32/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^r' | sed 's/^v//g' | sort -V | tail -1)
       ;;
@@ -188,7 +203,7 @@ function update_package() {
       git commit -m "Update ${package_name}" .github/workflows/build.yml || exit 1
       git add .github/workflows/build.yml || exit 1
       git push origin "${branch}" || exit 1
-      gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
+      gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
       git checkout . >/dev/null 2>&1 || exit 1
       if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
         git checkout master >/dev/null 2>&1 || exit 1
@@ -200,10 +215,9 @@ function update_package() {
 
 cmds="cat cut sort tr grep sed wget curl git gh"
 cmds_missing=
-have_mail=0
 for cmd in ${cmds}; do
   which "${cmd}" >/dev/null 2>&1
-  if [ "${?}" -eq 0 ] ; then
+  if [ $? -eq 0 ] ; then
     continue
   fi
   if [ "${cmds_missing}" = "" ]; then
@@ -231,8 +245,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-git fetch >/dev/null || exit 1
-git checkout . >/dev/null || exit 1
+git fetch >/dev/null 2>&1 || exit 1
+git checkout . >/dev/null 2>&1 || exit 1
 
 if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
   git checkout master >/dev/null 2>&1 || exit 1
@@ -248,5 +262,5 @@ for package in ${packages}; do
   if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
     git checkout master >/dev/null 2>&1 || exit 1
   fi
-  git pull origin master --rebase >/dev/null || exit 1
+  git pull origin master --rebase >/dev/null 2>&1 || exit 1
 done
