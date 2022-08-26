@@ -34,7 +34,7 @@ env:
   glib_version: '2.73.3'
   glib_networking_version: '2.72.2'
   libpsl_version: '0.21.1'
-  libsoup_version: '2.74.2'
+  libsoup_version: '3.1.3'
   orc_version: '0.4.32'
   musepack_version: '475'
   libopenmpt_version: '0.6.5'
@@ -1299,6 +1299,11 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/libsoup-${{env.libsoup_version}}.tar.xz
 
+      - name: Patch libsoup
+        shell: bash
+        working-directory: sources/libsoup-${{env.libsoup_version}}
+        run: patch -p1 < ../../patches/libsoup-msvc.patch
+
       - name: Compile libsoup
         shell: cmd
         env:
@@ -1307,7 +1312,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/libsoup-${{env.libsoup_version}}
         run: |
-          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dtests=false -Dsysprof=disabled -Dtls_check=false -Dgnome=false -Dgtk_doc=false build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig -Dtests=false -Ddocs=disabled -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
           cd build
           ninja
           ninja install
