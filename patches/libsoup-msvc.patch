@@ -1,18 +1,29 @@
-diff --git a/libsoup/soup-http2-utils.h b/libsoup/soup-http2-utils.h
-index f3a7c73..a30ca83 100644
---- a/libsoup/soup-http2-utils.h
-+++ b/libsoup/soup-http2-utils.h
-@@ -4,6 +4,13 @@
+From 3473799c3690f39b18cdad47923c54ebbe722b56 Mon Sep 17 00:00:00 2001
+From: Patrick Griffis <pgriffis@igalia.com>
+Date: Mon, 29 Aug 2022 11:41:37 -0500
+Subject: [PATCH] Fix ssize_t not being defined on msvc
+
+We alias ssize_t to gssize so the glib header must be included first.
+---
+ libsoup/soup-http2-utils.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libsoup/soup-http2-utils.c b/libsoup/soup-http2-utils.c
+index 3bacf2c3..a2d33e16 100644
+--- a/libsoup/soup-http2-utils.c
++++ b/libsoup/soup-http2-utils.c
+@@ -2,9 +2,10 @@
+  * Copyright 2022 Igalia, S.L.
+  */
  
- #pragma once
+-#include "soup-http2-utils.h"
+ #include <glib.h>
  
-+#ifdef _MSC_VER
-+#include <BaseTsd.h>
-+typedef SSIZE_T ssize_t;
-+#else
-+#include <unistd.h>
-+#endif
++#include "soup-http2-utils.h"
 +
- #include <nghttp2/nghttp2.h>
- 
- #define NGCHECK(stm)                                                                             \
+ const char *
+ soup_http2_io_state_to_string (SoupHTTP2IOState state)
+ {
+-- 
+GitLab
+
