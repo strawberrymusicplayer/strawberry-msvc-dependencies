@@ -9,7 +9,7 @@ env:
   pkgconf_version: '1.9.3'
   zlib_version: '1.2.12'
   openssl_version: '3.0.5'
-  gnutls_version: '3.7.6'
+  gnutls_version: '3.7.7'
   libpng_version: '1.6.37'
   pcre2_version: '10.40'
   bzip2_version: '1.0.8'
