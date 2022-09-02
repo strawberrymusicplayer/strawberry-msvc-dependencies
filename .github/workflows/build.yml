@@ -1299,11 +1299,6 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/libsoup-${{env.libsoup_version}}.tar.xz
 
-      - name: Patch libsoup
-        shell: bash
-        working-directory: sources/libsoup-${{env.libsoup_version}}
-        run: patch -p1 < ../../patches/libsoup-msvc.patch
-
       - name: Compile libsoup
         shell: cmd
         env:
