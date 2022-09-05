@@ -18,7 +18,7 @@ env:
   pixmap_version: '0.40.0'
   libxml2_version: '2.10.2'
   nghttp2_version: '1.49.0'
-  sqlite3_version: '3390200'
+  sqlite3_version: '3390300'
   libogg_version: '1.3.5'
   libvorbis_version: '1.3.7'
   flac_version: '1.3.4'
