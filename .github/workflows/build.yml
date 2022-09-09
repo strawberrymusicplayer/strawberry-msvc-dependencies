@@ -1934,10 +1934,7 @@ jobs:
       - name: Extract qtbase
         shell: bash
         working-directory: sources
-        run: |
-          tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
-          cd qtbase-everywhere-src-${{env.qt_version}}
-          patch -p1 < ../../patches/qt6-qtbase-columnalignment.patch
+        run: tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Copy sqlite3
         shell: bash
