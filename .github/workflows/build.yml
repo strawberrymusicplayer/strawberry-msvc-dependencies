@@ -21,7 +21,7 @@ env:
   sqlite3_version: '3390300'
   libogg_version: '1.3.5'
   libvorbis_version: '1.3.7'
-  flac_version: '1.3.4'
+  flac_version: '1.4.0'
   wavpack_version: '5.5.0'
   opus_version: '1.3.1'
   opusfile_version: '0.12'
