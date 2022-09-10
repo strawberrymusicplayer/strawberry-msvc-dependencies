@@ -2115,8 +2115,10 @@ jobs:
           set -x
           hub release delete "latest" || true
           hub release create \
+            -t "$GITHUB_SHA" \
+            -m "Strawberry MSVC Dependencies" \
             -a releases/releases/strawberry-msvc-x86-debug.tar.xz \
             -a releases/releases/strawberry-msvc-x86-release.tar.xz \
             -a releases/releases/strawberry-msvc-x86_64-debug.tar.xz \
             -a releases/releases/strawberry-msvc-x86_64-release.tar.xz \
-            -m "Strawberry MSVC Dependencies $GITHUB_SHA" "latest"
+            "latest"
