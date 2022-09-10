@@ -18,7 +18,7 @@
 #
 
 repo="strawberrymusicplayer/strawberry-msvc-dependencies"
-repodir="${HOME}/strawberry-msvc-dependencies"
+repodir="${HOME}/Projects/strawberry-msvc-dependencies"
 ci_file=".github/workflows/build.yml"
 
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
