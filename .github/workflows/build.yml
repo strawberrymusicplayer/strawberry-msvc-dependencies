@@ -1202,6 +1202,27 @@ jobs:
           xcopy /s /y fftw3.h ${{matrix.prefix_path_backslash}}\include\
 
 
+      - name: Download libffi
+        shell: bash
+        working-directory: sources
+        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi
+
+      - name: Compile libffi
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{matrix.prefix_path_forwardslash}}/include
+          LDFLAGS: -L${{matrix.prefix_path_forwardslash}}/lib
+        working-directory: sources/libffi
+        run: |
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+          cd build
+          ninja
+          ninja install
+
+
       - name: Download GLib
         uses: suisei-cn/actions-download-file@v1
         with:
