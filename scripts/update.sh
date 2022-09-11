@@ -100,10 +100,10 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
       ;;
     "opus")
-      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
       ;;
     "opusfile")
-      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
       ;;
     "mpg123")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/mpg123/files/mpg123/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | head -1)
@@ -124,22 +124,22 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
       ;;
     "glib")
-      package_version_latest=$(wget -q -O- 'https://github.com/gnome/glib/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '\([0-9]\+\.\)\{2\}9[0-9]' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/glib/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9.]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "glib_networking")
-      package_version_latest=$(wget -q -O- 'https://github.com/gnome/glib-networking/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' |     grep -v '\([0-9]\+\.\)\{2\}9[0-9]' | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/glib-networking/tags' | sed -n "s,.*glib-networking-\([0-9]\+\.[0-9]*[0-9]*\.[^']*\)\.tar.*,\1,p" | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -V | tail -1)
       ;;
     "libpsl")
       package_version_latest=$(wget -q -O- 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | head -1)
       ;;
     "libsoup")
-      package_version_latest=$(wget -q -O- 'https://github.com/gnome/libsoup/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '\([0-9]\+\.\)\{2\}9[0-9]' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "orc")
-      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/orc/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]*\.[0-9]*\.[0-9][^']*\\)'.*,\\1,p" | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/orc/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]*\.[0-9]*\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
       ;;
     "libopenmpt")
-      package_version_latest=$(wget -q -O- 'https://lib.openmpt.org/files/libopenmpt/src/' | sed -n 's,.*libopenmpt-\([0-9][^>]*\)+release\.autotools\.tar.*,\1,p' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://lib.openmpt.org/files/libopenmpt/src/' | sed -n 's,.*libopenmpt-\([0-9][^>]*\)+release\.autotools\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "fdk_aac")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/opencore-amr/files/fdk-aac/' | sed -n 's,.*fdk-aac-\([0-9.]*\)\.tar.*,\1,p' | sort -V | tail -1)
@@ -151,10 +151,10 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://github.com/acoustid/chromaprint/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
       ;;
     "gstreamer")
-      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
       ;;
     "icu4c")
-      package_version_latest=$(wget -q -O- 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | sort -Vr | head -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | sort -V | tail -1)
       ;;
     "expat")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/expat/files/expat/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | head -1)
