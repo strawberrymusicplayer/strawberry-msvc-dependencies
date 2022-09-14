@@ -2042,6 +2042,11 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/qttools-everywhere-src-${{env.qt_version}}.tar.xz
 
+      - name: Patch qttools
+        shell: bash
+        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}
+        run: patch -p1 < ../../patches/qttools-designer.patch
+
       - name: Configure qttools
         shell: cmd
         env:
