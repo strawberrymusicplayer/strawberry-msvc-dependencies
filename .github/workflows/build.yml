@@ -4,7 +4,7 @@ on: [push, pull_request]
 env:
   nasm_version: '2.15.05'
   yasm_version: '1.3.0'
-  win_flex_bison: '2.5.25'
+  win_flex_bison_version: '2.5.25'
   boost_version: '1.80.0'
   pkgconf_version: '1.9.3'
   zlib_version: '1.2.12'
@@ -49,6 +49,8 @@ env:
   harfbuzz_version: '5.1.0'
   protobuf_version: '3.21.5'
   qt_version: '6.3.2'
+
+  max_releases: '6'
 
 jobs:
 
@@ -216,7 +218,7 @@ jobs:
       - name: Download win_flex_bison
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison}}/win_flex_bison-${{env.win_flex_bison}}.zip)!"
+          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison_version}}/win_flex_bison-${{env.win_flex_bison_version}}.zip)!"
           target: downloads/
           auto-match: true
 
@@ -225,7 +227,7 @@ jobs:
         run: |
           mkdir c:\win_flex_bison
           cd c:\win_flex_bison
-          7z x ${{github.workspace}}\downloads\win_flex_bison-${{env.win_flex_bison}}.zip
+          7z x ${{github.workspace}}\downloads\win_flex_bison-${{env.win_flex_bison_version}}.zip
 
       - name: Add win_flex_bison to PATH
         run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -2133,25 +2135,107 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release'
     needs:
       - build-windows-msvc
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          path: releases
-      - name: Create Release
+          fetch-depth: 0
+
+      - name: Set release tag
+        run: echo "release_tag=release-$GITHUB_RUN_ID" >> $GITHUB_ENV
+
+      - name: Set have release
+        run: echo "have_release=$(git tag -l | grep ${{env.release_tag}} >/dev/null 2>&1 && echo 1 || echo 0)" >> $GITHUB_ENV
+
+      - name: Delete existing release
+        if: env.have_release == '1'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          hub release delete "${{env.release_tag}}"
+          git tag -d "${{env.release_tag}}"
+          git push --delete origin "${{env.release_tag}}"
+
+      - name: Delete old releases
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          while [ "$(git tag | wc -l)" -ge "${{env.max_releases}}" ]; do
+            oldest_tag=$(git tag | head -1)
+            hub release delete "$oldest_tag"
+            git tag -d "$oldest_tag"
+            git push --delete origin "$oldest_tag"
+          done
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: releases
+
+      - name: Set release notes file
+        run: echo "release_notes_file=release_notes.txt" >> $GITHUB_ENV
+
+      - name: Create release notes
+        run: |
+          echo "Strawberry MSVC Dependencies Release $GITHUB_RUN_ID" > "${{env.release_notes_file}}"
+          echo "" >> "${{env.release_notes_file}}"
+          echo "Libraries:" >> "${{env.release_notes_file}}"
+          echo "" >> "${{env.release_notes_file}}"
+          echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
+          echo "* zlib ${{env.zlib_version}}" >> "${{env.release_notes_file}}"
+          echo "* OpenSSL ${{env.openssl_version}}" >> "${{env.release_notes_file}}"
+          echo "* GnuTLS ${{env.gnutls_version}}" >> "${{env.release_notes_file}}"
+          echo "* libng ${{env.libpng_version}}" >> "${{env.release_notes_file}}"
+          echo "* PCRE2 ${{env.pcre2_version}}" >> "${{env.release_notes_file}}"
+          echo "* bzip2 ${{env.bzip2_version}}" >> "${{env.release_notes_file}}"
+          echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
+          echo "* Brotli ${{env.brotli_version}}" >> "${{env.release_notes_file}}"
+          echo "* Pixmap ${{env.pixmap_version}}" >> "${{env.release_notes_file}}"
+          echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
+          echo "* nghttp2 ${{env.nghttp2_version}}" >> "${{env.release_notes_file}}"
+          echo "* SQLite ${{env.sqlite3_version}}" >> "${{env.release_notes_file}}"
+          echo "* libogg ${{env.libogg_version}}" >> "${{env.release_notes_file}}"
+          echo "* libvorbis ${{env.libvorbis_version}}" >> "${{env.release_notes_file}}"
+          echo "* FLAC ${{env.flac_version}}" >> "${{env.release_notes_file}}"
+          echo "* WavPack ${{env.wavpack_version}}" >> "${{env.release_notes_file}}"
+          echo "* Opus Codec ${{env.opus_version}}" >> "${{env.release_notes_file}}"
+          echo "* opusfile ${{env.opusfile_version}}" >> "${{env.release_notes_file}}"
+          echo "* MPG123 ${{env.mpg123_version}}" >> "${{env.release_notes_file}}"
+          echo "* LAME ${{env.lame_version}}" >> "${{env.release_notes_file}}"
+          echo "* TwoLAME ${{env.twolame_version}}" >> "${{env.release_notes_file}}"
+          echo "* TagLib ${{env.taglib_version}}" >> "${{env.release_notes_file}}"
+          echo "* dlfcn ${{env.dlfcn_version}}" >> "${{env.release_notes_file}}"
+          echo "* fftw ${{env.fftw_version}}" >> "${{env.release_notes_file}}"
+          echo "* GLib ${{env.glib_version}}" >> "${{env.release_notes_file}}"
+          echo "* GLib Networking ${{env.glib_networking_version}}" >> "${{env.release_notes_file}}"
+          echo "* libpsl ${{env.libpsl_version}}" >> "${{env.release_notes_file}}"
+          echo "* libsoup ${{env.libsoup_version}}" >> "${{env.release_notes_file}}"
+          echo "* orc ${{env.orc_version}}" >> "${{env.release_notes_file}}"
+          echo "* Musepack ${{env.musepack_version}}" >> "${{env.release_notes_file}}"
+          echo "* libopenmpt ${{env.libopenmpt_version}}" >> "${{env.release_notes_file}}"
+          echo "* libgme ${{env.libgme_version}}" >> "${{env.release_notes_file}}"
+          echo "* fdk-aac ${{env.fdk_aac_version}}" >> "${{env.release_notes_file}}"
+          echo "* libbs2b ${{env.libbs2b_version}}" >> "${{env.release_notes_file}}"
+          echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
+          echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
+          echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
+          echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
+          echo "* FreeType ${{env.freetype_version}}" >> "${{env.release_notes_file}}"
+          echo "* Harfbuzz ${{env.harfbuzz_version}}" >> "${{env.release_notes_file}}"
+          echo "* Protobuf ${{env.protobuf_version}}" >> "${{env.release_notes_file}}"
+          echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
           set -x
-          hub release delete "latest" || true
-          hub release create \
-            -t "$GITHUB_SHA" \
-            -m "Strawberry MSVC Dependencies" \
-            -a releases/releases/strawberry-msvc-x86-debug.tar.xz \
-            -a releases/releases/strawberry-msvc-x86-release.tar.xz \
-            -a releases/releases/strawberry-msvc-x86_64-debug.tar.xz \
-            -a releases/releases/strawberry-msvc-x86_64-release.tar.xz \
-            "latest"
+          files=()
+          for file in $(find releases -type f); do
+            echo "Adding file: ${file}"
+            files+=("-a" "${file}")
+          done
+          hub release create -t "$GITHUB_SHA" "${files[@]}" -F "${{env.release_notes_file}}" "${{env.release_tag}}"
