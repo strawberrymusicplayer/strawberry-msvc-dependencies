@@ -47,7 +47,7 @@ env:
   expat_version: '2.4.8'
   freetype_version: '2.12.1'
   harfbuzz_version: '5.1.0'
-  protobuf_version: '3.21.5'
+  protobuf_version: '21.6'
   qt_version: '6.3.2'
 
   max_releases: '6'
@@ -144,7 +144,6 @@ jobs:
           echo "glib_version_short=$(echo ${{env.glib_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "glib_networking_version_short=$(echo ${{env.glib_networking_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
-          echo "protobuf_version_short=$(echo ${{env.protobuf_version}} | cut -d '.' -f 2-3)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
 
       - name: Delete conflicting files
@@ -1930,21 +1929,21 @@ jobs:
       - name: Download Protobuf
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version_short}}/protobuf-cpp-${{env.protobuf_version}}.tar.gz)!"
+          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
       - name: Extract Protobuf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/protobuf-cpp-${{env.protobuf_version}}.tar.gz
+        run: tar -xf ../downloads/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
 
       - name: Compile Protobuf
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/protobuf-${{env.protobuf_version}}/cmake
+        working-directory: sources/protobuf-3.${{env.protobuf_version}}/cmake
         run: |
           mkdir build
           cd build
