@@ -37,7 +37,7 @@ env:
   libsoup_version: '3.2.0'
   orc_version: '0.4.32'
   musepack_version: '475'
-  libopenmpt_version: '0.6.5'
+  libopenmpt_version: '0.6.6'
   libgme_version: '0.6.3'
   fdk_aac_version: '2.0.2'
   libbs2b_version: '3.1.0'
