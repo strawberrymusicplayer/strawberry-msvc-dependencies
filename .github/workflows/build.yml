@@ -2081,7 +2081,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          ${{matrix.prefix_path_backslash}}\bin\qt-configure-module.bat ..
+          ${{matrix.prefix_path_backslash}}\bin\qt-configure-module.bat .. -feature-linguist -no-feature-assistant -no-feature-designer
 
       - name: Compile qttools
         shell: cmd
