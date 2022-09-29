@@ -48,7 +48,7 @@ env:
   freetype_version: '2.12.1'
   harfbuzz_version: '5.2.0'
   protobuf_version: '21.6'
-  qt_version: '6.3.2'
+  qt_version: '6.4.0'
 
   max_releases: '6'
 
