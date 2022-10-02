@@ -63,6 +63,9 @@ function update_package() {
     "libpng")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/p/libpng/code/ref/master/tags/' | sed -n 's,.*<a[^>]*>v\([0-9][^<]*\)<.*,\1,p' | grep -v alpha | grep -v beta | grep -v rc | sort -V | tail -1)
       ;;
+    "libjpeg_turbo")
+      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/libjpeg-turbo/files/' | sed -n 's,.*/projects/.*/\([0-9][^"%]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
     "pcre2")
       package_version_latest=$(wget -q -O- 'https://github.com/PhilipHazel/pcre2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^pcre2\-//g' | sort -V | tail -1)
       ;;
