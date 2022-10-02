@@ -2274,6 +2274,7 @@ jobs:
           echo "* OpenSSL ${{env.openssl_version}}" >> "${{env.release_notes_file}}"
           echo "* GnuTLS ${{env.gnutls_version}}" >> "${{env.release_notes_file}}"
           echo "* libng ${{env.libpng_version}}" >> "${{env.release_notes_file}}"
+          echo "* libjpeg-turbo ${{env.libjpeg_turbo_version}}" >> "${{env.release_notes_file}}"
           echo "* PCRE2 ${{env.pcre2_version}}" >> "${{env.release_notes_file}}"
           echo "* bzip2 ${{env.bzip2_version}}" >> "${{env.release_notes_file}}"
           echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
