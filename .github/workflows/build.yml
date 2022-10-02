@@ -20,6 +20,8 @@ env:
 
   libpng_version: '1.6.38'
 
+  libjpeg_turbo_version: '2.1.4'
+
   pcre2_version: '10.40'
 
   bzip2_version: '1.0.8'
@@ -481,6 +483,35 @@ jobs:
           cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}"
           cmake --build .
           cmake --install .
+
+
+      - name: Download libjpeg-turbo
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "libjpeg-turbo [this](https://sourceforge.net/projects/libjpeg-turbo/files/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract libjpeg-turbo
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz
+
+      - name: Configure libjpeg-turbo
+        shell: cmd
+        env:
+          CL: "/MP"
+        run: cmake --log-level="DEBUG" -S sources/libjpeg-turbo-${{env.libjpeg_turbo_version}} -B sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build -G Ninja -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX="${{matrix.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON
+
+      - name: Build libjpeg-turbo
+        shell: cmd
+        working-directory: sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
+        run: cmake --build .
+
+      - name: Install libjpeg-turbo
+        shell: cmd
+        working-directory: sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
+        run: cmake --install .
 
 
       - name: Download pcre2
@@ -2080,7 +2111,7 @@ jobs:
           -DFEATURE_style_windowsvista=ON
           -DFEATURE_system_zlib=ON
           -DFEATURE_system_png=ON
-          -DFEATURE_system_jpeg=OFF
+          -DFEATURE_system_jpeg=ON
           -DFEATURE_system_pcre2=ON
           -DFEATURE_system_freetype=ON
           -DFEATURE_system_harfbuzz=ON
