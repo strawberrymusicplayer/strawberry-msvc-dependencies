@@ -12,7 +12,7 @@ env:
 
   pkgconf_version: '1.9.3'
 
-  zlib_version: '1.2.12'
+  zlib_version: '1.2.13'
 
   openssl_version: '3.0.5'
 
