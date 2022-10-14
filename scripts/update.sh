@@ -25,6 +25,36 @@ function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
 function status() { echo "[$(timestamp)] $*"; }
 function error() { echo "[$(timestamp)] ERROR: $*" >&2; }
 
+function update_repo() {
+
+  git fetch >/dev/null 2>&1 || exit 1
+  if [ $? -ne 0 ]; then
+    error "Could not fetch"
+    exit 1
+  fi
+
+  git checkout . >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    error "Could not checkout ."
+    exit 1
+  fi
+
+  if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
+    git checkout master >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      error "Could not checkout master branch."
+      exit 1
+    fi
+  fi
+
+  git pull origin master --rebase >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    error "Could not pull with rebase ."
+    exit 1
+  fi
+
+}
+
 function merge_prs() {
 
   local prs
@@ -71,6 +101,16 @@ function merge_prs() {
     fi
     status "Merging pull request ${pr}."
     gh pr merge -dr "${pr}"
+  done
+
+}
+
+function update_packages() {
+
+  packages=$(cat "${ci_file}" | sed -n "s,^  \(.*\)_version: .*$,\1,p" | tr '\n' ' ')
+  for package in ${packages}; do
+    update_package "${package}"
+    update_repo
   done
 
 }
@@ -299,25 +339,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-git fetch >/dev/null 2>&1 || exit 1
-git checkout . >/dev/null 2>&1 || exit 1
-
-if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
-  git checkout master >/dev/null 2>&1 || exit 1
-fi
-
-git pull origin master --rebase >/dev/null || exit 1
-
-# Merge existing pull requests
+update_repo
 merge_prs
 
-packages=$(cat "${ci_file}" | sed -n "s,^  \(.*\)_version: .*$,\1,p" | tr '\n' ' ')
-
-for package in ${packages}; do
-  update_package "${package}"
-  git checkout . >/dev/null 2>&1 || exit 1
-  if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
-    git checkout master >/dev/null 2>&1 || exit 1
-  fi
-  git pull origin master --rebase >/dev/null 2>&1 || exit 1
-done
+update_repo
+update_packages
