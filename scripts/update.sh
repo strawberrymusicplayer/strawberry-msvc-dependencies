@@ -22,7 +22,58 @@ repodir="${HOME}/Projects/strawberry-msvc-dependencies"
 ci_file=".github/workflows/build.yml"
 
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
+function status() { echo "[$(timestamp)] $*"; }
 function error() { echo "[$(timestamp)] ERROR: $*" >&2; }
+
+function merge_prs() {
+
+  local prs
+  local pr
+  local review_decision
+  local status_check_rollup
+  local status_check_ok
+  local status_check_total
+
+  prs=$(gh pr list --json number | jq '.[].number')
+  if [ "${prs}" = "" ]; then
+    return
+  fi
+
+  for pr in ${prs}; do
+    if ! [ "$(gh pr view "${pr}" --json 'author' | jq -r '.author.login')" = "strawbsbot" ]; then
+      continue
+    fi
+    if ! [ "$(gh pr view "${pr}" --json 'isDraft' | jq '.isDraft')" = "false" ]; then
+      continue
+    fi
+    if ! [ "$(gh pr view "${pr}" --json 'mergeable' | jq -r '.mergeable')" = "MERGEABLE" ]; then
+      continue
+    fi
+    if ! [ "$(gh pr view "${pr}" --json 'mergeStateStatus' | jq -r '.mergeStateStatus')" = "CLEAN" ]; then
+      continue
+    fi
+    review_decision=$(gh pr view "${pr}" --json 'reviewDecision' | jq -r '.reviewDecision')
+    if [ ! "${review_decision}" = "" ] && [ ! "${review_decision}" = "APPROVED" ] ; then
+      continue
+    fi
+    status_check_rollup=$(gh pr view "${pr}" --json 'statusCheckRollup')
+    status_check_ok="1"
+    status_check_total=$(echo "${status_check_rollup}" | jq '.statusCheckRollup | length')
+    for ((i = 0; i < status_check_total; i++)); do
+      status_check=$(echo "${status_check_rollup}" | jq -r ".statusCheckRollup[${i}].status")
+      if ! [ "${status_check}" = "COMPLETED" ]; then
+        status_check_ok=0
+        break
+      fi
+    done
+    if ! [ "${status_check_ok}" = "1" ]; then
+      continue
+    fi
+    status "Merging pull request ${pr}."
+    gh pr merge -dr "${pr}"
+  done
+
+}
 
 function update_package() {
 
@@ -34,7 +85,7 @@ function update_package() {
   package_version_current=$(cat "${ci_file}" | sed -n "s,^  ${package_name}_version: \(.*\)\$,\1,p" | tr -d "\'")
 
   if [ "${package_version_current}" = "" ]; then
-    echo "Could not get current version for ${package}."
+    error "Could not get current version for ${package}."
     return
   fi
 
@@ -177,30 +228,30 @@ function update_package() {
       ;;
     *)
       package_version_latest=
-      echo "No update rule for package: ${package}"
+      error "No update rule for package: ${package}"
       return
       ;;
   esac
 
   if [ "${package_version_latest}" = "" ]; then
-    echo "Could not get latest version for ${package}."
+    error "Could not get latest version for ${package}."
     return
   fi
 
   package_version_highest=$(echo "${package_version_current} ${package_version_latest}" | tr ' ' '\n' | sort -V | tail -1)
 
   if [ "${package_version_highest}" = "" ]; then
-    echo "Could not get highest version for ${package}."
+    error "Could not get highest version for ${package}."
     return
   fi
 
   if [ "${package_version_highest}" = "${package_version_current}" ]; then
-    echo "${package_name}: ${package_version_current} is the latest"
+    status "${package_name}: ${package_version_current} is the latest"
   else
     branch="${package_name}_$(echo ${package_version_latest} | sed 's/\./_/g')"
     git branch | grep "${branch}" >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-      echo "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
+      status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
       git checkout -b "${branch}" || exit 1
       sed -i "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g" .github/workflows/build.yml || exit 1
       git commit -m "Update ${package_name}" .github/workflows/build.yml || exit 1
@@ -236,7 +287,7 @@ if ! [ "${cmds_missing}" = "" ]; then
 fi
 
 if ! [ -d "${repodir}" ]; then
-  echo "Missing ${repodir}"
+  error "Missing ${repodir}"
   exit 1
 fi
 
@@ -256,6 +307,9 @@ if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
 fi
 
 git pull origin master --rebase >/dev/null || exit 1
+
+# Merge existing pull requests
+merge_prs
 
 packages=$(cat "${ci_file}" | sed -n "s,^  \(.*\)_version: .*$,\1,p" | tr '\n' ' ')
 
