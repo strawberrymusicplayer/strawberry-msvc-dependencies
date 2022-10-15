@@ -17,8 +17,6 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-repo="strawberrymusicplayer/strawberry-msvc-dependencies"
-repodir="${HOME}/Projects/strawberry-msvc-dependencies"
 ci_file=".github/workflows/build.yml"
 
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
@@ -49,7 +47,7 @@ function update_repo() {
 
   git pull origin master --rebase >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    error "Could not pull with rebase ."
+    error "Could not pull with rebase."
     exit 1
   fi
 
@@ -70,7 +68,7 @@ function merge_prs() {
   fi
 
   for pr in ${prs}; do
-    if ! [ "$(gh pr view "${pr}" --json 'author' | jq -r '.author.login')" = "strawbsbot" ]; then
+    if ! [ "$(gh pr view "${pr}" --json 'author' | jq -r '.author.login')" = "${gh_username}" ]; then
       continue
     fi
     if ! [ "$(gh pr view "${pr}" --json 'isDraft' | jq '.isDraft')" = "false" ]; then
@@ -266,6 +264,9 @@ function update_package() {
       qt_major_version=$(wget -q -O- "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
       package_version_latest=$(wget -q -O- "https://download.qt.io/official_releases/qt/${qt_major_version}/" | sed -n 's,.*href="\([0-9]*\.[0-9]*\.[^/]*\)/".*,\1,p' | sort -V | tail -1)
       ;;
+    "win_flex_bison")
+      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
@@ -326,16 +327,51 @@ if ! [ "${cmds_missing}" = "" ]; then
   exit 1
 fi
 
-if ! [ -d "${repodir}" ]; then
-  error "Missing ${repodir}"
+dir="$(dirname "$0")"
+
+if [ "${dir}" = "" ]; then
+  error "Could not get current directory."
   exit 1
 fi
 
-cd "${repodir}" || exit 1
+if ! [ -d "${dir}" ]; then
+  error "Missing ${dir}"
+  exit 1
+fi
+
+if ! [ -d "${dir}/../.git" ]; then
+  error "Missing ${dir}/../.git"
+  exit 1
+fi
+
+repodir="$(dirname "${dir}")"
+
+if ! [ -d "${repodir}" ]; then
+  error "Missing ${repodir}."
+  exit 1
+fi
+
+cd "${repodir}"
+if [ $? -ne 0 ]; then
+  error "Could not change directory to ${repodir}."
+  exit 1
+fi
+
+repo=$(git config --get remote.origin.url | cut -d ':' -f 2 | sed 's/\.git$//g')
+if [ "${repo}" = "" ]; then
+  error "Could not get repo name."
+  exit 1
+fi
 
 gh auth status >/dev/null || exit 1
 if [ $? -ne 0 ]; then
   error "Missing GitHub login."
+  exit 1
+fi
+
+gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml)
+if [ "${gh_username}" = "" ]; then
+  error "Missing GitHub username."
   exit 1
 fi
 
