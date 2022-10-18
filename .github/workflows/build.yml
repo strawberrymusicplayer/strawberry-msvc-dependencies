@@ -676,10 +676,7 @@ jobs:
       - name: Extract pixman
         shell: bash
         working-directory: sources
-        run: |
-          tar -xf ../downloads/pixman-${{env.pixmap_version}}.tar.gz
-          cd pixman-${{env.pixmap_version}}
-          patch -p1 < ../../patches/pixman.patch
+        run: tar -xf ../downloads/pixman-${{env.pixmap_version}}.tar.gz
 
       - name: Compile pixman
         shell: cmd
@@ -689,7 +686,7 @@ jobs:
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/pixman-${{env.pixmap_version}}
         run: |
-          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled build
+          meson --buildtype=${{matrix.buildtype}} --prefix=${{matrix.prefix_path_backslash}} --pkg-config-path=${{matrix.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
           cd build
           ninja
           ninja install
