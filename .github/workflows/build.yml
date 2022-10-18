@@ -100,6 +100,8 @@ env:
 
   max_releases: '6'
 
+  sourceforge_mirror: 'deac-fra.dl.sourceforge.net'
+
 jobs:
 
   build-windows-msvc:
@@ -456,7 +458,7 @@ jobs:
       - name: Download libpng
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libpng [this](https://downloads.sourceforge.net/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz)!"
+          url: "libpng [this](https://${{env.sourceforge_mirror}}/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 
@@ -488,7 +490,7 @@ jobs:
       - name: Download libjpeg-turbo
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libjpeg-turbo [this](https://sourceforge.net/projects/libjpeg-turbo/files/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz)!"
+          url: "libjpeg-turbo [this](https://${{env.sourceforge_mirror}}/project/libjpeg-turbo/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1019,7 +1021,7 @@ jobs:
       - name: Download mpg123
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "mpg123 [this](https://downloads.sourceforge.net/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2)!"
+          url: "mpg123 [this](https://${{env.sourceforge_mirror}}/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -1046,7 +1048,7 @@ jobs:
       - name: Download lame
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "lame [this](https://downloads.sourceforge.net/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz)!"
+          url: "lame [this](https://${{env.sourceforge_mirror}}/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1118,7 +1120,7 @@ jobs:
       - name: Download twolame
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "twolame [this](https://downloads.sourceforge.net/twolame/twolame-${{env.twolame_version}}.tar.gz)!"
+          url: "twolame [this](https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1543,7 +1545,7 @@ jobs:
       - name: Download fdk-aac
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "fdk-aac [this](https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz)!"
+          url: "fdk-aac [this](https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
@@ -1626,7 +1628,7 @@ jobs:
       - name: Download libbs2b
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "libbs2b [this](https://downloads.sourceforge.net/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2)!"
+          url: "libbs2b [this](https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -1906,7 +1908,7 @@ jobs:
       - name: Download expat
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "expat [this](https://jztkft.dl.sourceforge.net/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2)!"
+          url: "expat [this](https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2)!"
           target: downloads/
           auto-match: true
 
@@ -1933,7 +1935,7 @@ jobs:
       - name: Download freetype
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "freetype [this](https://netix.dl.sourceforge.net/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz)!"
+          url: "freetype [this](https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz)!"
           target: downloads/
           auto-match: true
 
