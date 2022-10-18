@@ -86,7 +86,7 @@ env:
 
   gstreamer_version: '1.20.4'
 
-  icu4c_version: '71.1'
+  icu4c_version: '72.1'
 
   expat_version: '2.4.9'
 
