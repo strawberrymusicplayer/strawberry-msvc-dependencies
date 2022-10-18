@@ -132,7 +132,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://www.nasm.us/pub/nasm/releasebuilds/?C=M;O=D' | sed -n 's,.*href="\([0-9\.]*[^a-z]\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "yasm")
-      package_version_latest=$(wget -q -O- 'https://github.com/yasm/yasm/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/yasm/yasm/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "boost")
       package_version_latest=$(wget -q -O- 'https://www.boost.org/users/download/' | sed -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | grep -v beta | sort -V | tail -1)
@@ -165,7 +165,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://tukaani.org/xz/' | sed -n 's,.*xz-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
       ;;
     "brotli")
-      package_version_latest=$(wget -q -O- 'https://github.com/google/brotli/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/google/brotli/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "pixmap")
       package_version_latest=$(wget -q -O- 'https://www.cairographics.org/releases/?C=M;O=D' | sed -n 's,.*"pixman-\([0-9][^"]*\)\.tar.*,\1,p' | head -1)
@@ -174,7 +174,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/libxml2/tags' | sed -n "s,.*<a [^>]\+>v\([0-9,\.]\+\)<.*,\\1,p" | head -1)
       ;;
     "nghttp2")
-      package_version_latest=$(wget -q -O- 'https://github.com/nghttp2/nghttp2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/nghttp2/nghttp2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "sqlite3")
       package_version_latest=$(wget -q -O- 'https://www.sqlite.org/download.html' | sed -n 's,.*sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
@@ -207,10 +207,10 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/twolame/files/twolame/' | sed -n 's,^.*twolame/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "taglib")
-      package_version_latest=$(wget -q -O- 'https://github.com/taglib/taglib/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/taglib/taglib/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
       ;;
     "dlfcn")
-      package_version_latest=$(wget -q -O- 'https://github.com/dlfcn-win32/dlfcn-win32/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^r' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/dlfcn-win32/dlfcn-win32/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^r' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "fftw")
       package_version_latest=$(wget -q -O- 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
@@ -240,7 +240,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/bs2b/files/libbs2b/' | sed -n 's,.*<a href="/projects/bs2b/files/libbs2b/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "chromaprint")
-      package_version_latest=$(wget -q -O- 'https://github.com/acoustid/chromaprint/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/acoustid/chromaprint/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
       ;;
     "gstreamer")
       package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
@@ -258,7 +258,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://github.com/harfbuzz/harfbuzz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "protobuf")
-      package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | head -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | head -1)
       ;;
     "qt")
       qt_major_version=$(wget -q -O- "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
