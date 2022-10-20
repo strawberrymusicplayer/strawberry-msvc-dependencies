@@ -50,6 +50,8 @@ env:
 
   opusfile_version: '0.12'
 
+  speex_version: '1.2.1'
+
   mpg123_version: '1.30.2'
 
   lame_version: '3.100'
@@ -988,12 +990,21 @@ jobs:
 
 
       - name: Download speex
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "opusfile [this](https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${{env.speex_version}}/speex-Speex-${{env.speex_version}}.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract speex
         shell: bash
         working-directory: sources
-        run: |
-          git clone https://github.com/xiph/speex
-          cd speex
-          patch -p1 < ../../patches/speex-cmake.patch
+        run: tar -xf ../downloads/speex-Speex-${{env.speex_version}}.tar.gz
+
+      - name: Patch speex
+        shell: bash
+        working-directory: sources/speex-Speex-${{env.speex_version}}
+        run: patch -p1 < ../../patches/speex-cmake.patch
 
       - name: Compile speex
         shell: cmd
@@ -1001,7 +1012,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{matrix.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{matrix.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/speex
+        working-directory: sources/speex-Speex-${{env.speex_version}}
         run: |
           mkdir build
           cd build

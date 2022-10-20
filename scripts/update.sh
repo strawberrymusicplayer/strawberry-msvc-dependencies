@@ -197,6 +197,9 @@ function update_package() {
     "opusfile")
       package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
       ;;
+    "speex")
+      package_version_latest=$(wget -q -O- 'https://downloads.xiph.org/releases/speex/' | sed -n 's,.*<a href="speex-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)
+      ;;
     "mpg123")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/mpg123/files/mpg123/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | head -1)
       ;;
