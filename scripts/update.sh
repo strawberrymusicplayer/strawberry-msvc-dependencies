@@ -273,6 +273,9 @@ function update_package() {
     "win_flex_bison")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
       ;;
+    "faad2")
+      package_version_latest=$(wget -q -O- 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/_/\./g' | sort -V | tail -1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
