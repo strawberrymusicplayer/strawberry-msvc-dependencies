@@ -72,7 +72,7 @@ env:
 
   orc_version: '0.4.32'
 
-  musepack_version: '475'
+  musepack_version: 'r475'
 
   libopenmpt_version: '0.6.6'
 
