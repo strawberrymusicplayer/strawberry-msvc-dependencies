@@ -98,6 +98,8 @@ env:
 
   qt_version: '6.4.0'
 
+  faad2_version: '2.10.1'
+
   max_releases: '6'
 
   sourceforge_mirror: 'deac-fra.dl.sourceforge.net'
@@ -1567,23 +1569,41 @@ jobs:
 
 
       - name: Download faad2
+        uses: suisei-cn/actions-download-file@v1
+        with:
+          url: "faad2 [this](https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz)!"
+          target: downloads/
+          auto-match: true
+
+      - name: Extract faad2
         shell: bash
         working-directory: sources
         run: |
-          git clone https://github.com/knik0/faad2
-          cd faad2
-          patch -p1 < ../../patches/faad2-cmake.patch
+          mkdir faad2-${{env.faad2_version}}
+          tar -xvf ../downloads/faad2-${{env.faad2_version}}.tar.gz --strip-components=1 -C faad2-${{env.faad2_version}}
 
-      - name: Compile faad2
+      - name: Patch faad2
+        shell: bash
+        working-directory: sources/faad2-${{env.faad2_version}}
+        run: patch -p1 < ../../patches/faad2-cmake.patch
+
+      - name: Build faad2
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/faad2
+        working-directory: sources/faad2-${{env.faad2_version}}
         run: |
           mkdir build
           cd build
           cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.buildtype}} -DCMAKE_INSTALL_PREFIX=${{matrix.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
           cmake --build .
+
+      - name: Install faad2
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/faad2-${{env.faad2_version}}/build
+        run: |
           cmake --install .
           copy ..\include\*.h ${{matrix.prefix_path_backslash}}\include\
 
