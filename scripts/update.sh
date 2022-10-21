@@ -240,7 +240,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://bitbucket.org/mpyne/game-music-emu/downloads/' | sed -n 's,.*game-music-emu-\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "musepack")
-      package_version_latest=$(wget -q -O- 'https://www.musepack.net/index.php?pg=src' | sed -n 's,.*musepack_src_\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://www.musepack.net/index.php?pg=src' | sed -n 's,.*musepack_src_r\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "fdk_aac")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/opencore-amr/files/fdk-aac/' | sed -n 's,.*fdk-aac-\([0-9.]*\)\.tar.*,\1,p' | sort -V | tail -1)
