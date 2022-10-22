@@ -42,7 +42,7 @@ env:
 
   libvorbis_version: '1.3.7'
 
-  flac_version: '1.4.1'
+  flac_version: '1.4.2'
 
   wavpack_version: '5.5.0'
 
