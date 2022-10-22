@@ -861,7 +861,7 @@ jobs:
       - name: Download flac
         uses: suisei-cn/actions-download-file@v1
         with:
-          url: "flac [this](https://ftp.osuosl.org/pub/xiph/releases/flac/flac-${{env.flac_version}}.tar.xz)!"
+          url: "flac [this](https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz)!"
           target: downloads/
           auto-match: true
 

@@ -186,7 +186,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://www.xiph.org/downloads/' | sed -n 's,.*libvorbis-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "flac")
-      package_version_latest=$(wget -q -O- 'https://downloads.xiph.org/releases/flac/' | sed -n 's,.*<a href="flac-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/xiph/flac' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sort -V | tail -1)
       ;;
     "wavpack")
       package_version_latest=$(wget -q -O- 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
