@@ -870,11 +870,6 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/flac-${{env.flac_version}}.tar.xz
 
-      - name: Patch flac
-        shell: bash
-        working-directory: sources/flac-${{env.flac_version}}
-        run: patch -p1 < ../../patches/flac-seek.patch
-
       - name: Move nasm.exe
         shell: bash
         run: mv /c/nasm/nasm.exe /c/nasm/nasm.exe_
