@@ -58,7 +58,7 @@ env:
 
   twolame_version: '0.4.0'
 
-  taglib_version: '1.12'
+  taglib_version: '1.13'
 
   dlfcn_version: '1.3.1'
 
