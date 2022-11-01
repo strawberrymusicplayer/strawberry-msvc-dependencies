@@ -14,7 +14,7 @@ env:
 
   zlib_version: '1.2.13'
 
-  openssl_version: '3.0.5'
+  openssl_version: '3.0.7'
 
   gnutls_version: '3.7.7'
 
