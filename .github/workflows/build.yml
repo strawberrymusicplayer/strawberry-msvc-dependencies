@@ -178,9 +178,17 @@ jobs:
         shell: cmd
         run: pip install meson ninja
 
+      - name: Install wget
+        shell: cmd
+        run: choco install wget
+
       - name: Create sources directory
         shell: cmd
         run: mkdir sources
+
+      - name: Create downloads directory
+        shell: cmd
+        run: mkdir downloads
 
       - name: Create directories
         shell: bash
@@ -215,19 +223,15 @@ jobs:
 
       - name: Download nasm (x86)
         if: matrix.arch == 'x86'
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe
 
       - name: Download nasm (x86_64)
         if: matrix.arch == 'x86_64'
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "nasm [this](https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe
 
       - name: Install nasm (x86)
         if: matrix.arch == 'x86'
@@ -256,11 +260,9 @@ jobs:
 
 
       - name: Download yasm
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "yasm [this](http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe
 
       - name: Copy yasm
         shell: bash
@@ -269,11 +271,9 @@ jobs:
 
 
       - name: Download win_flex_bison
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "win_flex_bison [this](https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison_version}}/win_flex_bison-${{env.win_flex_bison_version}}.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison_version}}/win_flex_bison-${{env.win_flex_bison_version}}.zip
 
       - name: Copy win_flex_bison
         shell: pwsh
@@ -287,11 +287,9 @@ jobs:
 
 
       - name: Download Boost
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "Boost [this](https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
 
       - name: Extract Boost
         shell: bash
@@ -305,11 +303,9 @@ jobs:
 
 
       - name: Download pkgconf
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "pkgconf [this](https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${{env.pkgconf_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${{env.pkgconf_version}}.tar.gz
 
       - name: Extract pkgconf
         shell: bash
@@ -330,11 +326,9 @@ jobs:
 
 
       - name: Download zlib
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "zlib [this](https://zlib.net/zlib-${{env.zlib_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://zlib.net/zlib-${{env.zlib_version}}.tar.gz
 
       - name: Extract zlib
         shell: bash
@@ -369,11 +363,9 @@ jobs:
 
 
       - name: Download openssl
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "openssl [this](https://www.openssl.org/source/openssl-${{env.openssl_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://www.openssl.org/source/openssl-${{env.openssl_version}}.tar.gz
 
       - name: Extract openssl
         shell: bash
@@ -413,11 +405,9 @@ jobs:
 
 
       - name: Download GnuTLS
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "GnutTLS [this](https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc16.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc16.zip
 
       - name: Extract GnuTLS
         shell: pwsh
@@ -460,11 +450,9 @@ jobs:
 
 
       - name: Download libpng
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libpng [this](https://${{env.sourceforge_mirror}}/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz
 
       - name: Extract libpng
         shell: bash
@@ -492,11 +480,9 @@ jobs:
 
 
       - name: Download libjpeg-turbo
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libjpeg-turbo [this](https://${{env.sourceforge_mirror}}/project/libjpeg-turbo/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/libjpeg-turbo/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz
 
       - name: Extract libjpeg-turbo
         shell: bash
@@ -521,11 +507,9 @@ jobs:
 
 
       - name: Download pcre2
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "pcre2 [this](https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2
 
       - name: Extract pcre2
         shell: bash
@@ -553,11 +537,9 @@ jobs:
 
 
       - name: Download bzip2
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "bzip2 [this](https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz
 
       - name: Extract bzip2
         shell: bash
@@ -583,11 +565,9 @@ jobs:
 
 
       - name: Download xz
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "xz [this](https://tukaani.org/xz/xz-${{env.xz_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://tukaani.org/xz/xz-${{env.xz_version}}.tar.xz
 
       - name: Extract xz
         shell: bash
@@ -624,11 +604,9 @@ jobs:
 
 
       - name: Download brotli
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "brotli [this](https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz
 
       - name: Extract brotli
         shell: bash
@@ -673,11 +651,9 @@ jobs:
 
 
       - name: Download pixman
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "pixman [this](https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz
 
       - name: Extract pixman
         shell: bash
@@ -699,11 +675,9 @@ jobs:
 
 
       - name: Download libxml2
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libxml2 [this](https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${{env.libxml2_version}}/libxml2-v${{env.libxml2_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${{env.libxml2_version}}/libxml2-v${{env.libxml2_version}}.tar.bz2
 
       - name: Extract libxml2
         shell: bash
@@ -731,11 +705,9 @@ jobs:
 
 
       - name: Download nghttp2
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "nghttp2 [this](https://github.com/nghttp2/nghttp2/releases/download/v${{env.nghttp2_version}}/nghttp2-${{env.nghttp2_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/nghttp2/nghttp2/releases/download/v${{env.nghttp2_version}}/nghttp2-${{env.nghttp2_version}}.tar.xz
 
       - name: Extract nghttp2
         shell: bash
@@ -758,11 +730,9 @@ jobs:
 
 
       - name: Download SQLite
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "SQLite [this](https://sqlite.org/2022/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://sqlite.org/2022/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Extract SQLite
         shell: bash
@@ -805,11 +775,9 @@ jobs:
 
 
       - name: Download libogg
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libogg [this](https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz
 
       - name: Extract libogg
         shell: bash
@@ -832,11 +800,9 @@ jobs:
 
 
       - name: Download libvorbis
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libvorbis [this](https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz
 
       - name: Extract libvorbis
         shell: bash
@@ -859,11 +825,9 @@ jobs:
 
 
       - name: Download flac
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "flac [this](https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz
 
       - name: Extract flac
         shell: bash
@@ -893,11 +857,9 @@ jobs:
         run: mv /c/nasm/nasm.exe_ /c/nasm/nasm.exe
 
       - name: Download wavpack
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "wavpack [this](https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2
 
       - name: Extract wavpack
         shell: bash
@@ -926,11 +888,9 @@ jobs:
 
 
       - name: Download opus
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "opus [this](https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz
 
       - name: Extract opus
         shell: bash
@@ -955,11 +915,9 @@ jobs:
 
 
       - name: Download opusfile
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "opusfile [this](https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz
 
       - name: Extract opusfile
         shell: bash
@@ -985,11 +943,9 @@ jobs:
 
 
       - name: Download speex
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "opusfile [this](https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${{env.speex_version}}/speex-Speex-${{env.speex_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${{env.speex_version}}/speex-Speex-${{env.speex_version}}.tar.gz
 
       - name: Extract speex
         shell: bash
@@ -1024,11 +980,9 @@ jobs:
 
 
       - name: Download mpg123
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "mpg123 [this](https://${{env.sourceforge_mirror}}/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2
 
       - name: Extract mpg123
         shell: bash
@@ -1051,11 +1005,9 @@ jobs:
 
 
       - name: Download lame
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "lame [this](https://${{env.sourceforge_mirror}}/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz
 
       - name: Extract lame
         shell: bash
@@ -1123,11 +1075,9 @@ jobs:
 
 
       - name: Download twolame
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "twolame [this](https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Extract twolame
         shell: bash
@@ -1182,11 +1132,9 @@ jobs:
 
 
       - name: Download TagLib
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "TagLib [this](https://taglib.org/releases/taglib-${{env.taglib_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://taglib.org/releases/taglib-${{env.taglib_version}}.tar.gz
 
       - name: Extract TagLib
         shell: bash
@@ -1209,11 +1157,9 @@ jobs:
 
 
       - name: Download dlfcn-win32
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "dlfcn-win32 [this](https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
 
       - name: Extract dlfcn-win32
         shell: bash
@@ -1236,18 +1182,15 @@ jobs:
 
 
       - name: Download FFTW (x86)
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip
 
       - name: Download FFTW (x86_64)
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "FFTW [this](https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip
+
 
       #- name: Extract FFTW
         #shell: bash
@@ -1321,11 +1264,9 @@ jobs:
 
 
       - name: Download GLib
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "GLib [this](https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz
 
       - name: Extract GLib
         shell: bash
@@ -1351,11 +1292,9 @@ jobs:
 
 
       - name: Download glib-networking
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "glib-networking [this](https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz
 
       - name: Extract glib-networking
         shell: bash
@@ -1380,11 +1319,9 @@ jobs:
 
 
       - name: Download libpsl
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libpsl [this](https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz
 
       - name: Extract libpsl
         shell: bash
@@ -1406,11 +1343,9 @@ jobs:
 
 
       - name: Download libsoup
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libsoup [this](https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz
 
       - name: Extract libsoup
         shell: bash
@@ -1432,11 +1367,9 @@ jobs:
 
 
       - name: Download orc
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "orc [this](https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz
 
       - name: Extract orc
         shell: bash
@@ -1458,11 +1391,9 @@ jobs:
 
 
       - name: Download musepack
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "musepack [this](https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz
 
       - name: Extract musepack
         shell: bash
@@ -1490,11 +1421,9 @@ jobs:
 
 
       - name: Download libopenmpt
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libopenmpt [this](https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
 
       - name: Extract libopenmpt
         shell: pwsh
@@ -1523,11 +1452,9 @@ jobs:
 
 
       - name: Download libgme
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libgme [this](https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
 
       - name: Extract libgme
         shell: bash
@@ -1548,11 +1475,9 @@ jobs:
 
 
       - name: Download fdk-aac
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "fdk-aac [this](https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz
 
       - name: Extract fdk-aac
         shell: bash
@@ -1575,11 +1500,9 @@ jobs:
 
 
       - name: Download faad2
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "faad2 [this](https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz
 
       - name: Extract faad2
         shell: bash
@@ -1649,11 +1572,9 @@ jobs:
 
 
       - name: Download libbs2b
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "libbs2b [this](https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2
 
       - name: Extract libbs2b
         shell: bash
@@ -1700,11 +1621,9 @@ jobs:
 
 
       - name: Download Chromaprint
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "Chromaprint [this](https://github.com/acoustid/chromaprint/releases/download/v${{env.chromaprint_version}}/chromaprint-${{env.chromaprint_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/acoustid/chromaprint/releases/download/v${{env.chromaprint_version}}/chromaprint-${{env.chromaprint_version}}.tar.gz
 
       - name: Extract Chromaprint
         shell: bash
@@ -1727,11 +1646,9 @@ jobs:
 
 
       - name: Download GStreamer
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "GStreamer [this](https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract GStreamer
         shell: bash
@@ -1755,11 +1672,9 @@ jobs:
 
 
       - name: Download gst-plugins-base
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "gst-plugins-base [this](https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-base
         shell: bash
@@ -1783,11 +1698,9 @@ jobs:
 
 
       - name: Download gst-plugins-good
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "gst-plugins-good [this](https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-good
         shell: bash
@@ -1811,11 +1724,9 @@ jobs:
 
 
       - name: Download gst-plugins-bad
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "gst-plugins-bad [this](https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-bad
         shell: bash
@@ -1846,11 +1757,9 @@ jobs:
 
 
       - name: Download gst-plugins-ugly
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "gst-plugins-ugly [this](https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-ugly
         shell: bash
@@ -1873,11 +1782,9 @@ jobs:
 
 
       - name: Download gst-libav
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "gst-libav [this](https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${{env.gstreamer_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-libav
         shell: bash
@@ -1901,11 +1808,9 @@ jobs:
 
 
       - name: Download icu
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "icu [this](https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
 
       - name: Extract icu
         shell: bash
@@ -1929,11 +1834,9 @@ jobs:
 
 
       - name: Download expat
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "expat [this](https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2
 
       - name: Extract expat
         shell: bash
@@ -1956,11 +1859,9 @@ jobs:
 
 
       - name: Download freetype
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "freetype [this](https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
 
       - name: Extract freetype (boostrap)
         shell: bash
@@ -1988,11 +1889,9 @@ jobs:
 
 
       - name: Download harfbuzz
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "harfbuzz [this](https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz
 
       - name: Extract harfbuzz
         shell: bash
@@ -2044,11 +1943,9 @@ jobs:
 
 
       - name: Download Protobuf
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "Protobuf [this](https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
 
       - name: Extract Protobuf
         shell: bash
@@ -2071,11 +1968,9 @@ jobs:
 
 
       - name: Download qtbase
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "qtbase [this](https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Extract qtbase
         shell: bash
@@ -2160,11 +2055,9 @@ jobs:
 
 
       - name: Download qttools
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: "qttools [this](https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz)!"
-          target: downloads/
-          auto-match: true
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Extract qttools
         shell: bash
