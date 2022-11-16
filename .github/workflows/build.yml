@@ -36,7 +36,7 @@ env:
 
   nghttp2_version: '1.51.0'
 
-  sqlite3_version: '3390400'
+  sqlite3_version: '3400000'
 
   libogg_version: '1.3.5'
 
