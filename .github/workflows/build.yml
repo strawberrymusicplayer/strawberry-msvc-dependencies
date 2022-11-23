@@ -92,7 +92,7 @@ env:
 
   expat_version: '2.5.0'
 
-  freetype_version: '2.12.1'
+  freetype_version: '32/basic'
 
   harfbuzz_version: '5.3.1'
 
