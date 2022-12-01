@@ -110,7 +110,7 @@ env:
 
   curl_options: '-O -L --connect-timeout 15 -m 30 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
 
-  sourceforge_mirror: 'deac-fra.dl.sourceforge.net'
+  sourceforge_mirror: 'downloads.sourceforge.net'
 
   cmake_loglevel: 'DEBUG'
 
