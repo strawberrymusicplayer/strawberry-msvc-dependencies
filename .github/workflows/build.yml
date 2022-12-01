@@ -607,7 +607,7 @@ jobs:
       - name: Download xz
         shell: bash
         working-directory: downloads
-        run: wget -t 3 https://tukaani.org/xz/xz-${{env.xz_version}}.tar.xz
+        run: wget -t 3 https://${{env.sourceforge_mirror}}/project/lzmautils/xz-${{env.xz_version}}.tar.xz
 
       - name: Extract xz
         shell: bash
