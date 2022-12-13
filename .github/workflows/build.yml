@@ -614,11 +614,6 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
 
-      - name: Patch xz
-        shell: bash
-        working-directory: sources/xz-${{env.xz_version}}
-        run: patch -p1 < ../../patches/xz-config.patch
-
       - name: Build xz
         shell: cmd
         env:
