@@ -8,7 +8,7 @@ env:
 
   win_flex_bison_version: '2.5.25'
 
-  boost_version: '1.80.0'
+  boost_version: '1.81.0'
 
   pkgconf_version: '1.9.3'
 
