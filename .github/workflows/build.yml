@@ -94,7 +94,7 @@ env:
 
   freetype_version: '2.12.1'
 
-  harfbuzz_version: '5.3.1'
+  harfbuzz_version: '6.0.0'
 
   protobuf_version: '21.12'
 
