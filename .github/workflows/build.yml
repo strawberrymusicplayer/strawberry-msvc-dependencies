@@ -68,7 +68,7 @@ env:
 
   glib_networking_version: '2.74.0'
 
-  libpsl_version: '0.21.1'
+  libpsl_version: '0.21.2'
 
   libsoup_version: '3.2.2'
 
