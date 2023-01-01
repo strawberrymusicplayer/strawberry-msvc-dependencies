@@ -2305,6 +2305,11 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
+      - name: Patch qtbase
+        shell: bash
+        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}
+        run: patch -p1 < ../../patches/qtbase-font.patch
+
       - name: Copy sqlite3
         shell: bash
         working-directory: sources
