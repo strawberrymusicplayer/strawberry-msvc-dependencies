@@ -64,7 +64,7 @@ env:
 
   fftw_version: '3.3.5'
 
-  glib_version: '2.75.1'
+  glib_version: '2.75.2'
 
   glib_networking_version: '2.74.0'
 
