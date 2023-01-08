@@ -76,7 +76,7 @@ env:
 
   musepack_version: '475'
 
-  libopenmpt_version: '0.6.6'
+  libopenmpt_version: '0.6.7'
 
   libgme_version: '0.6.3'
 
