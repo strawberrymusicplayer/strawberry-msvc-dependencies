@@ -90,7 +90,7 @@ env:
 
   icu4c_version: '72.1'
 
-  expat_version: '2.5.0'
+  expat_version: '2.7'
 
   freetype_version: '2.12.1'
 
