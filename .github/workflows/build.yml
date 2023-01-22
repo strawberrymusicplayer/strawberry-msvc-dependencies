@@ -308,7 +308,7 @@ jobs:
         env:
           CL: "/MP"
         working-directory: sources/pkgconf-pkgconf-${{env.pkgconf_version}}
-        run: meson --buildtype=${{matrix.buildtype}} --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dtests=false build
+        run: meson --buildtype=${{matrix.buildtype}} --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dtests=disabled build
 
       - name: Build pkgconf
         shell: cmd
