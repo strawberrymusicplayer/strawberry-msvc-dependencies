@@ -10,7 +10,7 @@ env:
 
   boost_version: '1.81.0'
 
-  pkgconf_version: '1.9.3'
+  pkgconf_version: '1.9.4'
 
   zlib_version: '1.2.13'
 
