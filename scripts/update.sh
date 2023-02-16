@@ -266,6 +266,9 @@ function update_package() {
     "harfbuzz")
       package_version_latest=$(wget -q -O- 'https://github.com/harfbuzz/harfbuzz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
+    "abseil_cpp")
+      package_version_latest=$(wget -q -O- 'https://github.com/abseil/abseil-cpp/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | head -1)
+      ;;
     "protobuf")
       package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | head -1)
       ;;
