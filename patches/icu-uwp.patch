@@ -1,0 +1,70 @@
+diff --git a/source/allinone/allinone.sln b/source/allinone/allinone.sln
+index a7d032e..9d67d69 100644
+--- a/source/allinone/allinone.sln
++++ b/source/allinone/allinone.sln
+@@ -1,6 +1,6 @@
+ Microsoft Visual Studio Solution File, Format Version 12.00
+-# Visual Studio 15
+-VisualStudioVersion = 15.0.27130.2036
++# Visual Studio Version 17
++VisualStudioVersion = 17.4.33110.190
+ MinimumVisualStudioVersion = 10.0.40219.1
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cal", "..\samples\cal\cal.vcxproj", "{F7659D77-09CF-4FE9-ACEE-927287AA9509}"
+ 	ProjectSection(ProjectDependencies) = postProject
+@@ -189,17 +189,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testplug", "..\tools\icuinf
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "makedata_uwp", "..\data\makedata_uwp.vcxproj", "{B1D53358-37BD-48BC-B27C-68BAF1E78508}"
+ EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "i18n_uwp", "..\i18n\i18n_uwp.vcxproj", "{6786C051-383B-47E0-9E82-B8B994E06A25}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{0178B127-6269-407D-B112-93877BB62776} = {0178B127-6269-407D-B112-93877BB62776}
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2} = {C10CF34B-3F79-430E-AD38-5A32DC0589C2}
+-	EndProjectSection
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_uwp", "..\common\common_uwp.vcxproj", "{C10CF34B-3F79-430E-AD38-5A32DC0589C2}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{73C0A65B-D1F2-4DE1-B3A6-15DAD2C23F3D} = {73C0A65B-D1F2-4DE1-B3A6-15DAD2C23F3D}
+-	EndProjectSection
+-EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+ 		Debug|ARM = Debug|ARM
+@@ -700,38 +689,6 @@ Global
+ 		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|Win32.Build.0 = Release|Win32
+ 		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|x64.ActiveCfg = Release|x64
+ 		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|x64.Build.0 = Release|x64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|ARM.ActiveCfg = Debug|ARM
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|ARM.Build.0 = Debug|ARM
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|ARM64.ActiveCfg = Debug|ARM64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|ARM64.Build.0 = Debug|ARM64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|Win32.Build.0 = Debug|Win32
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|x64.ActiveCfg = Debug|x64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Debug|x64.Build.0 = Debug|x64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|ARM.ActiveCfg = Release|ARM
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|ARM.Build.0 = Release|ARM
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|ARM64.ActiveCfg = Release|ARM64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|ARM64.Build.0 = Release|ARM64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|Win32.ActiveCfg = Release|Win32
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|Win32.Build.0 = Release|Win32
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|x64.ActiveCfg = Release|x64
+-		{6786C051-383B-47E0-9E82-B8B994E06A25}.Release|x64.Build.0 = Release|x64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|ARM.ActiveCfg = Debug|ARM
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|ARM.Build.0 = Debug|ARM
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|ARM64.ActiveCfg = Debug|ARM64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|ARM64.Build.0 = Debug|ARM64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|Win32.Build.0 = Debug|Win32
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|x64.ActiveCfg = Debug|x64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Debug|x64.Build.0 = Debug|x64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|ARM.ActiveCfg = Release|ARM
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|ARM.Build.0 = Release|ARM
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|ARM64.ActiveCfg = Release|ARM64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|ARM64.Build.0 = Release|ARM64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|Win32.ActiveCfg = Release|Win32
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|Win32.Build.0 = Release|Win32
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|x64.ActiveCfg = Release|x64
+-		{C10CF34B-3F79-430E-AD38-5A32DC0589C2}.Release|x64.Build.0 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(SolutionProperties) = preSolution
+ 		HideSolutionNode = FALSE
