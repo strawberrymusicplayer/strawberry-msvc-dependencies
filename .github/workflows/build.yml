@@ -158,7 +158,7 @@ jobs:
           toolset: 14.29
 
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v3
 
       - name: Install python dependencies
         shell: cmd
