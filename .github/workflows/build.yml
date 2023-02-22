@@ -117,7 +117,7 @@ jobs:
 
   build-windows-msvc:
     name: Build Windows MSVC
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     if: (!contains(github.event.head_commit.message, 'skip ci'))
 
@@ -157,7 +157,9 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{matrix.arch}}
-          toolset: 14.29
+          sdk: 10.0.20348.0
+          vsversion: 17
+          toolset: 14.3
 
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
@@ -421,7 +423,7 @@ jobs:
       - name: Download GnuTLS
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc16.zip
+        run: wget ${{env.wget_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc17.zip
 
       - name: Create GnuTLS directory
         shell: cmd
@@ -431,7 +433,7 @@ jobs:
       - name: Extract GnuTLS
         shell: cmd
         working-directory: downloads/gnutls
-        run: 7z x "../libgnutls_${{env.gnutls_version}}_msvc16.zip"
+        run: 7z x "../libgnutls_${{env.gnutls_version}}_msvc17.zip"
 
       - name: Copy GnuTLS (x86)
         if: matrix.arch == 'x86'
@@ -618,6 +620,13 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
 
+      - name: Upgrade xz project
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
+        run: start /w devenv.exe xz_win.sln /upgrade
+
       - name: Build xz
         shell: cmd
         env:
@@ -671,10 +680,7 @@ jobs:
       - name: Download libiconv
         shell: cmd
         working-directory: sources
-        run: |
-          git clone https://github.com/pffang/libiconv-for-Windows
-          cd libiconv-for-Windows
-          git checkout 9b7aba8da6e125ef33912fa4412779279f204003
+        run: git clone https://github.com/pffang/libiconv-for-Windows
 
       - name: Build libiconv
         shell: cmd
@@ -688,8 +694,13 @@ jobs:
         working-directory: sources/libiconv-for-Windows
         run: |
           copy include\*.h ${{env.prefix_path_backslash}}\include\
-          copy ${{env.libdir}}\*.lib ${{env.prefix_path_backslash}}\lib\
-          copy ${{env.libdir}}\*.dll ${{env.prefix_path_backslash}}\bin\
+          copy output\${{env.msbuild_platform}}\${{matrix.buildtype}}\*.lib ${{env.prefix_path_backslash}}\lib\
+          copy output\${{env.msbuild_platform}}\${{matrix.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
+
+      - name: Copy libiconv (debug)
+        if: matrix.buildtype == 'debug'
+        shell: bash
+        run: cp ${{env.prefix_path_unix}}/lib/libiconvD.lib ${{env.prefix_path_unix}}/lib/libiconv.lib
 
 
       - name: Download pixman
@@ -1588,7 +1599,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/musepack_src_r${{env.musepack_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
 
       - name: Build musepack
         shell: cmd
@@ -1757,12 +1768,19 @@ jobs:
         working-directory: sources/faac
         run: patch -p1 < ../../patches/faac-msvc.patch
 
+      - name: Upgrade faac project
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/faac/project/msvc
+        run: start /w devenv.exe faac.sln /upgrade
+
       - name: Build faac
         shell: cmd
         env:
           CL: "/MP"
         working-directory: sources/faac/project/msvc
-        run: msbuild faac.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{env.msbuild_platform}}
+        run: msbuild faac.sln /p:Configuration=${{matrix.buildtype}} /p:Platform=${{env.msbuild_platform}}
 
       - name: Install faac headers
         shell: cmd
@@ -2111,6 +2129,11 @@ jobs:
         shell: bash
         working-directory: sources
         run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
+
+      - name: Patch icu
+        shell: bash
+        working-directory: sources/icu
+        run: patch -p1 < ../../patches/icu-uwp.patch
 
       - name: Build icu
         shell: cmd
