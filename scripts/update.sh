@@ -187,7 +187,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://www.xiph.org/downloads/' | sed -n 's,.*libvorbis-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "flac")
-      package_version_latest=$(wget -q -O- 'https://github.com/xiph/flac' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/xiph/flac' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sort -V | tail -1)
       ;;
     "wavpack")
       package_version_latest=$(wget -q -O- 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
@@ -226,7 +226,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/glib-networking/tags' | sed -n "s,.*glib-networking-\([0-9]\+\.[0-9]*[0-9]*\.[^']*\)\.tar.*,\1,p" | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -V | tail -1)
       ;;
     "libpsl")
-      package_version_latest=$(wget -q -O- 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sed 's/^libpsl-//g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | sed 's/^libpsl-//g' | sort -V | tail -1)
       ;;
     "libsoup")
       package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
@@ -256,7 +256,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
       ;;
     "icu4c")
-      package_version_latest=$(wget -q -O- 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | grep -v '^\*name$' | sort -V | tail -1)
       ;;
     "expat")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/expat/files/expat/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
@@ -268,10 +268,10 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://github.com/harfbuzz/harfbuzz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "abseil_cpp")
-      package_version_latest=$(wget -q -O- 'https://github.com/abseil/abseil-cpp/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | head -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/abseil/abseil-cpp/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | head -1)
       ;;
     "protobuf")
-      package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | head -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
       ;;
     "qt")
       qt_major_version=$(wget -q -O- "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
@@ -281,7 +281,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
       ;;
     "faad2")
-      package_version_latest=$(wget -q -O- 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/_/\./g' | sort -V | tail -1)
+      package_version_latest=$(wget -q -O- 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^\*name$' | sed 's/_/\./g' | sort -V | tail -1)
       ;;
     *)
       package_version_latest=
