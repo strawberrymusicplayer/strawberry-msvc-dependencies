@@ -108,6 +108,8 @@ env:
 
   wget_options: '-t 20 --retry-connrefused'
 
+  curl_options: '-O -L --connect-timeout 15 -m 30 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
+
   sourceforge_mirror: 'deac-fra.dl.sourceforge.net'
 
   cmake_loglevel: 'DEBUG'
@@ -220,13 +222,13 @@ jobs:
         if: matrix.arch == 'x86'
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe
+        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe
 
       - name: Download nasm (x86_64)
         if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe
+        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe
 
       - name: Create nasm directory
         shell: cmd
@@ -256,7 +258,7 @@ jobs:
       - name: Download yasm
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe
+        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe
 
       - name: Copy yasm
         shell: bash
@@ -267,7 +269,7 @@ jobs:
       - name: Download win_flex_bison
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison_version}}/win_flex_bison-${{env.win_flex_bison_version}}.zip
+        run: curl ${{env.curl_options}} https://github.com/lexxmark/winflexbison/releases/download/v${{env.win_flex_bison_version}}/win_flex_bison-${{env.win_flex_bison_version}}.zip
 
       - name: Create win_flex_bison directory
         shell: cmd
@@ -286,7 +288,7 @@ jobs:
       - name: Download Boost
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
+        run: curl ${{env.curl_options}} https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
 
       - name: Extract Boost
         shell: bash
@@ -302,7 +304,7 @@ jobs:
       - name: Download pkgconf
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${{env.pkgconf_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${{env.pkgconf_version}}.tar.gz
 
       - name: Extract pkgconf
         shell: bash
@@ -336,7 +338,7 @@ jobs:
       - name: Download zlib
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://zlib.net/zlib-${{env.zlib_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://zlib.net/zlib-${{env.zlib_version}}.tar.gz
 
       - name: Extract zlib
         shell: bash
@@ -380,7 +382,7 @@ jobs:
       - name: Download openssl
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://www.openssl.org/source/openssl-${{env.openssl_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://www.openssl.org/source/openssl-${{env.openssl_version}}.tar.gz
 
       - name: Extract openssl
         shell: bash
@@ -423,7 +425,7 @@ jobs:
       - name: Download GnuTLS
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc17.zip
+        run: curl ${{env.curl_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc17.zip
 
       - name: Create GnuTLS directory
         shell: cmd
@@ -472,7 +474,7 @@ jobs:
       - name: Download libpng
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/libpng/libpng16/${{env.libpng_version}}/libpng-${{env.libpng_version}}.tar.xz
 
       - name: Extract libpng
         shell: bash
@@ -509,7 +511,7 @@ jobs:
       - name: Download libjpeg-turbo
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/libjpeg-turbo/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/libjpeg-turbo/${{env.libjpeg_turbo_version}}/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz
 
       - name: Extract libjpeg-turbo
         shell: bash
@@ -539,7 +541,7 @@ jobs:
       - name: Download pcre2
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2
 
       - name: Extract pcre2
         shell: bash
@@ -576,7 +578,7 @@ jobs:
       - name: Download bzip2
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz
 
       - name: Extract bzip2
         shell: bash
@@ -613,7 +615,7 @@ jobs:
       - name: Download xz
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/lzmautils/xz-${{env.xz_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/lzmautils/xz-${{env.xz_version}}.tar.xz
 
       - name: Extract xz
         shell: bash
@@ -648,7 +650,7 @@ jobs:
       - name: Download brotli
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz
 
       - name: Extract brotli
         shell: bash
@@ -706,7 +708,7 @@ jobs:
       - name: Download pixman
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz
 
       - name: Extract pixman
         shell: bash
@@ -738,7 +740,7 @@ jobs:
       - name: Download libxml2
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${{env.libxml2_version}}/libxml2-v${{env.libxml2_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${{env.libxml2_version}}/libxml2-v${{env.libxml2_version}}.tar.bz2
 
       - name: Extract libxml2
         shell: bash
@@ -775,7 +777,7 @@ jobs:
       - name: Download nghttp2
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/nghttp2/nghttp2/releases/download/v${{env.nghttp2_version}}/nghttp2-${{env.nghttp2_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/nghttp2/nghttp2/releases/download/v${{env.nghttp2_version}}/nghttp2-${{env.nghttp2_version}}.tar.xz
 
       - name: Extract nghttp2
         shell: bash
@@ -807,7 +809,7 @@ jobs:
       - name: Download SQLite
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://sqlite.org/2023/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://sqlite.org/2023/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Extract SQLite
         shell: bash
@@ -852,7 +854,7 @@ jobs:
       - name: Download libogg
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz
 
       - name: Extract libogg
         shell: bash
@@ -884,7 +886,7 @@ jobs:
       - name: Download libvorbis
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz
 
       - name: Extract libvorbis
         shell: bash
@@ -916,7 +918,7 @@ jobs:
       - name: Download flac
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz
 
       - name: Extract flac
         shell: bash
@@ -956,7 +958,7 @@ jobs:
       - name: Download wavpack
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2
 
       - name: Extract wavpack
         shell: bash
@@ -998,7 +1000,7 @@ jobs:
       - name: Download opus
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz
 
       - name: Extract opus
         shell: bash
@@ -1035,7 +1037,7 @@ jobs:
       - name: Download opusfile
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz
 
       - name: Extract opusfile
         shell: bash
@@ -1072,7 +1074,7 @@ jobs:
       - name: Download speex
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${{env.speex_version}}/speex-Speex-${{env.speex_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${{env.speex_version}}/speex-Speex-${{env.speex_version}}.tar.gz
 
       - name: Extract speex
         shell: bash
@@ -1116,7 +1118,7 @@ jobs:
       - name: Download mpg123
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/mpg123/mpg123/${{env.mpg123_version}}/mpg123-${{env.mpg123_version}}.tar.bz2
 
       - name: Extract mpg123
         shell: bash
@@ -1148,7 +1150,7 @@ jobs:
       - name: Download lame
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/lame/lame/${{env.lame_version}}/lame-${{env.lame_version}}.tar.gz
 
       - name: Extract lame
         shell: bash
@@ -1210,7 +1212,7 @@ jobs:
       - name: Download twolame
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Extract twolame
         shell: bash
@@ -1271,7 +1273,7 @@ jobs:
       - name: Download TagLib
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://taglib.org/releases/taglib-${{env.taglib_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://taglib.org/releases/taglib-${{env.taglib_version}}.tar.gz
 
       - name: Extract TagLib
         shell: bash
@@ -1303,7 +1305,7 @@ jobs:
       - name: Download dlfcn-win32
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
 
       - name: Extract dlfcn-win32
         shell: bash
@@ -1336,13 +1338,13 @@ jobs:
         if: matrix.arch == 'x86'
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip
+        run: curl ${{env.curl_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip
 
       - name: Download FFTW (x86_64)
         if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip
+        run: curl ${{env.curl_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip
 
       - name: Create FFTW directory
         shell: cmd
@@ -1404,7 +1406,7 @@ jobs:
       - name: Download GLib
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz
 
       - name: Extract GLib
         shell: bash
@@ -1442,7 +1444,7 @@ jobs:
       - name: Download glib-networking
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz
 
       - name: Extract glib-networking
         shell: bash
@@ -1479,7 +1481,7 @@ jobs:
       - name: Download libpsl
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz
 
       - name: Extract libpsl
         shell: bash
@@ -1516,7 +1518,7 @@ jobs:
       - name: Download libsoup
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz
 
       - name: Extract libsoup
         shell: bash
@@ -1548,7 +1550,7 @@ jobs:
       - name: Download orc
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz
 
       - name: Extract orc
         shell: bash
@@ -1580,7 +1582,7 @@ jobs:
       - name: Download musepack
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz
 
       - name: Extract musepack
         shell: bash
@@ -1620,7 +1622,7 @@ jobs:
       - name: Download libopenmpt
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
+        run: curl ${{env.curl_options}} https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
 
       - name: Create libopenmpt directory
         shell: cmd
@@ -1660,7 +1662,7 @@ jobs:
       - name: Download libgme
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
 
       - name: Extract libgme
         shell: bash
@@ -1690,7 +1692,7 @@ jobs:
       - name: Download fdk-aac
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz
 
       - name: Extract fdk-aac
         shell: bash
@@ -1722,7 +1724,7 @@ jobs:
       - name: Download faad2
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz
 
       - name: Extract faad2
         shell: bash
@@ -1800,7 +1802,7 @@ jobs:
       - name: Download libbs2b
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2
 
       - name: Extract libbs2b
         shell: bash
@@ -1868,7 +1870,7 @@ jobs:
       - name: Download Chromaprint
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/acoustid/chromaprint/releases/download/v${{env.chromaprint_version}}/chromaprint-${{env.chromaprint_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/acoustid/chromaprint/releases/download/v${{env.chromaprint_version}}/chromaprint-${{env.chromaprint_version}}.tar.gz
 
       - name: Extract Chromaprint
         shell: bash
@@ -1900,7 +1902,7 @@ jobs:
       - name: Download GStreamer
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract GStreamer
         shell: bash
@@ -1936,7 +1938,7 @@ jobs:
       - name: Download gst-plugins-base
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-base
         shell: bash
@@ -1972,7 +1974,7 @@ jobs:
       - name: Download gst-plugins-good
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-good
         shell: bash
@@ -2008,7 +2010,7 @@ jobs:
       - name: Download gst-plugins-bad
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-bad
         shell: bash
@@ -2054,7 +2056,7 @@ jobs:
       - name: Download gst-plugins-ugly
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-plugins-ugly
         shell: bash
@@ -2087,7 +2089,7 @@ jobs:
       - name: Download gst-libav
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${{env.gstreamer_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${{env.gstreamer_version}}.tar.xz
 
       - name: Extract gst-libav
         shell: bash
@@ -2123,7 +2125,7 @@ jobs:
       - name: Download icu
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
+        run: curl ${{env.curl_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
 
       - name: Extract icu
         shell: bash
@@ -2154,7 +2156,7 @@ jobs:
       - name: Download expat
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2
 
       - name: Extract expat
         shell: bash
@@ -2186,7 +2188,7 @@ jobs:
       - name: Download freetype
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
 
       - name: Extract freetype (boostrap)
         shell: bash
@@ -2223,7 +2225,7 @@ jobs:
       - name: Download harfbuzz
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz
 
       - name: Extract harfbuzz
         shell: bash
@@ -2292,7 +2294,7 @@ jobs:
       - name: Download Protobuf
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
 
       - name: Extract Protobuf
         shell: bash
@@ -2325,7 +2327,7 @@ jobs:
       - name: Download qtbase
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Extract qtbase
         shell: bash
@@ -2415,7 +2417,7 @@ jobs:
       - name: Download qttools
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://download.qt.io/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qttools-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Extract qttools
         shell: bash
