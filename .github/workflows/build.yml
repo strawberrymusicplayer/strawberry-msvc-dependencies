@@ -98,7 +98,7 @@ env:
 
   abseil_cpp_version: '20230125.1'
 
-  protobuf_version: '21.12'
+  protobuf_version: '22.1'
 
   qt_version: '6.4.2'
 
@@ -2291,36 +2291,56 @@ jobs:
         run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
 
 
+      - name: Download abseil-cpp
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
+
       - name: Download Protobuf
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-${{env.protobuf_version}}.tar.gz
 
       - name: Extract Protobuf
         shell: bash
         working-directory: sources
-        run: tar -xf ../downloads/protobuf-cpp-3.${{env.protobuf_version}}.tar.gz
+        run: tar -xf ../downloads/protobuf-${{env.protobuf_version}}.tar.gz
+
+      - name: Remove empty abseil-cpp directory
+        shell: bash
+        working-directory: sources/protobuf-${{env.protobuf_version}}/third_party
+        run: rmdir abseil-cpp
+
+      - name: Extract abseil-cpp
+        shell: bash
+        working-directory: sources/protobuf-${{env.protobuf_version}}/third_party
+        run: tar -xf ../../../downloads/${{env.abseil_cpp_version}}.tar.gz
+
+      - name: Rename abseil-cpp directory
+        shell: bash
+        working-directory: sources/protobuf-${{env.protobuf_version}}/third_party
+        run: mv "abseil-cpp-${{env.abseil_cpp_version}}" "abseil-cpp"
 
       - name: Configure Protobuf
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/protobuf-3.${{env.protobuf_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF
+        working-directory: sources/protobuf-${{env.protobuf_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_ABSL_PROVIDER="module"
 
       - name: Build Protobuf
         env:
           CL: "/MP"
-        working-directory: sources/protobuf-3.${{env.protobuf_version}}/build
+        working-directory: sources/protobuf-${{env.protobuf_version}}/build
         run: cmake --build .
 
       - name: Install Protobuf
-        working-directory: sources/protobuf-3.${{env.protobuf_version}}/build
+        working-directory: sources/protobuf-${{env.protobuf_version}}/build
         run: cmake --install .
 
       - name: Install Protobuf pkgconfig file
-        working-directory: sources/protobuf-3.${{env.protobuf_version}}/build
+        working-directory: sources/protobuf-${{env.protobuf_version}}/build
         run: copy protobuf.pc ${{env.prefix_path_backslash}}\lib\pkgconfig\
 
 
