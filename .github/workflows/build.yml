@@ -16,7 +16,7 @@ env:
 
   openssl_version: '3.0.8'
 
-  gnutls_version: '3.7.8'
+  gnutls_version: '3.8.0'
 
   libpng_version: '1.6.39'
 
