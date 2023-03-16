@@ -144,6 +144,8 @@ jobs:
         run: |
           echo "openssl_platform=VC-WIN32" >> $GITHUB_ENV
           echo "msbuild_platform=win32" >> $GITHUB_ENV
+          echo "arch_short=x86" >> $GITHUB_ENV
+          echo "arch_win=win32" >> $GITHUB_ENV
           echo "libdir=lib" >> $GITHUB_ENV
           echo "bindir=bin" >> $GITHUB_ENV
 
@@ -153,6 +155,8 @@ jobs:
         run: |
           echo "openssl_platform=VC-WIN64A" >> $GITHUB_ENV
           echo "msbuild_platform=x64" >> $GITHUB_ENV
+          echo "arch_short=x64" >> $GITHUB_ENV
+          echo "arch_win=win64" >> $GITHUB_ENV
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
 
@@ -218,33 +222,19 @@ jobs:
           find "/c/program files (x86)/windows kits/" -name 'icu*.h' -delete
 
 
-      - name: Download nasm (x86)
-        if: matrix.arch == 'x86'
+      - name: Download nasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win32/nasm-${{env.nasm_version}}-installer-x86.exe
-
-      - name: Download nasm (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/win64/nasm-${{env.nasm_version}}-installer-x64.exe
+        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/${{env.arch_win}}/nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe
 
       - name: Create nasm directory
         shell: cmd
         run: mkdir c:\nasm
 
-      - name: Extract nasm (x86)
-        if: matrix.arch == 'x86'
+      - name: Extract nasm
         shell: cmd
         working-directory: c:/nasm
-        run: 7z x "${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-x86.exe"
-
-      - name: Extract nasm (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        working-directory: c:/nasm
-        run: 7z x "${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-x64.exe"
+        run: 7z x "${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe"
 
       - name: Copy nasm
         shell: bash
@@ -258,12 +248,12 @@ jobs:
       - name: Download yasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-win64.exe
+        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-${{env.arch_win}}.exe
 
       - name: Copy yasm
         shell: bash
         working-directory: downloads
-        run: cp yasm-${{env.yasm_version}}-win64.exe ${{env.prefix_path_unix}}/bin/yasm.exe
+        run: cp yasm-${{env.yasm_version}}-${{env.arch_win}}.exe ${{env.prefix_path_unix}}/bin/yasm.exe
 
 
       - name: Download win_flex_bison
