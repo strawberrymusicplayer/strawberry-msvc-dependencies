@@ -202,7 +202,7 @@ function update_package() {
       package_version_latest=$(wget -q -O- 'https://downloads.xiph.org/releases/speex/' | sed -n 's,.*<a href="speex-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)
       ;;
     "mpg123")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/mpg123/files/mpg123/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | head -1)
+      package_version_latest=$(wget -q -O- 'https://www.mpg123.de/download/' | sed -n 's,.*<a href="mpg123-\([0-9][^>]*\)\.tar\.bz2">.*,\1,p' | grep -v 'beta' | grep -v 'svn' | sort -V | tail -1)
       ;;
     "lame")
       package_version_latest=$(wget -q -O- 'https://sourceforge.net/p/lame/svn/HEAD/tree/tags' | grep RELEASE_ | sed -n 's,.*RELEASE__\([0-9_][^<]*\)<.*,\1,p' | tr '_' '.' | sort -V | tail -1)
