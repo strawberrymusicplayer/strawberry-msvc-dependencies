@@ -1474,7 +1474,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: sources/glib-networking-${{env.glib_networking_version}}
-        run: meson --buildtype=${{matrix.buildtype}} --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=enabled -Dopenssl=enabled build
+        run: meson --buildtype=${{matrix.buildtype}} --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=enabled -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
 
       - name: Build glib-networking
         shell: cmd
