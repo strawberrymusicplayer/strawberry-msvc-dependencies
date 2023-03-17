@@ -328,7 +328,7 @@ jobs:
       - name: Download zlib
         shell: bash
         working-directory: downloads
-        run: wget ${{env.wget_options}} https://zlib.net/zlib-${{env.zlib_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/madler/zlib/releases/download/v${{env.zlib_version}}/zlib-${{env.zlib_version}}.tar.gz
 
       - name: Extract zlib
         shell: bash
