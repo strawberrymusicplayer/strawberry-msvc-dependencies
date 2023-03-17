@@ -245,21 +245,6 @@ jobs:
         run: echo "c:\nasm" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
 
-      - name: Download yasm
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/vsyasm-${{env.yasm_version}}-${{env.arch_win}}.zip
-
-      - name: Create yasm directory
-        shell: cmd
-        run: mkdir c:\yasm
-
-      - name: Extract yasm
-        shell: cmd
-        working-directory: c:\yasm
-        run: 7z x "${{github.workspace}}\downloads\vsyasm-${{env.yasm_version}}-${{env.arch_win}}.zip"
-
-
       - name: Download win_flex_bison
         shell: bash
         working-directory: downloads
@@ -327,6 +312,38 @@ jobs:
       - name: Copy pkgconf
         shell: cmd
         run: copy ${{env.prefix_path_backslash}}\bin\pkgconf.exe ${{env.prefix_path_backslash}}\bin\pkg-config.exe
+
+
+      - name: Download yasm
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}.tar.gz
+
+      - name: Extract yasm
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/yasm-${{env.yasm_version}}.tar.gz
+
+      - name: Configure yasm
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/yasm-${{env.yasm_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+
+      - name: Build yasm
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/yasm-${{env.yasm_version}}/build
+        run: cmake --build .
+
+      - name: Install yasm
+        shell: cmd
+        working-directory: sources/yasm-${{env.yasm_version}}/build
+        run: cmake --install .
 
 
       - name: Download zlib
@@ -1125,9 +1142,8 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          YASMPATH: c:\yasm\
         working-directory: sources/mpg123-${{env.mpg123_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF -DYASM_ASSEMBLER="c:\yasm\vsyasm.exe"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
 
       - name: Build mpg123
         shell: cmd
