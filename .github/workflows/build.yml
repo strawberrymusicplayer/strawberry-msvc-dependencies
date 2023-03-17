@@ -248,12 +248,16 @@ jobs:
       - name: Download yasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}-${{env.arch_win}}.exe
+        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/vsyasm-${{env.yasm_version}}-${{env.arch_win}}.zip
 
-      - name: Copy yasm
-        shell: bash
-        working-directory: downloads
-        run: cp yasm-${{env.yasm_version}}-${{env.arch_win}}.exe ${{env.prefix_path_unix}}/bin/yasm.exe
+      - name: Create yasm directory
+        shell: cmd
+        run: mkdir c:\yasm
+
+      - name: Extract yasm
+        shell: cmd
+        working-directory: c:\yasm
+        run: 7z x "${{github.workspace}}\downloads\vsyasm-${{env.yasm_version}}-${{env.arch_win}}.zip"
 
 
       - name: Download win_flex_bison
@@ -1121,8 +1125,9 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          YASMPATH: c:\yasm\
         working-directory: sources/mpg123-${{env.mpg123_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF -DYASM_ASSEMBLER="c:\yasm\vsyasm.exe"
 
       - name: Build mpg123
         shell: cmd
