@@ -66,7 +66,7 @@ env:
 
   glib_version: '2.76.0'
 
-  glib_networking_version: '2.74.0'
+  glib_networking_version: '2.76.0'
 
   libpsl_version: '0.21.2'
 
