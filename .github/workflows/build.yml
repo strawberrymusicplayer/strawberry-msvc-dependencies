@@ -100,7 +100,7 @@ env:
 
   protobuf_version: '22.2'
 
-  qt_version: '6.4.3'
+  qt_version: '6.5.0'
 
   faad2_version: '2.10.1'
 
