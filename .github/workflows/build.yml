@@ -90,7 +90,7 @@ env:
 
   icu4c_version: '73.1'
 
-  expat_version: '2.5.0'
+  expat_version: '4.8.2/threads-win32/sjlj'
 
   freetype_version: '2.13.0'
 
