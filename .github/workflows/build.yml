@@ -32,7 +32,7 @@ env:
 
   pixmap_version: '0.42.2'
 
-  libxml2_version: '2.10.4'
+  libxml2_version: '2.11.0'
 
   nghttp2_version: '1.52.0'
 
