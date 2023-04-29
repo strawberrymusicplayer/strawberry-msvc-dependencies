@@ -70,7 +70,7 @@ env:
 
   libpsl_version: '0.21.2'
 
-  libsoup_version: '3.4.1'
+  libsoup_version: '3.4.2'
 
   orc_version: '0.4.33'
 
