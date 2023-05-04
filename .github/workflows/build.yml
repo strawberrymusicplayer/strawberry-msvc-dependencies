@@ -98,7 +98,7 @@ env:
 
   abseil_cpp_version: '20230125.3'
 
-  protobuf_version: '22.3'
+  protobuf_version: '22.4'
 
   qt_version: '6.5.0'
 
