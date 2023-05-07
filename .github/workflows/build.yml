@@ -160,40 +160,6 @@ jobs:
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
 
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{matrix.arch}}
-          sdk: 10.0.20348.0
-          vsversion: 17
-          toolset: 14.3
-
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-
-      - name: Install python dependencies
-        shell: cmd
-        run: pip install meson ninja
-
-      - name: Install wget
-        shell: cmd
-        run: choco install wget
-
-      - name: Create sources directory
-        shell: cmd
-        run: mkdir sources
-
-      - name: Create downloads directory
-        shell: cmd
-        run: mkdir downloads
-
-      - name: Create directories
-        shell: bash
-        run: mkdir -p ${{env.prefix_path_unix}}/{bin,lib,include}
-
-      - name: Update PATH
-        shell: pwsh
-        run: echo "${{env.prefix_path_backslash}}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       - name: Set extra version variables
         shell: bash
         run: |
@@ -205,10 +171,17 @@ jobs:
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
 
+      - name: Create directories
+        shell: bash
+        run: mkdir -p ${{env.prefix_path_unix}}/{bin,lib,include}
+
+      - name: Update PATH
+        shell: pwsh
+        run: echo "${{env.prefix_path_backslash}}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Copy bin files
         shell: bash
-        run: cp /c/strawberry/c/bin/{patch.exe,strip.exe,strings.exe} ${{env.prefix_path_unix}}/bin
-
+        run: cp /c/strawberry/c/bin/{patch.exe,strip.exe,strings.exe,objdump.exe} ${{env.prefix_path_unix}}/bin
 
       - name: Uninstall conflicting mingw
         shell: cmd
@@ -223,6 +196,40 @@ jobs:
         run: |
           find "/c/program files (x86)/windows kits/" -name 'icu*.lib' -delete
           find "/c/program files (x86)/windows kits/" -name 'icu*.h' -delete
+
+      - name: Install wget
+        shell: cmd
+        run: choco install wget
+
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+
+      - name: Install python dependencies
+        shell: cmd
+        run: pip install meson ninja
+
+
+      - name: Setup MSVC Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{matrix.arch}}
+          sdk: 10.0.20348.0
+          vsversion: 17
+          toolset: 14.3
+
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Create sources directory
+        shell: cmd
+        run: mkdir sources
+
+      - name: Create downloads directory
+        shell: cmd
+        run: mkdir downloads
 
 
       - name: Download nasm
