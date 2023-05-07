@@ -62,7 +62,7 @@ env:
 
   dlfcn_version: '1.3.1'
 
-  fftw_version: '3.3.5'
+  fftw_version: '3.3.10'
 
   glib_version: '2.76.2'
 
@@ -1355,39 +1355,25 @@ jobs:
         run: cmake --install .
 
 
-      - name: Download FFTW (x86)
-        if: matrix.arch == 'x86'
+      - name: Download FFTW
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll32.zip
-
-      - name: Download FFTW (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://fftw.org/pub/fftw/fftw-${{env.fftw_version}}-dll64.zip
+        run: curl ${{env.curl_options}} https://files.strawberrymusicplayer.org/fftw-${{env.fftw_version}}-${{env.arch_short}}-${{matrix.buildtype}}.zip
 
       - name: Create FFTW directory
         shell: cmd
         working-directory: downloads
         run: mkdir fftw
 
-      - name: Extract FFTW (x86)
-        if: matrix.arch == 'x86'
+      - name: Extract FFTW
         shell: cmd
         working-directory: downloads/fftw
-        run: 7z x "../fftw-${{env.fftw_version}}-dll32.zip"
-
-      - name: Extract FFTW (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        working-directory: downloads/fftw
-        run: 7z x "../fftw-${{env.fftw_version}}-dll64.zip"
+        run: 7z x "../fftw-${{env.fftw_version}}-${{env.arch_short}}-${{matrix.buildtype}}.zip"
 
       - name: Install FFTW
         working-directory: downloads/fftw
         run: |          
-          lib /def:libfftw3-3.def
+          lib /machine:${{env.arch_short}} /def:libfftw3-3.def
           xcopy /s /y libfftw3-3.dll ${{env.prefix_path_backslash}}\bin\
           xcopy /s /y libfftw3-3.lib ${{env.prefix_path_backslash}}\lib\
           xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
