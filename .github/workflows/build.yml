@@ -34,7 +34,7 @@ env:
 
   libxml2_version: '2.11.2'
 
-  nghttp2_version: '1.52.0'
+  nghttp2_version: '1.53.0'
 
   sqlite3_version: '3410200'
 
