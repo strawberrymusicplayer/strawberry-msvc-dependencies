@@ -86,7 +86,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.22.2'
+  gstreamer_version: '1.22.3'
 
   icu4c_version: '73.1'
 
