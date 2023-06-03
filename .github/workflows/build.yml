@@ -1374,7 +1374,7 @@ jobs:
         working-directory: downloads/fftw
         run: |          
           lib /machine:${{env.arch_short}} /def:libfftw3-3.def
-          xcopy /s /y libfftw3-3.dll ${{env.prefix_path_backslash}}\bin\
+          xcopy /s /y *.dll ${{env.prefix_path_backslash}}\bin\
           xcopy /s /y libfftw3-3.lib ${{env.prefix_path_backslash}}\lib\
           xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
 
