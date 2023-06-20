@@ -86,7 +86,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.22.3'
+  gstreamer_version: '1.22.4'
 
   icu4c_version: '73.2'
 
@@ -1987,11 +1987,6 @@ jobs:
         shell: bash
         working-directory: sources
         run: tar -xf ../downloads/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
-
-      - name: Patch gst-plugins-good
-        shell: bash
-        working-directory: sources/gst-plugins-good-${{env.gstreamer_version}}
-        run: patch -p1 < ../../patches/gst-plugins-good-adaptivedemux2.patch
 
       - name: Configure gst-plugins-good
         shell: cmd
