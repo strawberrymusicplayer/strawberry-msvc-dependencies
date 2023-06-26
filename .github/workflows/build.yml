@@ -1986,6 +1986,11 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
 
+      - name: Patch gst-plugins-base
+        shell: bash
+        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}
+        run: patch -p3 < ../../patches/gst-plugins-base-discoverer.patch
+
       - name: Configure gst-plugins-base
         shell: cmd
         env:
