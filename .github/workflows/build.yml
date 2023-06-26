@@ -86,6 +86,8 @@ env:
 
   chromaprint_version: '1.5.1'
 
+  libebur128_version: '1.2.6'
+
   gstreamer_version: '1.22.4'
 
   icu4c_version: '73.2'
@@ -1843,6 +1845,38 @@ jobs:
         run: cmake --install .
 
 
+      - name: Download libebur128
+        shell: bash
+        working-directory: downloads
+        run: curl -o libebur128-${{env.libebur128_version}}.tar.gz ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}.tar.gz
+
+      - name: Extract libebur128
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
+
+      - name: Configure libebur128
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/libebur128-${{env.libebur128_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
+
+      - name: Build libebur128
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/libebur128-${{env.libebur128_version}}/build
+        run: cmake --build .
+
+      - name: Install libebur128
+        shell: cmd
+        working-directory: sources/libebur128-${{env.libebur128_version}}/build
+        run: cmake --install .
+
+
       - name: Download ffmpeg
         shell: bash
         working-directory: sources
@@ -2629,6 +2663,7 @@ jobs:
           echo "* libgme ${{env.libgme_version}}" >> "${{env.release_notes_file}}"
           echo "* fdk-aac ${{env.fdk_aac_version}}" >> "${{env.release_notes_file}}"
           echo "* libbs2b ${{env.libbs2b_version}}" >> "${{env.release_notes_file}}"
+          echo "* libebur128 ${{env.libebur128_version}}" >> "${{env.release_notes_file}}"
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
