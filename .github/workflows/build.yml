@@ -60,7 +60,7 @@ env:
 
   taglib_version: '1.13.1'
 
-  dlfcn_version: '1.4.0'
+  dlfcn_version: '1.4.1'
 
   fftw_version: '3.3.10'
 
