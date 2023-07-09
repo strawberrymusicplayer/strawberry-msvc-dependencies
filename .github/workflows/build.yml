@@ -110,7 +110,7 @@ env:
 
   wget_options: '-t 20 --retry-connrefused'
 
-  curl_options: '-O -L --connect-timeout 15 -m 30 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
+  curl_options: '-f -O -L --connect-timeout 15 -m 30 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
 
   sourceforge_mirror: 'downloads.sourceforge.net'
 
