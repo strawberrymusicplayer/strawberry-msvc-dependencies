@@ -12,6 +12,8 @@ env:
 
   pkgconf_version: '1.9.5'
 
+  mimalloc_version: '2.1.2'
+
   zlib_version: '1.2.13'
 
   openssl_version: '3.1.1'
@@ -324,6 +326,38 @@ jobs:
       - name: Copy pkgconf
         shell: cmd
         run: copy ${{env.prefix_path_backslash}}\bin\pkgconf.exe ${{env.prefix_path_backslash}}\bin\pkg-config.exe
+
+
+      - name: Download mimalloc
+        shell: bash
+        working-directory: downloads
+        run: curl -o mimalloc-${{env.mimalloc_version}}.tar.gz ${{env.curl_options}} https://github.com/microsoft/mimalloc/archive/refs/tags/v${{env.mimalloc_version}}.tar.gz
+
+      - name: Extract mimalloc
+        shell: bash
+        working-directory: sources
+        run: tar -xf ../downloads/mimalloc-${{env.mimalloc_version}}.tar.gz
+
+      - name: Configure mimalloc
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: sources/mimalloc-${{env.mimalloc_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+
+      - name: Build mimalloc
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: sources/mimalloc-${{env.mimalloc_version}}/build
+        run: cmake --build .
+
+      - name: Install mimalloc
+        shell: cmd
+        working-directory: sources/mimalloc-${{env.mimalloc_version}}/build
+        run: cmake --install .
 
 
       - name: Download yasm
