@@ -104,7 +104,7 @@ env:
 
   protobuf_version: '23.4'
 
-  qt_version: '6.5.1'
+  qt_version: '6.5.2'
 
   faad2_version: '2.10.1'
 
@@ -2433,11 +2433,6 @@ jobs:
         shell: bash
         working-directory: sources
         run: tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
-
-      - name: Patch qtbase tabbar
-        shell: bash
-        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}
-        run: patch -p1 < ../../patches/qtbase-tabbar.patch
 
       - name: Copy sqlite3
         shell: bash
