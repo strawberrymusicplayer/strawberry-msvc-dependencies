@@ -90,7 +90,7 @@ env:
 
   libebur128_version: '1.2.6'
 
-  gstreamer_version: '1.22.4'
+  gstreamer_version: '1.22.5'
 
   icu4c_version: '73.2'
 
