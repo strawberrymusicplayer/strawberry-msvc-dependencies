@@ -283,6 +283,9 @@ function update_package() {
     "faad2")
       package_version_latest=$(wget -q -O- 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^\*name$' | sed 's/_/\./g' | sort -V | tail -1)
       ;;
+    "libebur128")
+      package_version_latest=$(wget -q -O- 'https://github.com/jiixyj/libebur128/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^pkgconf\-//g' | sort -V | tail -1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
