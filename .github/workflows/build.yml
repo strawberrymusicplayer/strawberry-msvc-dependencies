@@ -90,6 +90,8 @@ env:
 
   libebur128_version: '1.2.6'
 
+  ffmpeg_version: '4.4.4'
+
   gstreamer_version: '1.22.5'
 
   icu4c_version: '73.2'
@@ -1914,7 +1916,10 @@ jobs:
       - name: Download ffmpeg
         shell: bash
         working-directory: sources
-        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
+        run: |
+          git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
+          cd ffmpeg
+          git checkout meson-${{env.ffmpeg_version}}
 
       - name: Configure ffmpeg
         shell: cmd
