@@ -286,6 +286,9 @@ function update_package() {
     "libebur128")
       package_version_latest=$(wget -q -O- 'https://github.com/jiixyj/libebur128/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
+    "ffmpeg")
+      package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
