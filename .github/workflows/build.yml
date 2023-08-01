@@ -716,6 +716,11 @@ jobs:
         working-directory: sources
         run: tar -xf ../downloads/v${{env.brotli_version}}.tar.gz
 
+      - name: Patch brotli
+        shell: bash
+        working-directory: sources/brotli-${{env.brotli_version}}
+        run: patch -p1 < ../../patches/brotli-pkgconfig.patch
+
       - name: Configure brotli
         shell: cmd
         env:
