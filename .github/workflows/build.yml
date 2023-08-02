@@ -28,7 +28,7 @@ env:
 
   bzip2_version: '1.0.8'
 
-  xz_version: '5.4.3'
+  xz_version: '5.4.4'
 
   brotli_version: '1.0.9'
 
