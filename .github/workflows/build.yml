@@ -92,6 +92,8 @@ env:
 
   ffmpeg_version: '6.0'
 
+  ffmpeg_version_x86: '4.4.4'
+
   gstreamer_version: '1.22.5'
 
   icu4c_version: '73.2'
@@ -1914,10 +1916,25 @@ jobs:
       - name: Download ffmpeg
         shell: bash
         working-directory: sources
-        run: |
-          git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
-          cd ffmpeg
-          git checkout meson-${{env.ffmpeg_version}}
+        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
+
+      - name: Checkout ffmpeg
+        if: matrix.arch == 'x86'
+        shell: bash
+        working-directory: sources/ffmpeg
+        run: git checkout meson-${{env.ffmpeg_version_x86}}
+
+      - name: Checkout ffmpeg
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: sources/ffmpeg
+        run: git checkout meson-${{env.ffmpeg_version}}
+
+      - name: Patch ffmpeg
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: sources/ffmpeg
+        run: patch -p1 < ../../patches/ffmpeg.patch
 
       - name: Configure ffmpeg
         shell: cmd
@@ -1940,6 +1957,19 @@ jobs:
         working-directory: sources/ffmpeg/build
         run: ninja install
 
+      - name: Copy missing ffmpeg headers
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        working-directory: sources/ffmpeg
+        run: |
+          copy libavutil\version.h ${{env.prefix_path_backslash}}\include\libavutil\
+          copy libavcodec\version.h ${{env.prefix_path_backslash}}\include\libavcodec\
+          copy libavcodec\version_major.h ${{env.prefix_path_backslash}}\include\libavcodec\
+          copy libavcodec\defs.h ${{env.prefix_path_backslash}}\include\libavcodec\
+          copy libavformat\version.h ${{env.prefix_path_backslash}}\include\libavformat\
+          copy libavformat\version_major.h ${{env.prefix_path_backslash}}\include\libavformat\
+          copy libavfilter\version.h ${{env.prefix_path_backslash}}\include\libavfilter\
+          copy libavfilter\version_major.h ${{env.prefix_path_backslash}}\include\libavfilter\
 
       - name: Download Chromaprint
         shell: bash
