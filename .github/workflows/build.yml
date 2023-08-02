@@ -100,7 +100,7 @@ env:
 
   freetype_version: '2.13.1'
 
-  harfbuzz_version: '8.1.0'
+  harfbuzz_version: '8.1.1'
 
   abseil_cpp_version: '20230125.3'
 
