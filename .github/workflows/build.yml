@@ -1957,20 +1957,6 @@ jobs:
         working-directory: sources/ffmpeg/build
         run: ninja install
 
-      - name: Copy missing ffmpeg headers
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        working-directory: sources/ffmpeg
-        run: |
-          copy libavutil\version.h ${{env.prefix_path_backslash}}\include\libavutil\
-          copy libavcodec\version.h ${{env.prefix_path_backslash}}\include\libavcodec\
-          copy libavcodec\version_major.h ${{env.prefix_path_backslash}}\include\libavcodec\
-          copy libavcodec\defs.h ${{env.prefix_path_backslash}}\include\libavcodec\
-          copy libavformat\version.h ${{env.prefix_path_backslash}}\include\libavformat\
-          copy libavformat\version_major.h ${{env.prefix_path_backslash}}\include\libavformat\
-          copy libavfilter\version.h ${{env.prefix_path_backslash}}\include\libavfilter\
-          copy libavfilter\version_major.h ${{env.prefix_path_backslash}}\include\libavfilter\
-
       - name: Download Chromaprint
         shell: bash
         working-directory: downloads
