@@ -1,7 +1,7 @@
 From f44b0883affd1cad236aaf726def09c9ad4037ca Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 26 Jul 2023 21:09:28 -0300
-Subject: [PATCH 01/28] meson: Allow building with Microsoft supplied Clang
+Subject: [PATCH 01/33] meson: Allow building with Microsoft supplied Clang
 
 ---
  meson.build | 2 +-
@@ -27,7 +27,7 @@ GitLab
 From 4a49ab3b838587988dc0343e427c65f2ba18739d Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 26 Jul 2023 21:14:25 -0300
-Subject: [PATCH 02/28] os_support, network: Fix build failure on Windows with
+Subject: [PATCH 02/33] os_support, network: Fix build failure on Windows with
  BZIP2
 
 Including winsock2.h without WIN32_LEAN_AND_MEAN causes bzlib.h to parse
@@ -127,7 +127,7 @@ GitLab
 From fae0ddbe9f955ede45e76a617ee842d8c9e0d9d3 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 26 Jul 2023 21:49:14 -0300
-Subject: [PATCH 03/28] meson: Work around Binutils <2.37 lacking nm -j
+Subject: [PATCH 03/33] meson: Work around Binutils <2.37 lacking nm -j
 
 ---
  compat/windows/makedef.py | 6 +++++-
@@ -157,7 +157,7 @@ GitLab
 From da080861134101b1d72f6ae9d7b607ed543b860a Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Thu, 27 Jul 2023 12:13:36 -0300
-Subject: [PATCH 04/28] meson: Fix CLI program generation
+Subject: [PATCH 04/33] meson: Fix CLI program generation
 
 Turns out, the parse_sources script never covered libavdevice nor
 fftools...
@@ -359,7 +359,7 @@ GitLab
 From 663824fc06667296115e41462d003ec6d5b84600 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Thu, 27 Jul 2023 19:44:08 -0300
-Subject: [PATCH 05/28] meson: Fix upstream's manual filter disabling not
+Subject: [PATCH 05/33] meson: Fix upstream's manual filter disabling not
  taking effect
 
 ---
@@ -389,7 +389,7 @@ GitLab
 From 55eb5d0ee1f2316addc35802b88b356d9105146d Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@amyspark.me>
 Date: Sat, 29 Jul 2023 18:25:11 +0000
-Subject: [PATCH 06/28] avdevice: Fix disabling audiotoolbox_outdev build on
+Subject: [PATCH 06/33] avdevice: Fix disabling audiotoolbox_outdev build on
  iOS
 
 audiotoolbox.m uses CoreAudio APIs that are only available in macOS.
@@ -435,7 +435,7 @@ GitLab
 From 538affd1c2d6bdde721ddeb24d5ae8a1a8255138 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 07/28] meson: Refactor order of checks for consistency
+Subject: [PATCH 07/33] meson: Refactor order of checks for consistency
 
 ---
  meson.build | 36 ++++++++++++++++++------------------
@@ -517,7 +517,7 @@ GitLab
 From e8a2b3200900b8eada7354512adb70be9960a6d7 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 08/28] meson: Complete implementation of TLS support
+Subject: [PATCH 08/33] meson: Complete implementation of TLS support
 
 ---
  libavformat/meson.build |  6 ++++++
@@ -682,7 +682,7 @@ GitLab
 From 378f6d10eb19fb48ff7f40acff34c10bee2c726e Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 09/28] meson: Implement Apple frameworks support
+Subject: [PATCH 09/33] meson: Implement Apple frameworks support
 
 ---
  .gitlab-ci.yml    |   3 ++
@@ -955,7 +955,7 @@ GitLab
 From 573f2a4325167e86c2500e78076d385b95b2ca79 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 10/28] meson: Implement DXVA2 support
+Subject: [PATCH 10/33] meson: Implement DXVA2 support
 
 ---
  meson.build       | 22 ++++++++++++++++++++++
@@ -1047,7 +1047,7 @@ GitLab
 From 228eca8a4f4dd36bded22ea987ef2a1f97bb2eda Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 11/28] meson: Complete Media Foundation checks
+Subject: [PATCH 11/33] meson: Complete Media Foundation checks
 
 ---
  meson.build       | 3 ++-
@@ -1109,7 +1109,7 @@ GitLab
 From ea18c8e8ba81afd6da84cc4ed05c7bcde475d0e9 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 12/28] meson: Complete Xlib checks
+Subject: [PATCH 12/33] meson: Complete Xlib checks
 
 ---
  meson.build       | 10 ++++++++++
@@ -1163,7 +1163,7 @@ GitLab
 From 5776512921b4a5c7942fbd609b158876eb4477c3 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 13/28] meson: Implement upstream 'programs' option and
+Subject: [PATCH 13/33] meson: Implement upstream 'programs' option and
  deprecate 'cli'
 
 ---
@@ -1245,7 +1245,7 @@ GitLab
 From 3a682b5598d9921394bd2efa201c8ba37746a015 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 14/28] meson: Implement iconv support
+Subject: [PATCH 14/33] meson: Implement iconv support
 
 ---
  meson.build       | 5 ++++-
@@ -1308,7 +1308,7 @@ GitLab
 From fddfb61186d92dc2d31f0b60b16a34fbf235940a Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 15/28] meson: Implement automatic library detection from
+Subject: [PATCH 15/33] meson: Implement automatic library detection from
  upstream
 
 Some options, like CUDA and LLVM, still need more support written in.
@@ -1543,7 +1543,7 @@ GitLab
 From b75c65a72fc1db3147992be0b9609ffdb9b3e534 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sat, 29 Jul 2023 18:24:39 +0000
-Subject: [PATCH 16/28] meson: Implement device autoselection option
+Subject: [PATCH 16/33] meson: Implement device autoselection option
 
 ---
  meson.build       | 9 +++++++++
@@ -1586,10 +1586,10 @@ index a8461bc309..20769716a9 100644
 GitLab
 
 
-From e575bd4359bcd462b36b339f5ef14de45b6ef98d Mon Sep 17 00:00:00 2001
+From c9368f8b94d90c7e063d059a57ce7d48b8b02322 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Sun, 30 Jul 2023 20:29:30 +0000
-Subject: [PATCH 17/28] meson: Implement Metal support
+Subject: [PATCH 17/33] meson: Implement Metal support
 
 ---
  ffbuild/bin2c.py           | 39 +++++++++++++++++++++++++++++++
@@ -1730,7 +1730,7 @@ index 2ea0683372..11f30eb0e1 100644
  ver_conf = configuration_data()
  ver_conf.set('majorver', libavfilter_majorver)
 diff --git a/meson.build b/meson.build
-index c9c25caa44..1685a77e61 100644
+index c9c25caa44..10d8914cfb 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -19,7 +19,8 @@
@@ -1771,7 +1771,7 @@ index c9c25caa44..1685a77e61 100644
 +    appleclang_sdk = 'iphoneos'
 +  elif is_tvos == '1'
 +    appleclang_sdk = 'tvos'
-+  elif is_macos
++  elif is_macos == '1'
 +    appleclang_sdk = 'macos'
 +  else
 +    warning('Unable to detect target OS SDK for Metal, assuming macOS')
@@ -1839,10 +1839,10 @@ index 017725b6c5..9971b26205 100644
 GitLab
 
 
-From 78f808eeebf43335c44a28f6a1c46623eeb851aa Mon Sep 17 00:00:00 2001
+From 67b7b1bf237aebb33c486b2375345057e3afdb6e Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 1 Aug 2023 16:57:12 -0300
-Subject: [PATCH 18/28] meson: Implement H.264 mediacodec decoder
+Subject: [PATCH 18/33] meson: Implement H.264 mediacodec decoder
 
 ---
  meson.build       | 10 ++++++++--
@@ -1850,7 +1850,7 @@ Subject: [PATCH 18/28] meson: Implement H.264 mediacodec decoder
  2 files changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 1685a77e61..be454c72a2 100644
+index 10d8914cfb..7ee44cc96d 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -1264,7 +1264,7 @@ check_headers = [
@@ -1913,17 +1913,17 @@ index 20769716a9..682c774c46 100644
 GitLab
 
 
-From 48c9cb1f670288b2748d96f8d56e1d77fc5230f8 Mon Sep 17 00:00:00 2001
+From 29b0cd2f80b348e17443b022683a0a723d5be494 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 1 Aug 2023 21:57:20 -0300
-Subject: [PATCH 19/28] meson: Fix Android x86 build
+Subject: [PATCH 19/33] meson: Fix Android x86 build
 
 ---
  meson.build | 56 +++++++++++++++++++++++++++++++++++++++++------------
  1 file changed, 44 insertions(+), 12 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index be454c72a2..15054cdc43 100644
+index 7ee44cc96d..56aced551f 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -104,7 +104,6 @@ project_c_args = [
@@ -2036,10 +2036,10 @@ index be454c72a2..15054cdc43 100644
 GitLab
 
 
-From ab89366648fc9138b4f78ac0fe04785412b87425 Mon Sep 17 00:00:00 2001
+From 88e07e9d3fb2ac5ccd1e9107b271d0017337f6cc Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 1 Aug 2023 22:47:55 -0300
-Subject: [PATCH 20/28] meson: Fix Windows x86 cross build
+Subject: [PATCH 20/33] meson: Fix Windows x86 cross build
 
 ---
  libavcodec/x86/meson.build | 9 +++++++--
@@ -2074,10 +2074,10 @@ index bc07efeb4c..4dc7daa800 100644
 GitLab
 
 
-From c317069dbd40fe7aebb492c3fd99eee249206e9f Mon Sep 17 00:00:00 2001
+From c0db28e5a6fcce7a42c3f9b72b08a3ca4d59aca3 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 1 Aug 2023 23:18:49 -0300
-Subject: [PATCH 21/28] meson: Fix another hidden dependency in the tests
+Subject: [PATCH 21/33] meson: Fix another hidden dependency in the tests
 
 ---
  libavfilter/meson.build | 5 ++++-
@@ -2110,14 +2110,15 @@ index 11f30eb0e1..a1fc7f633b 100644
 GitLab
 
 
-From fb75e04001dc4a1869c3ad6fe599959781133330 Mon Sep 17 00:00:00 2001
+From 4ffc71e5c6900fdf857b65289f12ad64545d5be7 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 1 Aug 2023 23:23:18 -0300
-Subject: [PATCH 22/28] meson: Fix more instances of empty Nasm files
+Subject: [PATCH 22/33] meson: Fix more instances of empty Nasm files
 
 ---
- libavcodec/x86/meson.build | 17 +++++++++++------
- 1 file changed, 11 insertions(+), 6 deletions(-)
+ libavcodec/x86/meson.build  | 17 +++++++++++------
+ libavfilter/x86/meson.build | 21 +++++++++++++++++++--
+ 2 files changed, 30 insertions(+), 8 deletions(-)
 
 diff --git a/libavcodec/x86/meson.build b/libavcodec/x86/meson.build
 index 4dc7daa800..992c115594 100644
@@ -2173,14 +2174,61 @@ index 4dc7daa800..992c115594 100644
 +    'truehd_decoder': libavcodec_x86_x86asm_optional_sources ['truehd_decoder'] + files('mlpdsp.asm'),
    }
  endif
+diff --git a/libavfilter/x86/meson.build b/libavfilter/x86/meson.build
+index f2176fcbbc..3e0bae10c0 100644
+--- a/libavfilter/x86/meson.build
++++ b/libavfilter/x86/meson.build
+@@ -1,3 +1,5 @@
++#### --- GENERATED --- ####
++
+ libavfilter_x86_optional_sources = {
+   'afir_filter' : files('af_afir_init.c'),
+   'anlmdn_filter' : files('af_anlmdn_init.c'),
+@@ -44,7 +46,7 @@ libavfilter_x86_optional_sources = {
+ libavfilter_x86_x86asm_optional_sources = {
+   'afir_filter' : files('af_afir.asm'),
+   'anlmdn_filter' : files('af_anlmdn.asm'),
+-  'atadenoise_filter' : files('vf_atadenoise.asm'),
++  'atadenoise_filter' : [], # MANUAL
+   'blend_filter' : files('vf_blend.asm'),
+   'bwdif_filter' : files('vf_bwdif.asm'),
+   'colorspace_filter' : files('colorspacedsp.asm'),
+@@ -62,7 +64,7 @@ libavfilter_x86_x86asm_optional_sources = {
+   'lut3d_filter' : files('vf_lut3d.asm'),
+   'maskedclamp_filter' : files('vf_maskedclamp.asm'),
+   'maskedmerge_filter' : files('vf_maskedmerge.asm'),
+-  'nlmeans_filter' : files('vf_nlmeans.asm'),
++  'nlmeans_filter' : [], # MANUAL
+   'overlay_filter' : files('vf_overlay.asm'),
+   'pp7_filter' : files('vf_pp7.asm'),
+   'psnr_filter' : files('vf_psnr.asm'),
+@@ -109,3 +111,18 @@ libavfilter_x86_slib_optional_sources = {
+ libavfilter_x86_optional_tests = {
+ }
+ 
++#### --- END GENERATED --- ####
++
++# This file results in empty codegen and empty PDB generation otherwise.
++# https://bugzilla.nasm.us/show_bug.cgi?id=3392738
++# https://developercommunity.visualstudio.com/t/MSVC-Hangs-when-compiling-ffmpeg-When-l/10233953
++if conf.get('x86_64', 0) == 1
++  # Alternatively,
++  # panic: ../libavcodec/x86/simple_idct10.asm: assertion cv8_state.source_files != NULL failed at output/codeview.c:512
++  libavfilter_x86_x86asm_optional_sources += {
++    'atadenoise_filter': libavfilter_x86_x86asm_optional_sources ['atadenoise_filter'] + files('vf_atadenoise.asm'),
++  }
++  libavfilter_x86_x86asm_optional_sources += {
++    'nlmeans_filter': libavfilter_x86_x86asm_optional_sources ['nlmeans_filter'] + files('vf_nlmeans.asm'),
++  }
++endif
 -- 
 GitLab
 
 
-From faa9758f70a1e5bacea166238af20d93543676ab Mon Sep 17 00:00:00 2001
+From e36e6e352233e2c192b351a69377562dab7945a7 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 00:06:10 -0300
-Subject: [PATCH 23/28] meson: Fix building TLS objects while tls_protocol is
+Subject: [PATCH 23/33] meson: Fix building TLS objects while tls_protocol is
  disabled
 
 ---
@@ -2188,7 +2236,7 @@ Subject: [PATCH 23/28] meson: Fix building TLS objects while tls_protocol is
  1 file changed, 11 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index 15054cdc43..cf31f3a63d 100644
+index 56aced551f..95cfdc6a37 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -2173,6 +2173,17 @@ if host_machine.system() == 'android' and get_option('jni').allowed()
@@ -2213,10 +2261,10 @@ index 15054cdc43..cf31f3a63d 100644
 GitLab
 
 
-From 0ee6ccaac162dc29a32a689cab9be3a2c0ba33d4 Mon Sep 17 00:00:00 2001
+From f07917c566a2b1064a48c289dcbe9fe8ad05b078 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 09:37:25 -0300
-Subject: [PATCH 24/28] meson: Fix missing handling of Meson >= 1.2.0 Arm ASM
+Subject: [PATCH 24/33] meson: Fix missing handling of Meson >= 1.2.0 Arm ASM
  checks
 
 ---
@@ -2224,7 +2272,7 @@ Subject: [PATCH 24/28] meson: Fix missing handling of Meson >= 1.2.0 Arm ASM
  1 file changed, 12 insertions(+), 7 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index cf31f3a63d..aa9acf92aa 100644
+index 95cfdc6a37..3aaab25ab1 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -2680,12 +2680,14 @@ if (conf.get('arm', 0) == 1 or conf.get('aarch64', 0) == 1) and cc.get_id() != '
@@ -2270,10 +2318,10 @@ index cf31f3a63d..aa9acf92aa 100644
 GitLab
 
 
-From 9a57150bbb7fb27a08f5cd06732a0baa2f79afa9 Mon Sep 17 00:00:00 2001
+From ef758c7ea2c4c13ec5b63baf845fa2afda484ac4 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 10:36:04 -0300
-Subject: [PATCH 25/28] meson: Fix missing headers in the FFmpeg installation
+Subject: [PATCH 25/33] meson: Fix missing headers in the FFmpeg installation
 
 ---
  libavcodec/meson.build    |  53 +++++------
@@ -2791,17 +2839,17 @@ index 9971b26205..858140fe15 100644
 GitLab
 
 
-From 76b417b1e900da5d1384f9540112e347225e74b7 Mon Sep 17 00:00:00 2001
+From 26ba20b27f728cb063478be91cfc94e0a2953599 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 13:59:46 -0300
-Subject: [PATCH 26/28] meson: Fix detection of PIC disabled compilers
+Subject: [PATCH 26/33] meson: Fix detection of PIC disabled compilers
 
 ---
  meson.build | 14 +++++++++++---
  1 file changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index aa9acf92aa..24d2d70548 100644
+index 3aaab25ab1..39c14277b5 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -793,7 +793,9 @@ if libc_type != ''
@@ -2867,10 +2915,10 @@ index aa9acf92aa..24d2d70548 100644
 GitLab
 
 
-From 03291e907643e3ca6ddbaabab1468713aa5e3040 Mon Sep 17 00:00:00 2001
+From 57dc2478ca8e278e6491718d420d9e43090d30fd Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 19:13:21 -0300
-Subject: [PATCH 27/28] meson: Fix asm disabling the entire build due to a
+Subject: [PATCH 27/33] meson: Fix asm disabling the entire build due to a
  variable leak
 
 This partially reverts commit 51165aa5765da2ee43cc807eb9bf0685d011bca1.
@@ -2879,7 +2927,7 @@ This partially reverts commit 51165aa5765da2ee43cc807eb9bf0685d011bca1.
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 24d2d70548..729ca23f81 100644
+index 39c14277b5..c8e382fec7 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -2309,7 +2309,6 @@ else
@@ -2906,10 +2954,10 @@ index 24d2d70548..729ca23f81 100644
 GitLab
 
 
-From 36eb6a3f87a1e3e69b3c813f03275562b5ffd81d Mon Sep 17 00:00:00 2001
+From 358dcc842f3ee14d63b9cd0d04b8fde6db67610e Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 2 Aug 2023 20:20:59 -0300
-Subject: [PATCH 28/28] meson: Integrate Android API checks for disabling
+Subject: [PATCH 28/33] meson: Integrate Android API checks for disabling
  assembly
 
 ---
@@ -2917,7 +2965,7 @@ Subject: [PATCH 28/28] meson: Integrate Android API checks for disabling
  1 file changed, 19 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index 729ca23f81..192083d182 100644
+index c8e382fec7..39ceb4c5f5 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -2318,6 +2318,16 @@ if conf.get('pic') == 1
@@ -2953,6 +3001,559 @@ index 729ca23f81..192083d182 100644
    conf.set10('ebp_available', conf.get('aligned_stack') == 1 and ebp_available)
  
    asm_inline_checks += [
+-- 
+GitLab
+
+
+From 408fc95ae52aedef66e095d2af5060d88d44fa57 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Thu, 3 Aug 2023 13:37:21 +0000
+Subject: [PATCH 29/33] meson: Skip building tests for the iOS simulator as it
+ doesn't accept static libraries
+
+---
+ meson.build | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 39ceb4c5f5..60587669cc 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3093,6 +3093,20 @@ config_components_h = configure_file(
+ 
+ rc = find_program('rc_workaround.py', required: host_machine.system() == 'windows')
+ 
++build_tests = get_option('tests').allowed()
++
++# Manual: Skip test building for iOS simulator because of an Apple lld bug
++# ld: warning: ignoring file libavutil.a, building for iOS Simulator-x86_64 but
++# attempting to link with file built for iOS Simulator-x86_64
++is_simulator = false
++if cc.has_header('TargetConditionals.h')
++  is_simulator = cc.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>') == '1'
++endif
++if is_simulator and cc.get_linker_id() == 'ld64'
++  warning('Apple Clang cannot link static libraries for the Simulator, disabling tests.')
++  build_tests = false
++endif
++
+ foreach built_lib : built_libs
+   sources = get_variable('lib@0@_sources'.format(built_lib[0])) + [ffversion_h]
+   x86asm_sources = []
+@@ -3297,7 +3311,7 @@ foreach built_lib : built_libs
+ 
+   set_variable('lib@0@_dep'.format(built_lib[0]), declared_dep)
+ 
+-  if not get_option('tests').disabled()
++  if build_tests
+     foreach test_ : tests
+       test_name = test_[0]
+       test_sources = test_[1]
+-- 
+GitLab
+
+
+From 174faeb3dcdd5faa6737fdd5075f11daf88d0683 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 3 Aug 2023 17:17:08 -0300
+Subject: [PATCH 30/33] meson: Fix disabling library components
+
+---
+ depgraph.py |  3 ++-
+ meson.build | 63 ++++++++++++++++++++++++++++++++---------------------
+ 2 files changed, 40 insertions(+), 26 deletions(-)
+
+diff --git a/depgraph.py b/depgraph.py
+index a7cbeeeed1..9edaff2eaf 100644
+--- a/depgraph.py
++++ b/depgraph.py
+@@ -858,7 +858,8 @@ GRAPH = {'aac_adtstoasc_bsf': {'select': ['adts_header', 'mpeg4audio']},
+  'png_decoder': {'select': ['inflate_wrapper']},
+  'png_encoder': {'select': ['deflate_wrapper', 'llvidencdsp']},
+  'podpages': {'deps': ['perl']},
+- 'postproc': {'deps': ['avutil', 'gpl'], 'suggest': ['libm', 'stdatomic']},
++ # See configure line 7531 -- requirement is a sham
++ 'postproc': {'deps': ['avutil'], 'suggest': ['libm', 'stdatomic']}, # MANUAL
+  'power8': {'deps': ['vsx']},
+  'pp7_filter': {'deps': ['gpl']},
+  'pp_filter': {'deps': ['gpl', 'postproc']},
+diff --git a/meson.build b/meson.build
+index 60587669cc..ad8b5c3d67 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1686,7 +1686,7 @@ foreach license : license_list
+ endforeach
+ 
+ foreach lib : library_list
+-  conf.set(lib, get_option(lib).enabled().to_int())
++  conf.set10(lib, get_option(lib).allowed())
+ endforeach
+ 
+ arch = 'c'
+@@ -2983,17 +2983,25 @@ libswresample_optional_deps = [libsoxr_extra_deps]
+ 
+ common_deps += libm_extra_deps
+ 
+-built_libs = [
++libs_deps = [
+   ['avutil', []],
+   ['postproc', ['libavutil']],
+   ['swresample', ['libavutil']],
+   ['swscale', ['libavutil']],
+-  ['avcodec', ['libavutil', 'libswresample']],
++  ['avcodec', ['libavutil']],
+   ['avformat', ['libavutil', 'libavcodec']],
+-  ['avfilter', ['libavutil', 'libavcodec', 'libavformat', 'libswscale', 'libswresample', 'libpostproc']],
+-  ['avdevice', ['libavutil', 'libavformat', 'libavfilter', 'libavcodec']],
++  ['avfilter', ['libavutil']],
++  ['avdevice', ['libavutil', 'libavformat', 'libavcodec']],
+ ]
+ 
++built_libs = []
++
++foreach built_lib : libs_deps
++  if conf.get(built_lib[0]) == 1
++    built_libs += [built_lib]
++  endif
++endforeach
++
+ makedef = find_program('compat/windows/makedef.py')
+ 
+ makedef_args = [makedef]
+@@ -3219,6 +3227,12 @@ foreach built_lib : built_libs
+   endforeach
+ 
+   foreach dep_comp_name: get_variable('@0@_flattened_deps'.format(built_lib[0]), [])
++    if dep_comp_name == built_lib[0]
++      continue
++    endif
++    if library_list.contains(dep_comp_name)
++      optional_deps += [get_variable('lib@0@_dep'.format(dep_comp_name))]
++    endif
+     optional_deps += get_variable('@0@_extra_deps'.format(dep_comp_name), [])
+   endforeach
+ 
+@@ -3226,10 +3240,6 @@ foreach built_lib : built_libs
+ 
+   link_with = []
+ 
+-  foreach dep : built_lib[1]
+-    deps += [get_variable('@0@_dep'.format(dep))]
+-  endforeach
+-
+   version = get_variable('lib@0@_majorver'.format(built_lib[0]))
+ 
+   if x86asm_sources.length() > 0
+@@ -3262,13 +3272,10 @@ foreach built_lib : built_libs
+ 
+   static_link_args = []
+ 
+-  if cc.get_id() == 'msvc'
++  if cc.get_linker_id() == 'msvc' and (get_option('buildtype') == 'debug' or get_option('optimization') == '0')
+     message('Applying MSVC link workaround for Debug mode and static libraries.')
+     static_link_args += cc.get_supported_link_arguments('/FORCE:UNRESOLVED')
+-
+-    if get_option('buildtype') == 'debug' or get_option('optimization') == '0'
+-      link_args += cc.get_supported_link_arguments('/FORCE:UNRESOLVED')
+-    endif
++    link_args += cc.get_supported_link_arguments('/FORCE:UNRESOLVED')
+   endif
+ 
+   static_lib = static_library('@0@-static'.format(built_lib[0]), sources + gen_objects + [config_h, config_components_h],
+@@ -3321,7 +3328,7 @@ foreach built_lib : built_libs
+       extra_libs = opts.get('extra_libs', [])
+       foreach libname: extra_libs
+         if libname == 'threads' and thread_dep.found()
+-          test_deps += test_deps
++          test_deps += [thread_dep]
+         else
+           test_deps += [cc.find_library(libname)]
+         endif
+@@ -3376,11 +3383,14 @@ foreach built_exe : built_exe_list
+ 
+   deps = common_deps + optional_deps
+ 
++  foreach built_lib: built_libs
++    deps += [get_variable('lib@0@_dep'.format(built_lib[0]))]
++  endforeach
++
+   exe = executable(built_exe, sources + [config_h, config_components_h],
+     install: true,
+     dependencies: deps,
+     include_directories: common_incs,
+-    link_with: [libavutil, libavcodec, libavfilter, libavdevice, libavformat, libswscale, libswresample, libpostproc],
+     implicit_include_directories : false,
+     pie: get_option('b_pie') and (conf.get('pic') == 1)
+   )
+@@ -3391,18 +3401,21 @@ endforeach
+ pkg = import('pkgconfig')
+ 
+ pkg_infos = [
+-  ['Multimedia utilities', 'libavutil'],
+-  ['FFmpeg postprocessing library', 'libpostproc'],
+-  ['FFmpeg audio resampling library', 'libswresample'],
+-  ['FFmpeg image rescaling library', 'libswscale'],
+-  ['Multimedia codecs', 'libavcodec'],
+-  ['Multimedia formats', 'libavformat'],
+-  ['Media device handling', 'libavdevice'],
+-  ['Audio/video filtering library', 'libavfilter'],
++  ['Multimedia utilities', 'avutil'],
++  ['FFmpeg postprocessing library', 'postproc'],
++  ['FFmpeg audio resampling library', 'swresample'],
++  ['FFmpeg image rescaling library', 'swscale'],
++  ['Multimedia codecs', 'avcodec'],
++  ['Multimedia formats', 'avformat'],
++  ['Media device handling', 'avdevice'],
++  ['Audio/video filtering library', 'avfilter'],
+ ]
+ 
+ foreach pkg_info : pkg_infos
+-  libname = pkg_info[1]
++  if conf.get(pkg_info[1]) == 0
++    continue
++  endif
++  libname = 'lib@0@'.format(pkg_info[1])
+   pkg.generate(get_variable(libname),
+     filebase:  libname,
+     description: pkg_info[0],
+-- 
+GitLab
+
+
+From 2c6b168e23003171237734e62daab18d220b372f Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 3 Aug 2023 17:26:01 -0300
+Subject: [PATCH 31/33] meson: Work around MSVC x86 hanging or crashing when
+ linking tests
+
+---
+ meson.build | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index ad8b5c3d67..cf1768d05c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -79,7 +79,9 @@ cc = meson.get_compiler('c')
+ 
+ languages_map = {}
+ 
+-if cc.get_id() == 'msvc'
++is_msvc = cc.get_define('_MSC_VER') != ''
++
++if cc.get_argument_syntax() == 'msvc'
+   # Ignore several spurious warnings for things FFmpeg does very commonly
+   # If a warning is completely useless and spammy, use '/wdXXXX' to suppress it
+   # If a warning is harmless but hard to fix, use '/woXXXX' so it's shown once
+@@ -2245,7 +2247,7 @@ endif
+ 
+ # Manual check for libx264
+ if conf.get('libx264') == 1
+-  if cc.get_define('_MSC_VER') != ''
++  if is_msvc
+     if not cc.links(cpp_cond.format('x264.h', 'X264_BUILD >= 122'), name: 'libx264 version')
+       warning('libx264 version must be >= 1.22')
+       conf.set('libx264', 0)
+@@ -3006,7 +3008,7 @@ makedef = find_program('compat/windows/makedef.py')
+ 
+ makedef_args = [makedef]
+ 
+-if cc.get_define('_MSC_VER') == ''
++if not is_msvc
+   nm = find_program('nm', required: true)
+   makedef_args += ['--nm', nm]
+ else
+@@ -3272,7 +3274,7 @@ foreach built_lib : built_libs
+ 
+   static_link_args = []
+ 
+-  if cc.get_linker_id() == 'msvc' and (get_option('buildtype') == 'debug' or get_option('optimization') == '0')
++  if is_msvc and (get_option('buildtype') == 'debug' or get_option('optimization') == '0')
+     message('Applying MSVC link workaround for Debug mode and static libraries.')
+     static_link_args += cc.get_supported_link_arguments('/FORCE:UNRESOLVED')
+     link_args += cc.get_supported_link_arguments('/FORCE:UNRESOLVED')
+@@ -3424,7 +3426,13 @@ foreach pkg_info : pkg_infos
+ endforeach
+ 
+ # Put this at the end so people see it
+-if conf.get('x86_32') == 1 and conf.get('asm') == 1 and cc.get_id() == 'msvc' and cc.version().version_compare('<19.30')
++if conf.get('x86_32') == 1 and is_msvc
+   # -Dasm=enabled seems to hang reliably on some Visual Studio 2019 installations, ask users to report back to us
+-  warning('Using VS 2019 x86 with `asm` enabled: if you see a hang while linking, please report an issue at https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/issues')
++  if conf.get('asm') == 1 and cc.version().version_compare('<19.30')
++    warning('Using VS 2019 x86 with `asm` enabled: if you see a hang while linking, please report an issue at https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/issues')
++  endif
++  # MSVC x86 -> x86 cannot cope with the amount of PDB information
++  if (new_programs.allowed() or build_tests) and conf.get('shared') == 0
++    warning('Using VS x86 with static libraries: if you see a hang while linking, please disable programs and tests, or report an issue at https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/issues')
++  endif
+ endif
+-- 
+GitLab
+
+
+From 9c724fafb9981cf8ede8f443c4b6937ddd4d4570 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 3 Aug 2023 21:00:10 -0300
+Subject: [PATCH 32/33] meson: Implement configuration summary
+
+---
+ meson.build | 144 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 143 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index cf1768d05c..f6edce2b3c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3049,7 +3049,6 @@ else
+   license = 'LGPL version 2.1 or later'
+ endif
+ final_conf.set_quoted('FFMPEG_LICENSE', license)
+-message('License: ' + license)
+ 
+ if not get_option('version3').disabled()
+   if not get_option('gpl').disabled()
+@@ -3425,6 +3424,8 @@ foreach pkg_info : pkg_infos
+   )
+ endforeach
+ 
++### Summary
++
+ # Put this at the end so people see it
+ if conf.get('x86_32') == 1 and is_msvc
+   # -Dasm=enabled seems to hang reliably on some Visual Studio 2019 installations, ask users to report back to us
+@@ -3436,3 +3437,144 @@ if conf.get('x86_32') == 1 and is_msvc
+     warning('Using VS x86 with static libraries: if you see a hang while linking, please disable programs and tests, or report an issue at https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/issues')
+   endif
+ endif
++
++thread_type = ''
++foreach t : threads_list
++  if conf.get(t) == 1
++    thread_type = t
++    break
++  endif
++endforeach
++
++summary({
++  'License': license,
++  'static': conf.get('static').is_odd(),
++  'shared': conf.get('shared').is_odd(),
++  'postprocessing support': conf.get('postproc').is_odd(),
++  'network support': conf.get('network').is_odd(),
++  'threading support': thread_type,
++  'safe bitstream reader': conf.get('safe_bitstream_reader').is_odd(),
++}, section: 'Basics', bool_yn: true)
++
++if conf.get('x86') == 1
++  summary({
++    'standalone assembly': conf.get('x86asm').is_odd(),
++    'x86 assembler': get_variable('x86asm_type', 'none'),
++    'MMX': conf.get('mmx').is_odd(),
++    'MMXEXT': conf.get('mmxext').is_odd(),
++    '3DNow!': conf.get('amd3dnow').is_odd(),
++    '3DNow! extended': conf.get('amd3dnowext').is_odd(),
++    'SSE': conf.get('sse').is_odd(),
++    'SSSE3': conf.get('ssse3').is_odd(),
++    'AESNI': conf.get('aesni').is_odd(),
++    'AVX': conf.get('avx').is_odd(),
++    'AVX2': conf.get('avx2').is_odd(),
++    'AVX-512': conf.get('avx512').is_odd(),
++    'AVX-512ICL': conf.get('avx512icl').is_odd(),
++    'XOP': conf.get('xop').is_odd(),
++    'FMA3': conf.get('fma3').is_odd(),
++    'FMA4': conf.get('fma4').is_odd(),
++    'i686 features': conf.get('i686').is_odd(),
++    'CMOV is fast': conf.get('fast_cmov').is_odd(),
++    'EBX available': conf.get('ebx_available').is_odd(),
++    'EBP available': conf.get('ebp_available').is_odd(),
++  }, section: 'x86', bool_yn: true)
++endif
++if conf.get('aarch64') == 1
++  summary({
++    'NEON': conf.get('neon').is_odd(),
++    'VFP': conf.get('vfp').is_odd(),
++  }, section: 'Arm64', bool_yn: true)
++endif
++if conf.get('arm') == 1
++  summary({
++    'ARMv5TE': conf.get('armv5te').is_odd(),
++    'ARMv6': conf.get('armv6').is_odd(),
++    'ARMv6T2': conf.get('armv6t2').is_odd(),
++    'VFP': conf.get('vfp').is_odd(),
++    'NEON': conf.get('neon').is_odd(),
++    'THUMB': conf.get('thumb').is_odd(),
++  }, section: 'Arm', bool_yn: true)
++endif
++if conf.get('mips') == 1
++  summary({
++    'MIPS FPU': conf.get('mipsfpu').is_odd(),
++    'MIPS DSP R1': conf.get('mipsdsp').is_odd(),
++    'MIPS DSP R2': conf.get('mipsdspr2').is_odd(),
++    'MIPS MSA': conf.get('msa').is_odd(),
++    'LOONGSON MMI': conf.get('mmi').is_odd(),
++  }, section: 'MIPS', bool_yn: true)
++endif
++if conf.get('ppc') == 1
++  summary({
++    'AltiVec': conf.get('altivec').is_odd(),
++    'VSX': conf.get('vsx').is_odd(),
++    'POWER8': conf.get('power8').is_odd(),
++    'PPC 4xx optimizations': conf.get('ppc4xx').is_odd(),
++    'dcbzl available': conf.get('dcbzl').is_odd(),
++  }, section: 'PowerPC', bool_yn: true)
++endif
++if conf.get('loongarch') == 1
++  summary({
++    'LSX': conf.get('lsx').is_odd(),
++    'LASX': conf.get('lasx').is_odd(),
++  }, section: 'Loongson', bool_yn: true)
++endif
++if conf.get('riscv') == 1
++  summary({
++    'RISC-V Vector': conf.get('rvv').is_odd(),
++  }, section: 'RISC-V', bool_yn: true)
++endif
++
++d = {}
++v = []
++foreach lib : external_library_list + external_autodetect_library_list
++  if conf.get(lib) == 1
++    v += [lib]
++  endif
++endforeach
++d += {'External libraries': v}
++
++v = []
++foreach lib : hwaccel_library_list + hwaccel_autodetect_library_list
++  if conf.get(lib) == 1
++    v += [lib]
++  endif
++endforeach
++d += {'External libraries providing hardware acceleration': v}
++
++v = []
++foreach lib : library_list
++  if conf.get(lib) == 1
++    v += [lib]
++  endif
++endforeach
++d += {'Libraries': v}
++
++v = []
++foreach lib : program_list
++  if conf.get(lib) == 1
++    v += [lib]
++  endif
++endforeach
++d += {'Programs': v}
++
++# uncomment if needed
++# foreach type : ['decoder', 'encoder', 'hwaccel', 'parser', 'demuxer', 'muxer', 'protocol', 'filter', 'bsf', 'indev', 'outdev']
++#   k = 'Enabled @0@s'.format(type)
++#   v = []
++#   if type == 'indev'
++#     suffix = '_@0@'.format('demuxer')
++#   elif type == 'outdev'
++#     suffix = '_@0@'.format('muxer')
++#   else
++#     suffix = '_@0@'.format(type)
++#   endif
++#   foreach component : get_variable('@0@_list'.format(type))
++#     if conf.get(component) == 1
++#       v += [component.replace(suffix, '')]
++#     endif
++#   endforeach
++#   d += {k: v}
++# endforeach
++summary(d, section: 'Components', list_sep: ' ')
+-- 
+GitLab
+
+
+From f4742076cb88dc9f5b7158b399b0e44f4bb802fe Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Thu, 3 Aug 2023 15:30:14 +0000
+Subject: [PATCH 33/33] meson: Work around Apple lld inability to link-whole
+ static libraries for the Simulator
+
+---
+ meson.build | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index f6edce2b3c..f9692a599f 100644
+--- a/meson.build
++++ b/meson.build
+@@ -20,7 +20,8 @@ project('FFmpeg', 'c',
+   meson_version: '>= 0.60',
+   license: 'LGPL2.1+',
+   # C11 is needed for Metal support
+-  default_options: [ 'buildtype=debugoptimized', 'c_std=c11', 'cpp_std=c++11'],
++  # Static libraries by default following upstream
++  default_options: [ 'buildtype=debugoptimized', 'c_std=c11', 'cpp_std=c++11', 'default_library=static'],
+   version: '6.0.0',
+ )
+ 
+@@ -1774,6 +1775,7 @@ elif cc.get_id() == 'msvc'
+   endif
+ endif
+ 
++conf.set10('static', get_option('default_library') != 'shared')
+ conf.set10('shared', get_option('default_library') != 'static')
+ 
+ conf.set10('bigendian', host_machine.endian() == 'big')
+@@ -2415,6 +2417,18 @@ if conf.get('x86') == 1
+   # of an x86 context. So I fix those semantics here.
+   conf.set10('x86asm', get_option('asm').allowed() and (conf.get('mmx', 1) == 1) and get_option('x86asm').allowed())
+ 
++  # Manual: Skip Nasm building for iOS simulator because of an Apple lld bug
++  # ld: warning: ignoring file libavutil.a, building for iOS Simulator-x86_64 but
++  # attempting to link with file built for iOS Simulator-x86_64
++  is_simulator = false
++  if cc.has_header('TargetConditionals.h')
++    is_simulator = cc.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>') == '1'
++  endif
++  if is_simulator
++    warning('Disabling inline assembly because Apple Clang cannot link Nasm assembly for the Simulator.')
++    conf.set10('x86asm', false)
++  endif
++
+   if conf.get('x86asm') == 1
+     conf.set('x86asm', 0)
+     nasm_version = '>=0'
+@@ -3104,18 +3118,6 @@ rc = find_program('rc_workaround.py', required: host_machine.system() == 'window
+ 
+ build_tests = get_option('tests').allowed()
+ 
+-# Manual: Skip test building for iOS simulator because of an Apple lld bug
+-# ld: warning: ignoring file libavutil.a, building for iOS Simulator-x86_64 but
+-# attempting to link with file built for iOS Simulator-x86_64
+-is_simulator = false
+-if cc.has_header('TargetConditionals.h')
+-  is_simulator = cc.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>') == '1'
+-endif
+-if is_simulator and cc.get_linker_id() == 'ld64'
+-  warning('Apple Clang cannot link static libraries for the Simulator, disabling tests.')
+-  build_tests = false
+-endif
+-
+ foreach built_lib : built_libs
+   sources = get_variable('lib@0@_sources'.format(built_lib[0])) + [ffversion_h]
+   x86asm_sources = []
+@@ -3296,11 +3298,11 @@ foreach built_lib : built_libs
+   )
+ 
+   lib = library(built_lib[0],
++    objects: static_lib.extract_all_objects(recursive: true),
+     dependencies: deps,
+     soversion: version,
+     include_directories: common_incs,
+     link_with: link_with,
+-    link_whole: static_lib,
+     link_args: link_args,
+     c_args: c_args,
+     pic: conf.get('pic') == 1,
 -- 
 GitLab
 
