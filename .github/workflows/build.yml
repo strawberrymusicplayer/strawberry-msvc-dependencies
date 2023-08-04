@@ -10,7 +10,7 @@ env:
 
   boost_version: '1.82.0'
 
-  pkgconf_version: '1.9.5'
+  pkgconf_version: '2.0.0'
 
   mimalloc_version: '2.1.2'
 
