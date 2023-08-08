@@ -102,7 +102,7 @@ env:
 
   harfbuzz_version: '8.1.1'
 
-  abseil_cpp_version: '20230125.3'
+  abseil_cpp_version: '20230802.0'
 
   protobuf_version: '24.0'
 
