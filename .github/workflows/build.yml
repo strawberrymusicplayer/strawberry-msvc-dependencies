@@ -1921,11 +1921,6 @@ jobs:
         working-directory: sources/ffmpeg
         run: git checkout meson-${{env.ffmpeg_version}}
 
-      - name: Patch ffmpeg
-        shell: bash
-        working-directory: sources/ffmpeg
-        run: patch -p1 < ../../patches/ffmpeg.patch
-
       - name: Configure ffmpeg
         shell: cmd
         env:
@@ -1946,6 +1941,7 @@ jobs:
         shell: cmd
         working-directory: sources/ffmpeg/build
         run: ninja install
+
 
       - name: Download Chromaprint
         shell: bash
