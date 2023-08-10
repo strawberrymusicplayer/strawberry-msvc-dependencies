@@ -8,8 +8,6 @@ env:
 
   win_flex_bison_version: '2.5.25'
 
-  boost_version: '1.83.0'
-
   pkgconf_version: '2.0.0'
 
   mimalloc_version: '2.1.2'
@@ -32,13 +30,35 @@ env:
 
   brotli_version: '1.0.9'
 
+  icu4c_version: '73.2'
+
   pixmap_version: '0.42.2'
+
+  expat_version: '2.5.0'
+
+  boost_version: '1.83.0'
 
   libxml2_version: '2.11.5'
 
   nghttp2_version: '1.55.1'
 
+  dlfcn_version: '1.4.1'
+
+  libpsl_version: '0.21.2'
+
+  orc_version: '0.4.34'
+
   sqlite3_version: '3420000'
+
+  glib_version: '2.77.1'
+
+  libsoup_version: '3.4.2'
+
+  glib_networking_version: '2.76.1'
+
+  freetype_version: '2.13.1'
+
+  harfbuzz_version: '8.1.1'
 
   libogg_version: '1.3.5'
 
@@ -60,55 +80,35 @@ env:
 
   twolame_version: '0.4.0'
 
-  taglib_version: '1.13.1'
-
-  dlfcn_version: '1.4.1'
-
-  fftw_version: '3.3.10'
-
-  glib_version: '2.77.1'
-
-  glib_networking_version: '2.76.1'
-
-  libpsl_version: '0.21.2'
-
-  libsoup_version: '3.4.2'
-
-  orc_version: '0.4.34'
-
   musepack_version: '475'
 
   libopenmpt_version: '0.7.2'
 
   libgme_version: '0.6.3'
 
+  faad2_version: '2.10.1'
+
   fdk_aac_version: '2.0.2'
+
+  taglib_version: '1.13.1'
 
   libbs2b_version: '3.1.0'
 
-  chromaprint_version: '1.5.1'
-
   libebur128_version: '1.2.6'
+
+  fftw_version: '3.3.10'
 
   ffmpeg_version: '6.0'
 
+  chromaprint_version: '1.5.1'
+
   gstreamer_version: '1.22.5'
 
-  icu4c_version: '73.2'
-
-  expat_version: '2.5.0'
-
-  freetype_version: '2.13.1'
-
-  harfbuzz_version: '8.1.1'
+  qt_version: '6.5.2'
 
   abseil_cpp_version: '20230802.0'
 
   protobuf_version: '24.0'
-
-  qt_version: '6.5.2'
-
-  faad2_version: '2.10.1'
 
   max_releases: '6'
 
@@ -229,13 +229,13 @@ jobs:
         uses: actions/checkout@v3
 
 
-      - name: Create sources directory
-        shell: cmd
-        run: mkdir sources
-
       - name: Create downloads directory
         shell: cmd
         run: mkdir downloads
+
+      - name: Create build directory
+        shell: cmd
+        run: mkdir build
 
 
       - name: Download nasm
@@ -280,21 +280,6 @@ jobs:
         run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
 
-      - name: Download Boost
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
-
-      - name: Extract Boost
-        shell: bash
-        working-directory: sources
-        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.bz2
-
-      - name: Copy Boost
-        shell: bash
-        working-directory: sources
-        run: cp -r boost_${{env.boost_version_underscore}}/boost ${{env.prefix_path_unix}}/include/
-
 
       - name: Download pkgconf
         shell: bash
@@ -303,26 +288,26 @@ jobs:
 
       - name: Extract pkgconf
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/pkgconf-${{env.pkgconf_version}}.tar.gz
 
       - name: Configure pkgconf
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pkgconf-pkgconf-${{env.pkgconf_version}}
+        working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dtests=disabled build
 
       - name: Build pkgconf
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pkgconf-pkgconf-${{env.pkgconf_version}}/build
+        working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}/build
         run: ninja
 
       - name: Install pkgconf
         shell: cmd
-        working-directory: sources/pkgconf-pkgconf-${{env.pkgconf_version}}/build
+        working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}/build
         run: ninja install
 
       - name: Copy pkgconf
@@ -337,7 +322,7 @@ jobs:
 
       - name: Extract mimalloc
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/mimalloc-${{env.mimalloc_version}}.tar.gz
 
       - name: Configure mimalloc
@@ -346,19 +331,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/mimalloc-${{env.mimalloc_version}}
+        working-directory: build/mimalloc-${{env.mimalloc_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build mimalloc
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/mimalloc-${{env.mimalloc_version}}/build
+        working-directory: build/mimalloc-${{env.mimalloc_version}}/build
         run: cmake --build .
 
       - name: Install mimalloc
         shell: cmd
-        working-directory: sources/mimalloc-${{env.mimalloc_version}}/build
+        working-directory: build/mimalloc-${{env.mimalloc_version}}/build
         run: cmake --install .
 
 
@@ -369,7 +354,7 @@ jobs:
 
       - name: Extract yasm
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/yasm-${{env.yasm_version}}.tar.gz
 
       - name: Configure yasm
@@ -378,19 +363,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/yasm-${{env.yasm_version}}
+        working-directory: build/yasm-${{env.yasm_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build yasm
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/yasm-${{env.yasm_version}}/build
+        working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --build .
 
       - name: Install yasm
         shell: cmd
-        working-directory: sources/yasm-${{env.yasm_version}}/build
+        working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --install .
 
 
@@ -401,7 +386,7 @@ jobs:
 
       - name: Extract zlib
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/zlib-${{env.zlib_version}}.tar.gz
 
       - name: Configure zlib
@@ -410,19 +395,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/zlib-${{env.zlib_version}}
+        working-directory: build/zlib-${{env.zlib_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build zlib
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/zlib-${{env.zlib_version}}/build
+        working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --build .
 
       - name: Install zlib
         shell: cmd
-        working-directory: sources/zlib-${{env.zlib_version}}/build
+        working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --install .
 
       - name: Copy zlib (release)
@@ -445,7 +430,7 @@ jobs:
 
       - name: Extract openssl
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/openssl-${{env.openssl_version}}.tar.gz
 
       - name: Configure openssl (release)
@@ -455,7 +440,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/openssl-${{env.openssl_version}}
+        working-directory: build/openssl-${{env.openssl_version}}
         run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --release --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib.lib
 
       - name: Configure openssl (debug)
@@ -465,19 +450,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/openssl-${{env.openssl_version}}
+        working-directory: build/openssl-${{env.openssl_version}}
         run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --debug --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlibd.lib
 
       - name: Build openssl
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/openssl-${{env.openssl_version}}
+        working-directory: build/openssl-${{env.openssl_version}}
         run: nmake
 
       - name: Install openssl
         shell: cmd
-        working-directory: sources/openssl-${{env.openssl_version}}
+        working-directory: build/openssl-${{env.openssl_version}}
         run: nmake install_sw
 
 
@@ -537,12 +522,12 @@ jobs:
 
       - name: Extract libpng
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/libpng-${{env.libpng_version}}.tar.xz
 
       - name: Patch libpng
         shell: bash
-        working-directory: sources/libpng-${{env.libpng_version}}
+        working-directory: build/libpng-${{env.libpng_version}}
         run: patch -p1 < ../../patches/libpng-pkgconf.patch
 
       - name: Configure libpng
@@ -551,19 +536,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libpng-${{env.libpng_version}}
+        working-directory: build/libpng-${{env.libpng_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build libpng
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libpng-${{env.libpng_version}}/build
+        working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --build .
 
       - name: Install libpng
         shell: cmd
-        working-directory: sources/libpng-${{env.libpng_version}}/build
+        working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --install .
 
 
@@ -574,26 +559,26 @@ jobs:
 
       - name: Extract libjpeg-turbo
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz
 
       - name: Configure libjpeg-turbo
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}
+        working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON
 
       - name: Build libjpeg-turbo
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
+        working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
         run: cmake --build .
 
       - name: Install libjpeg-turbo
         shell: cmd
-        working-directory: sources/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
+        working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
         run: cmake --install .
 
 
@@ -604,7 +589,7 @@ jobs:
 
       - name: Extract pcre2
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/pcre2-${{env.pcre2_version}}.tar.bz2
 
       - name: Configure pcre2
@@ -613,19 +598,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/pcre2-${{env.pcre2_version}}
+        working-directory: build/pcre2-${{env.pcre2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_PCRE2_8=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_TESTS=OFF
 
       - name: Build pcre2
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pcre2-${{env.pcre2_version}}/build
+        working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --build .
 
       - name: Install pcre2
         shell: cmd
-        working-directory: sources/pcre2-${{env.pcre2_version}}/build
+        working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --install .
 
       - name: copy pcre2 lib (debug)
@@ -641,12 +626,12 @@ jobs:
 
       - name: Extract bzip2
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/bzip2-${{env.bzip2_version}}.tar.gz
 
       - name: Patch bzip2
         shell: bash
-        working-directory: sources/bzip2-${{env.bzip2_version}}
+        working-directory: build/bzip2-${{env.bzip2_version}}
         run: patch -p1 < ../../patches/bzip2-cmake.patch
 
       - name: Configure bzip2
@@ -655,19 +640,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/bzip2-${{env.bzip2_version}}
+        working-directory: build/bzip2-${{env.bzip2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build bzip2
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/bzip2-${{env.bzip2_version}}/build
+        working-directory: build/bzip2-${{env.bzip2_version}}/build
         run: cmake --build .
 
       - name: Install bzip2
         shell: cmd
-        working-directory: sources/bzip2-${{env.bzip2_version}}/build
+        working-directory: build/bzip2-${{env.bzip2_version}}/build
         run: cmake --install .
 
 
@@ -678,26 +663,26 @@ jobs:
 
       - name: Extract xz
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
 
       - name: Upgrade xz project
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
+        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
         run: start /w devenv.exe xz_win.sln /upgrade
 
       - name: Build xz
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
+        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
         run: msbuild xz_win.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{env.msbuild_platform}}
 
       - name: Install xz
         shell: cmd
-        working-directory: sources/xz-${{env.xz_version}}/windows/vs2019
+        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
         run: |
           copy ${{matrix.buildtype}}\${{env.msbuild_platform}}\liblzma_dll\*.lib ${{env.prefix_path_backslash}}\lib\
           copy ${{matrix.buildtype}}\${{env.msbuild_platform}}\liblzma_dll\*.dll ${{env.prefix_path_backslash}}\bin\
@@ -713,12 +698,12 @@ jobs:
 
       - name: Extract brotli
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/v${{env.brotli_version}}.tar.gz
 
       - name: Patch brotli
         shell: bash
-        working-directory: sources/brotli-${{env.brotli_version}}
+        working-directory: build/brotli-${{env.brotli_version}}
         run: patch -p1 < ../../patches/brotli-pkgconfig.patch
 
       - name: Configure brotli
@@ -727,37 +712,37 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/brotli-${{env.brotli_version}}
+        working-directory: build/brotli-${{env.brotli_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build_dir -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF
 
       - name: Build brotli
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/brotli-${{env.brotli_version}}/build_dir
+        working-directory: build/brotli-${{env.brotli_version}}/build_dir
         run: cmake --build .
 
       - name: Install brotli
         shell: cmd
-        working-directory: sources/brotli-${{env.brotli_version}}/build_dir
+        working-directory: build/brotli-${{env.brotli_version}}/build_dir
         run: cmake --install .
 
 
       - name: Download libiconv
         shell: cmd
-        working-directory: sources
+        working-directory: build
         run: git clone https://github.com/pffang/libiconv-for-Windows
 
       - name: Build libiconv
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libiconv-for-Windows
+        working-directory: build/libiconv-for-Windows
         run: msbuild libiconv.sln /property:Configuration=${{matrix.buildtype}}
 
       - name: Install libiconv
         shell: cmd
-        working-directory: sources/libiconv-for-Windows
+        working-directory: build/libiconv-for-Windows
         run: |
           copy include\*.h ${{env.prefix_path_backslash}}\include\
           copy output\${{env.msbuild_platform}}\${{matrix.buildtype}}\*.lib ${{env.prefix_path_backslash}}\lib\
@@ -768,6 +753,36 @@ jobs:
         shell: bash
         run: cp ${{env.prefix_path_unix}}/lib/libiconvD.lib ${{env.prefix_path_unix}}/lib/libiconv.lib
 
+      - name: Download icu
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
+
+      - name: Extract icu
+        shell: bash
+        working-directory: build
+        run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
+
+      - name: Patch icu
+        shell: bash
+        working-directory: build/icu
+        run: patch -p1 < ../../patches/icu-uwp.patch
+
+      - name: Build icu
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/icu/source/allinone
+        run: msbuild allinone.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{env.msbuild_platform}}
+
+      - name: Install icu
+        shell: bash
+        working-directory: build/icu
+        run: |
+          cp -r include/unicode ${{env.prefix_path_unix}}/include/
+          cp ${{env.libdir}}/{*.lib,*.pdb,*.exp} ${{env.prefix_path_unix}}/lib/
+          cp ${{env.bindir}}/{*.dll,*.exe} ${{env.prefix_path_unix}}/bin/
+
 
       - name: Download pixman
         shell: bash
@@ -776,7 +791,7 @@ jobs:
 
       - name: Extract pixman
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/pixman-${{env.pixmap_version}}.tar.gz
 
       - name: Configure pixman
@@ -785,20 +800,83 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/pixman-${{env.pixmap_version}}
+        working-directory: build/pixman-${{env.pixmap_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
 
       - name: Build pixman
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/pixman-${{env.pixmap_version}}/build
+        working-directory: build/pixman-${{env.pixmap_version}}/build
         run: ninja
 
       - name: Install pixman
         shell: cmd
-        working-directory: sources/pixman-${{env.pixmap_version}}/build
+        working-directory: build/pixman-${{env.pixmap_version}}/build
         run: ninja install
+
+
+      - name: Download expat
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2
+
+      - name: Extract expat
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/expat-${{env.expat_version}}.tar.bz2
+
+      - name: Configure expat
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/expat-${{env.expat_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
+
+      - name: Build expat
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/expat-${{env.expat_version}}/build
+        run: cmake --build .
+
+      - name: Install expat
+        shell: cmd
+        working-directory: build/expat-${{env.expat_version}}/build
+        run: cmake --install .
+
+
+      - name: Download Boost
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
+
+      - name: Extract Boost
+        shell: bash
+        working-directory: build
+        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.bz2
+
+      - name: Configure Boost
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/boost_${{env.boost_version_underscore}}
+        run: bootstrap.bat
+
+      - name: Build and install Boost
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/boost_${{env.boost_version_underscore}}
+        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path}}" --exec-prefix="${{env.prefix_path}}\bin" --libdir="${{env.prefix_path}}\lib" --includedir="${{env.prefix_path}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{matrix.buildtype}} install || goto end
+
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
 
 
       - name: Download libxml2
@@ -808,7 +886,7 @@ jobs:
 
       - name: Extract libxml2
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/libxml2-v${{env.libxml2_version}}.tar.bz2 || true
 
       - name: Configure libxml2
@@ -817,19 +895,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libxml2-v${{env.libxml2_version}}
+        working-directory: build/libxml2-v${{env.libxml2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DLIBXML2_WITH_PYTHON=OFF -DLIBXML2_WITH_ZLIB=ON
 
       - name: Build libxml2
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libxml2-v${{env.libxml2_version}}/build
+        working-directory: build/libxml2-v${{env.libxml2_version}}/build
         run: cmake --build .
 
       - name: Install libxml2
         shell: cmd
-        working-directory: sources/libxml2-v${{env.libxml2_version}}/build
+        working-directory: build/libxml2-v${{env.libxml2_version}}/build
         run: cmake --install .
 
       - name: copy libxml2 (debug)
@@ -845,7 +923,7 @@ jobs:
 
       - name: Extract nghttp2
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/nghttp2-${{env.nghttp2_version}}.tar.xz
 
       - name: Configure nghttp2
@@ -854,20 +932,148 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/nghttp2-${{env.nghttp2_version}}
+        working-directory: build/nghttp2-${{env.nghttp2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DENABLE_SHARED_LIB=ON
 
       - name: Build nghttp2
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/nghttp2-${{env.nghttp2_version}}/build
+        working-directory: build/nghttp2-${{env.nghttp2_version}}/build
         run: cmake --build .
 
       - name: Install nghttp2
         shell: cmd
-        working-directory: sources/nghttp2-${{env.nghttp2_version}}/build
+        working-directory: build/nghttp2-${{env.nghttp2_version}}/build
         run: cmake --install .
+
+
+      - name: Download libffi
+        shell: bash
+        working-directory: build
+        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi
+
+      - name: Configure libffi
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/libffi
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+
+      - name: Build libffi
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libffi/build
+        run: ninja
+
+      - name: Install libffi
+        shell: cmd
+        working-directory: build/libffi/build
+        run: ninja install
+
+
+      - name: Download dlfcn-win32
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
+
+      - name: Extract dlfcn-win32
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/v${{env.dlfcn_version}}.tar.gz
+
+      - name: Configure dlfcn-win32
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/dlfcn-win32-${{env.dlfcn_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+
+      - name: Build dlfcn-win32
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/dlfcn-win32-${{env.dlfcn_version}}/build
+        run: cmake --build .
+
+      - name: Install dlfcn-win32
+        shell: cmd
+        working-directory: build/dlfcn-win32-${{env.dlfcn_version}}/build
+        run: cmake --install .
+
+
+      - name: Download libpsl
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz
+
+      - name: Extract libpsl
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/libpsl-${{env.libpsl_version}}.tar.gz
+
+      - name: Patch libpsl
+        shell: bash
+        working-directory: build/libpsl-${{env.libpsl_version}}
+        run: patch -p1 < ../../patches/libpsl-time.patch
+
+      - name: Configure libpsl
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/libpsl-${{env.libpsl_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+
+      - name: Build libpsl
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libpsl-${{env.libpsl_version}}/build
+        run: ninja
+
+      - name: Install libpsl
+        shell: cmd
+        working-directory: build/libpsl-${{env.libpsl_version}}/build
+        run: ninja install
+
+
+      - name: Download orc
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz
+
+      - name: Extract orc
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/orc-${{env.orc_version}}.tar.xz
+
+      - name: Configure orc
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/orc-${{env.orc_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+
+      - name: Build orc
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/orc-${{env.orc_version}}/build
+        run: ninja
+
+      - name: Install orc
+        shell: cmd
+        working-directory: build/orc-${{env.orc_version}}/build
+        run: ninja install
 
 
       - name: Download SQLite
@@ -877,21 +1083,21 @@ jobs:
 
       - name: Extract SQLite
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Build SQlite
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/sqlite-autoconf-${{env.sqlite3_version}}
+        working-directory: build/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
           cl shell.c sqlite3.c -Fe:sqlite3.exe
 
       - name: Install SQLite
         shell: cmd
-        working-directory: sources/sqlite-autoconf-${{env.sqlite3_version}}
+        working-directory: build/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           copy *.h ${{env.prefix_path_backslash}}\include\
           copy *.lib ${{env.prefix_path_backslash}}\lib\
@@ -915,6 +1121,222 @@ jobs:
           echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
 
 
+      - name: Download GLib
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz
+
+      - name: Extract GLib
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/glib-${{env.glib_version}}.tar.xz || true
+
+      - name: Configure GLib
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_backslash}}\include
+          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
+          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
+        working-directory: build/glib-${{env.glib_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig build
+
+      - name: Build GLib
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/glib-${{env.glib_version}}/build
+        run: ninja
+
+      - name: Install GLib
+        shell: cmd
+        working-directory: build/glib-${{env.glib_version}}/build
+        run: ninja install
+
+
+      - name: Download libsoup
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz
+
+      - name: Extract libsoup
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/libsoup-${{env.libsoup_version}}.tar.xz
+
+      - name: Configure libsoup
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/libsoup-${{env.libsoup_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
+
+      - name: Build libsoup
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libsoup-${{env.libsoup_version}}/build
+        run: ninja
+
+      - name: Install libsoup
+        shell: cmd
+        working-directory: build/libsoup-${{env.libsoup_version}}/build
+        run: ninja install
+
+
+      - name: Download glib-networking
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz
+
+      - name: Extract glib-networking
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/glib-networking-${{env.glib_networking_version}}.tar.xz
+
+      - name: Patch glib-networking
+        shell: bash
+        working-directory: build/glib-networking-${{env.glib_networking_version}}
+        run: patch -p1 < ../../patches/glib-networking-tests.patch
+
+      - name: Configure glib-networking
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/glib-networking-${{env.glib_networking_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=enabled -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
+
+      - name: Build glib-networking
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/glib-networking-${{env.glib_networking_version}}/build
+        run: ninja
+
+      - name: Install glib-networking
+        shell: cmd
+        working-directory: build/glib-networking-${{env.glib_networking_version}}/build
+        run: ninja install
+
+
+      - name: Download freetype
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
+
+      - name: Extract freetype (boostrap)
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
+
+      - name: Configure freetype (boostrap)
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/freetype-${{env.freetype_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+
+      - name: Build freetype (boostrap)
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/freetype-${{env.freetype_version}}/build
+        run: cmake --build .
+
+      - name: Install freetype (boostrap)
+        shell: cmd
+        working-directory: build/freetype-${{env.freetype_version}}/build
+        run: cmake --install .
+
+      - name: Copy freetype (debug)
+        if: matrix.buildtype == 'debug'
+        shell: bash
+        run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
+
+
+      - name: Download harfbuzz
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz
+
+      - name: Extract harfbuzz
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/harfbuzz-${{env.harfbuzz_version}}.tar.xz
+
+      - name: Configure harfbuzz
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/harfbuzz-${{env.harfbuzz_version}}
+        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
+
+      - name: Build harfbuzz
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/harfbuzz-${{env.harfbuzz_version}}/build
+        run: ninja
+
+      - name: Install harfbuzz
+        shell: cmd
+        working-directory: build/harfbuzz-${{env.harfbuzz_version}}/build
+        run: ninja install
+
+
+      - name: Delete freetype bootstrap
+        shell: bash
+        working-directory: build
+        run: rm -rf freetype-${{env.freetype_version}}
+
+      - name: Extract freetype
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
+
+      - name: Configure freetype
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/freetype-${{env.freetype_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+
+      - name: Build freetype
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/freetype-${{env.freetype_version}}/build
+        run: cmake --build .
+
+      - name: Install freetype
+        shell: cmd
+        working-directory: build/freetype-${{env.freetype_version}}/build
+        run: cmake --install .
+
+      - name: Copy freetype (debug)
+        if: matrix.buildtype == 'debug'
+        shell: bash
+        run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
+
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
+
+
       - name: Download libogg
         shell: bash
         working-directory: downloads
@@ -922,7 +1344,7 @@ jobs:
 
       - name: Extract libogg
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/libogg-${{env.libogg_version}}.tar.xz
 
       - name: Configure libogg
@@ -931,19 +1353,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libogg-${{env.libogg_version}}
+        working-directory: build/libogg-${{env.libogg_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF
 
       - name: Build libogg
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libogg-${{env.libogg_version}}/build
+        working-directory: build/libogg-${{env.libogg_version}}/build
         run: cmake --build .
 
       - name: Install libogg
         shell: cmd
-        working-directory: sources/libogg-${{env.libogg_version}}/build
+        working-directory: build/libogg-${{env.libogg_version}}/build
         run: cmake --install .
 
 
@@ -954,7 +1376,7 @@ jobs:
 
       - name: Extract libvorbis
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/libvorbis-${{env.libvorbis_version}}.tar.xz
 
       - name: Configure libvorbis
@@ -963,19 +1385,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libvorbis-${{env.libvorbis_version}}
+        working-directory: build/libvorbis-${{env.libvorbis_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build libvorbis
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/libvorbis-${{env.libvorbis_version}}/build
+        working-directory: build/libvorbis-${{env.libvorbis_version}}/build
         run: cmake --build .
 
       - name: Install libvorbis
         shell: cmd
-        working-directory: sources/libvorbis-${{env.libvorbis_version}}/build
+        working-directory: build/libvorbis-${{env.libvorbis_version}}/build
         run: cmake --install .
 
 
@@ -986,7 +1408,7 @@ jobs:
 
       - name: Extract flac
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/flac-${{env.flac_version}}.tar.xz
 
       - name: Rename nasm.exe
@@ -999,19 +1421,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/flac-${{env.flac_version}}
+        working-directory: build/flac-${{env.flac_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_DOCS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_MANPAGES=OFF -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF
 
       - name: Build flac
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/flac-${{env.flac_version}}/build
+        working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --build .
 
       - name: Install flac
         shell: cmd
-        working-directory: sources/flac-${{env.flac_version}}/build
+        working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --install .
 
       - name: Rename nasm.exe
@@ -1026,12 +1448,12 @@ jobs:
 
       - name: Extract wavpack
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/wavpack-${{env.wavpack_version}}.tar.bz2
 
       - name: patch wavpack
         shell: bash
-        working-directory: sources/wavpack-${{env.wavpack_version}}
+        working-directory: build/wavpack-${{env.wavpack_version}}
         run: sed -i '/wavpackdll.rc/d' CMakeLists.txt
 
       - name: Configure wavpack
@@ -1040,19 +1462,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/wavpack-${{env.wavpack_version}}
+        working-directory: build/wavpack-${{env.wavpack_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DWAVPACK_BUILD_DOCS=OFF -DWAVPACK_BUILD_PROGRAMS=OFF -DWAVPACK_ENABLE_ASM=OFF -DWAVPACK_ENABLE_LEGACY=OFF -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF
 
       - name: Build wavpack
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/wavpack-${{env.wavpack_version}}/build
+        working-directory: build/wavpack-${{env.wavpack_version}}/build
         run: cmake --build .
 
       - name: Install wavpack
         shell: cmd
-        working-directory: sources/wavpack-${{env.wavpack_version}}/build
+        working-directory: build/wavpack-${{env.wavpack_version}}/build
         run: |
           cmake --install .
           mkdir ${{env.prefix_path_backslash}}\include\wavpack
@@ -1068,12 +1490,12 @@ jobs:
 
       - name: Extract opus
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/opus-${{env.opus_version}}.tar.gz
 
       - name: Patch opus
         shell: bash
-        working-directory: sources/opus-${{env.opus_version}}
+        working-directory: build/opus-${{env.opus_version}}
         run: sed -i '/include(opus_buildtype.cmake)/d' CMakeLists.txt
 
       - name: Configure opus
@@ -1082,19 +1504,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/opus-${{env.opus_version}}
+        working-directory: build/opus-${{env.opus_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build opus
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/opus-${{env.opus_version}}/build
+        working-directory: build/opus-${{env.opus_version}}/build
         run: cmake --build .
 
       - name: Install opus
         shell: cmd
-        working-directory: sources/opus-${{env.opus_version}}/build
+        working-directory: build/opus-${{env.opus_version}}/build
         run: cmake --install .
 
 
@@ -1105,12 +1527,12 @@ jobs:
 
       - name: Extract opusfile
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/opusfile-${{env.opusfile_version}}.tar.gz
 
       - name: Patch opusfile
         shell: bash
-        working-directory: sources/opusfile-${{env.opusfile_version}}
+        working-directory: build/opusfile-${{env.opusfile_version}}
         run: patch -p1 < ../../patches/opusfile-cmake.patch
 
       - name: Configure opusfile
@@ -1119,19 +1541,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/opusfile-${{env.opusfile_version}}
+        working-directory: build/opusfile-${{env.opusfile_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build opusfile
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/opusfile-${{env.opusfile_version}}/build
+        working-directory: build/opusfile-${{env.opusfile_version}}/build
         run: cmake --build .
 
       - name: Install opusfile
         shell: cmd
-        working-directory: sources/opusfile-${{env.opusfile_version}}/build
+        working-directory: build/opusfile-${{env.opusfile_version}}/build
         run: cmake --install .
 
 
@@ -1142,12 +1564,12 @@ jobs:
 
       - name: Extract speex
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/speex-Speex-${{env.speex_version}}.tar.gz
 
       - name: Patch speex
         shell: bash
-        working-directory: sources/speex-Speex-${{env.speex_version}}
+        working-directory: build/speex-Speex-${{env.speex_version}}
         run: patch -p1 < ../../patches/speex-cmake.patch
 
       - name: Configure speex
@@ -1156,19 +1578,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/speex-Speex-${{env.speex_version}}
+        working-directory: build/speex-Speex-${{env.speex_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build speex
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/speex-Speex-${{env.speex_version}}/build
+        working-directory: build/speex-Speex-${{env.speex_version}}/build
         run: cmake --build .
 
       - name: Install speex
         shell: cmd
-        working-directory: sources/speex-Speex-${{env.speex_version}}/build
+        working-directory: build/speex-Speex-${{env.speex_version}}/build
         run: cmake --install .
 
       - name: Copy speex (debug)
@@ -1186,7 +1608,7 @@ jobs:
 
       - name: Extract mpg123
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/mpg123-${{env.mpg123_version}}.tar.bz2
 
       - name: Configure mpg123
@@ -1195,19 +1617,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/mpg123-${{env.mpg123_version}}
+        working-directory: build/mpg123-${{env.mpg123_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
 
       - name: Build mpg123
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/mpg123-${{env.mpg123_version}}/build
+        working-directory: build/mpg123-${{env.mpg123_version}}/build
         run: cmake --build .
 
       - name: Install mpg123
         shell: cmd
-        working-directory: sources/mpg123-${{env.mpg123_version}}/build
+        working-directory: build/mpg123-${{env.mpg123_version}}/build
         run: cmake --install .
 
 
@@ -1218,19 +1640,19 @@ jobs:
 
       - name: Extract lame
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/lame-${{env.lame_version}}.tar.gz
 
       - name: Patch lame (x86)
         if: matrix.arch == 'x86'
         shell: bash
-        working-directory: sources/lame-${{env.lame_version}}
+        working-directory: build/lame-${{env.lame_version}}
         run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X86/g' Makefile.MSVC
 
       - name: Patch lame (x86_64)
         if: matrix.arch == 'x86_64'
         shell: bash
-        working-directory: sources/lame-${{env.lame_version}}
+        working-directory: build/lame-${{env.lame_version}}
         run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' Makefile.MSVC
 
       - name: Build lame (x86)
@@ -1238,7 +1660,7 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/lame-${{env.lame_version}}
+        working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
 
       - name: Build lame (x86_64)
@@ -1246,12 +1668,12 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/lame-${{env.lame_version}}
+        working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
 
       - name: Install lame
         shell: cmd
-        working-directory: sources/lame-${{env.lame_version}}
+        working-directory: build/lame-${{env.lame_version}}
         run: |
           copy include\*.h ${{env.prefix_path_backslash}}\include\
           copy output\libmp3lame*.lib ${{env.prefix_path_backslash}}\lib\
@@ -1280,23 +1702,23 @@ jobs:
 
       - name: Extract twolame
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Patch twolame source
         shell: bash
-        working-directory: sources/twolame-${{env.twolame_version}}
+        working-directory: build/twolame-${{env.twolame_version}}
         run: patch -p1 < ../../patches/twolame.patch
 
       - name: Upgrade twolame project
         shell: cmd
-        working-directory: sources/twolame-${{env.twolame_version}}/win32
+        working-directory: build/twolame-${{env.twolame_version}}/win32
         run: start /w devenv.exe libtwolame_dll.sln /upgrade
 
       - name: Patch twolame project for x86_64
         if: matrix.arch == 'x86_64'
         shell: bash
-        working-directory: sources/twolame-${{env.twolame_version}}/win32
+        working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           sed -i 's/Win32/x64/g' *.sln *.vcproj *.vcxproj
           sed -i 's/MachineX86/MachineX64/g' *.sln *.vcxproj
@@ -1305,14 +1727,14 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/twolame-${{env.twolame_version}}/win32
+        working-directory: build/twolame-${{env.twolame_version}}/win32
         run: msbuild libtwolame_dll.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{env.msbuild_platform}}
 
       - name: Install twolame
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/twolame-${{env.twolame_version}}/win32
+        working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
           copy lib\*.lib ${{env.prefix_path_backslash}}\lib\
@@ -1334,6 +1756,226 @@ jobs:
           echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
 
 
+      - name: Download musepack
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz
+
+      - name: Extract musepack
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/musepack_src_r${{env.musepack_version}}.tar.gz
+
+      - name: Patch musepack
+        shell: bash
+        working-directory: build/musepack_src_r${{env.musepack_version}}
+        run: patch -p1 < ../../patches/musepack-fixes.patch
+
+      - name: Configure musepack
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/musepack_src_r${{env.musepack_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
+
+      - name: Build musepack
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/musepack_src_r${{env.musepack_version}}/build
+        run: cmake --build .
+
+      - name: Install musepack
+        shell: cmd
+        working-directory: build/musepack_src_r${{env.musepack_version}}/build
+        run: |
+          cmake --install .
+          copy libmpcdec\*.lib ${{env.prefix_path_backslash}}\lib\
+          copy libmpcdec\*.dll ${{env.prefix_path_backslash}}\bin\
+
+
+      - name: Download libopenmpt
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
+
+      - name: Create libopenmpt directory
+        shell: cmd
+        working-directory: build
+        run: mkdir libopenmpt
+
+      - name: Extract libopenmpt
+        shell: cmd
+        working-directory: build/libopenmpt
+        run: 7z x "../../downloads/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip"
+
+      - name: Patch libopenmpt
+        shell: bash
+        working-directory: build/libopenmpt
+        run: patch -p1 < ../../patches/libopenmpt-cmake.patch
+
+      - name: Configure libopenmpt
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libopenmpt
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
+
+      - name: Build libopenmpt
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libopenmpt/build
+        run: cmake --build .
+
+      - name: Install libopenmpt
+        shell: cmd
+        working-directory: build/libopenmpt/build
+        run: cmake --install .
+
+
+      - name: Download libgme
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
+
+      - name: Extract libgme
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/game-music-emu-${{env.libgme_version}}.tar.xz
+
+      - name: Configure libgme
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/game-music-emu-${{env.libgme_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+
+      - name: Build libgme
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/game-music-emu-${{env.libgme_version}}/build
+        run: cmake --build .
+
+      - name: Install libgme
+        shell: cmd
+        working-directory: build/game-music-emu-${{env.libgme_version}}/build
+        run: cmake --install .
+
+
+      - name: Download faad2
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz
+
+      - name: Extract faad2
+        shell: bash
+        working-directory: build
+        run: |
+          mkdir faad2-${{env.faad2_version}}
+          tar -xvf ../downloads/faad2-${{env.faad2_version}}.tar.gz --strip-components=1 -C faad2-${{env.faad2_version}}
+
+      - name: Patch faad2
+        shell: bash
+        working-directory: build/faad2-${{env.faad2_version}}
+        run: patch -p1 < ../../patches/faad2-cmake.patch
+
+      - name: Configure faad2
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/faad2-${{env.faad2_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
+
+      - name: Build faad2
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/faad2-${{env.faad2_version}}/build
+        run: cmake --build .
+
+      - name: Install faad2
+        shell: cmd
+        working-directory: build/faad2-${{env.faad2_version}}/build
+        run: |
+          cmake --install .
+          copy ..\include\*.h ${{env.prefix_path_backslash}}\include\
+
+
+      - name: Download faac
+        shell: bash
+        working-directory: build
+        run: git clone https://github.com/knik0/faac
+
+      - name: Patch faac
+        shell: bash
+        working-directory: build/faac
+        run: patch -p1 < ../../patches/faac-msvc.patch
+
+      - name: Upgrade faac project
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/faac/project/msvc
+        run: start /w devenv.exe faac.sln /upgrade
+
+      - name: Build faac
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/faac/project/msvc
+        run: msbuild faac.sln /p:Configuration=${{matrix.buildtype}} /p:Platform=${{env.msbuild_platform}}
+
+      - name: Install faac headers
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/faac
+        run: copy include\*.h ${{env.prefix_path_backslash}}\include\
+
+      - name: Install faac lib
+        shell: cmd
+        working-directory: build/faac/project/msvc
+        run: |
+          copy bin\${{matrix.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\libfaac.lib
+          copy bin\${{matrix.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
+
+
+      - name: Download fdk-aac
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz
+
+      - name: Extract fdk-aac
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/fdk-aac-${{env.fdk_aac_version}}.tar.gz
+
+      - name: Configure fdk-aac
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/fdk-aac-${{env.fdk_aac_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
+
+      - name: Build fdk-aac
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/fdk-aac-${{env.fdk_aac_version}}/build
+        run: cmake --build .
+
+      - name: Install fdk-aac
+        shell: cmd
+        working-directory: build/fdk-aac-${{env.fdk_aac_version}}/build
+        run: cmake --install .
+
+
       - name: Download TagLib
         shell: bash
         working-directory: downloads
@@ -1341,7 +1983,7 @@ jobs:
 
       - name: Extract TagLib
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/taglib-${{env.taglib_version}}.tar.gz
 
       - name: Configure TagLib
@@ -1350,51 +1992,88 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/taglib-${{env.taglib_version}}
+        working-directory: build/taglib-${{env.taglib_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build TagLib
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/taglib-${{env.taglib_version}}/build
+        working-directory: build/taglib-${{env.taglib_version}}/build
         run: cmake --build .
 
       - name: Install TagLib
         shell: cmd
-        working-directory: sources/taglib-${{env.taglib_version}}/build
+        working-directory: build/taglib-${{env.taglib_version}}/build
         run: cmake --install .
 
 
-      - name: Download dlfcn-win32
+      - name: Download libbs2b
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2
 
-      - name: Extract dlfcn-win32
+      - name: Extract libbs2b
         shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/v${{env.dlfcn_version}}.tar.gz
+        working-directory: build
+        run: tar -xf ../downloads/libbs2b-${{env.libbs2b_version}}.tar.bz2
 
-      - name: Configure dlfcn-win32
+      - name: Patch libbs2b
+        shell: bash
+        working-directory: build/libbs2b-${{env.libbs2b_version}}
+        run: patch -p1 < ../../patches/libbs2b-msvc.patch
+
+      - name: Configure libbs2b
         shell: cmd
         env:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/dlfcn-win32-${{env.dlfcn_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+        working-directory: build/libbs2b-${{env.libbs2b_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
-      - name: Build dlfcn-win32
+      - name: Build libbs2b
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/dlfcn-win32-${{env.dlfcn_version}}/build
+        working-directory: build/libbs2b-${{env.libbs2b_version}}/build
         run: cmake --build .
 
-      - name: Install dlfcn-win32
+      - name: Install libbs2b
         shell: cmd
-        working-directory: sources/dlfcn-win32-${{env.dlfcn_version}}/build
+        working-directory: build/libbs2b-${{env.libbs2b_version}}/build
+        run: cmake --install .
+
+
+      - name: Download libebur128
+        shell: bash
+        working-directory: downloads
+        run: curl -o libebur128-${{env.libebur128_version}}.tar.gz ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}.tar.gz
+
+      - name: Extract libebur128
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
+
+      - name: Configure libebur128
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/libebur128-${{env.libebur128_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
+
+      - name: Build libebur128
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/libebur128-${{env.libebur128_version}}/build
+        run: cmake --build .
+
+      - name: Install libebur128
+        shell: cmd
+        working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --install .
 
 
@@ -1422,503 +2101,14 @@ jobs:
           xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
 
 
-      - name: Download libffi
-        shell: bash
-        working-directory: sources
-        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi
-
-      - name: Configure libffi
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libffi
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
-
-      - name: Build libffi
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libffi/build
-        run: ninja
-
-      - name: Install libffi
-        shell: cmd
-        working-directory: sources/libffi/build
-        run: ninja install
-
-
-      - name: Download GLib
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib/${{env.glib_version_short}}/glib-${{env.glib_version}}.tar.xz
-
-      - name: Extract GLib
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/glib-${{env.glib_version}}.tar.xz || true
-
-      - name: Configure GLib
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
-        working-directory: sources/glib-${{env.glib_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig build
-
-      - name: Build GLib
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/glib-${{env.glib_version}}/build
-        run: ninja
-
-      - name: Install GLib
-        shell: cmd
-        working-directory: sources/glib-${{env.glib_version}}/build
-        run: ninja install
-
-
-      - name: Download glib-networking
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz
-
-      - name: Extract glib-networking
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/glib-networking-${{env.glib_networking_version}}.tar.xz
-
-      - name: Patch glib-networking
-        shell: bash
-        working-directory: sources/glib-networking-${{env.glib_networking_version}}
-        run: patch -p1 < ../../patches/glib-networking-tests.patch
-
-      - name: Configure glib-networking
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/glib-networking-${{env.glib_networking_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=enabled -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
-
-      - name: Build glib-networking
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/glib-networking-${{env.glib_networking_version}}/build
-        run: ninja
-
-      - name: Install glib-networking
-        shell: cmd
-        working-directory: sources/glib-networking-${{env.glib_networking_version}}/build
-        run: ninja install
-
-
-      - name: Download libpsl
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/rockdaboot/libpsl/releases/download/${{env.libpsl_version}}/libpsl-${{env.libpsl_version}}.tar.gz
-
-      - name: Extract libpsl
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/libpsl-${{env.libpsl_version}}.tar.gz
-
-      - name: Patch libpsl
-        shell: bash
-        working-directory: sources/libpsl-${{env.libpsl_version}}
-        run: patch -p1 < ../../patches/libpsl-time.patch
-
-      - name: Configure libpsl
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libpsl-${{env.libpsl_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
-
-      - name: Build libpsl
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libpsl-${{env.libpsl_version}}/build
-        run: ninja
-
-      - name: Install libpsl
-        shell: cmd
-        working-directory: sources/libpsl-${{env.libpsl_version}}/build
-        run: ninja install
-
-
-      - name: Download libsoup
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://download.gnome.org/sources/libsoup/${{env.libsoup_version_short}}/libsoup-${{env.libsoup_version}}.tar.xz
-
-      - name: Extract libsoup
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/libsoup-${{env.libsoup_version}}.tar.xz
-
-      - name: Configure libsoup
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libsoup-${{env.libsoup_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
-
-      - name: Build libsoup
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libsoup-${{env.libsoup_version}}/build
-        run: ninja
-
-      - name: Install libsoup
-        shell: cmd
-        working-directory: sources/libsoup-${{env.libsoup_version}}/build
-        run: ninja install
-
-
-      - name: Download orc
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://gstreamer.freedesktop.org/src/orc/orc-${{env.orc_version}}.tar.xz
-
-      - name: Extract orc
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/orc-${{env.orc_version}}.tar.xz
-
-      - name: Configure orc
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/orc-${{env.orc_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
-
-      - name: Build orc
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/orc-${{env.orc_version}}/build
-        run: ninja
-
-      - name: Install orc
-        shell: cmd
-        working-directory: sources/orc-${{env.orc_version}}/build
-        run: ninja install
-
-
-      - name: Download musepack
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://files.musepack.net/source/musepack_src_r${{env.musepack_version}}.tar.gz
-
-      - name: Extract musepack
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/musepack_src_r${{env.musepack_version}}.tar.gz
-
-      - name: Patch musepack
-        shell: bash
-        working-directory: sources/musepack_src_r${{env.musepack_version}}
-        run: patch -p1 < ../../patches/musepack-fixes.patch
-
-      - name: Configure musepack
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/musepack_src_r${{env.musepack_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
-
-      - name: Build musepack
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/musepack_src_r${{env.musepack_version}}/build
-        run: cmake --build .
-
-      - name: Install musepack
-        shell: cmd
-        working-directory: sources/musepack_src_r${{env.musepack_version}}/build
-        run: |
-          cmake --install .
-          copy libmpcdec\*.lib ${{env.prefix_path_backslash}}\lib\
-          copy libmpcdec\*.dll ${{env.prefix_path_backslash}}\bin\
-
-
-      - name: Download libopenmpt
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip
-
-      - name: Create libopenmpt directory
-        shell: cmd
-        working-directory: sources
-        run: mkdir libopenmpt
-
-      - name: Extract libopenmpt
-        shell: cmd
-        working-directory: sources/libopenmpt
-        run: 7z x "../../downloads/libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip"
-
-      - name: Patch libopenmpt
-        shell: bash
-        working-directory: sources/libopenmpt
-        run: patch -p1 < ../../patches/libopenmpt-cmake.patch
-
-      - name: Configure libopenmpt
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libopenmpt
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
-
-      - name: Build libopenmpt
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libopenmpt/build
-        run: cmake --build .
-
-      - name: Install libopenmpt
-        shell: cmd
-        working-directory: sources/libopenmpt/build
-        run: cmake --install .
-
-
-      - name: Download libgme
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
-
-      - name: Extract libgme
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/game-music-emu-${{env.libgme_version}}.tar.xz
-
-      - name: Configure libgme
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/game-music-emu-${{env.libgme_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
-
-      - name: Build libgme
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/game-music-emu-${{env.libgme_version}}/build
-        run: cmake --build .
-
-      - name: Install libgme
-        shell: cmd
-        working-directory: sources/game-music-emu-${{env.libgme_version}}/build
-        run: cmake --install .
-
-
-      - name: Download fdk-aac
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/opencore-amr/fdk-aac/fdk-aac-${{env.fdk_aac_version}}.tar.gz
-
-      - name: Extract fdk-aac
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/fdk-aac-${{env.fdk_aac_version}}.tar.gz
-
-      - name: Configure fdk-aac
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/fdk-aac-${{env.fdk_aac_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
-
-      - name: Build fdk-aac
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/fdk-aac-${{env.fdk_aac_version}}/build
-        run: cmake --build .
-
-      - name: Install fdk-aac
-        shell: cmd
-        working-directory: sources/fdk-aac-${{env.fdk_aac_version}}/build
-        run: cmake --install .
-
-
-      - name: Download faad2
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/knik0/faad2/tarball/${{env.faad2_version}}/faad2-${{env.faad2_version}}.tar.gz
-
-      - name: Extract faad2
-        shell: bash
-        working-directory: sources
-        run: |
-          mkdir faad2-${{env.faad2_version}}
-          tar -xvf ../downloads/faad2-${{env.faad2_version}}.tar.gz --strip-components=1 -C faad2-${{env.faad2_version}}
-
-      - name: Patch faad2
-        shell: bash
-        working-directory: sources/faad2-${{env.faad2_version}}
-        run: patch -p1 < ../../patches/faad2-cmake.patch
-
-      - name: Configure faad2
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/faad2-${{env.faad2_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
-
-      - name: Build faad2
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/faad2-${{env.faad2_version}}/build
-        run: cmake --build .
-
-      - name: Install faad2
-        shell: cmd
-        working-directory: sources/faad2-${{env.faad2_version}}/build
-        run: |
-          cmake --install .
-          copy ..\include\*.h ${{env.prefix_path_backslash}}\include\
-
-
-      - name: Download faac
-        shell: bash
-        working-directory: sources
-        run: git clone https://github.com/knik0/faac
-
-      - name: Patch faac
-        shell: bash
-        working-directory: sources/faac
-        run: patch -p1 < ../../patches/faac-msvc.patch
-
-      - name: Upgrade faac project
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/faac/project/msvc
-        run: start /w devenv.exe faac.sln /upgrade
-
-      - name: Build faac
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/faac/project/msvc
-        run: msbuild faac.sln /p:Configuration=${{matrix.buildtype}} /p:Platform=${{env.msbuild_platform}}
-
-      - name: Install faac headers
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/faac
-        run: copy include\*.h ${{env.prefix_path_backslash}}\include\
-
-      - name: Install faac lib
-        shell: cmd
-        working-directory: sources/faac/project/msvc
-        run: |
-          copy bin\${{matrix.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\libfaac.lib
-          copy bin\${{matrix.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
-
-
-      - name: Download libbs2b
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/bs2b/libbs2b/${{env.libbs2b_version}}/libbs2b-${{env.libbs2b_version}}.tar.bz2
-
-      - name: Extract libbs2b
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/libbs2b-${{env.libbs2b_version}}.tar.bz2
-
-      - name: Patch libbs2b
-        shell: bash
-        working-directory: sources/libbs2b-${{env.libbs2b_version}}
-        run: patch -p1 < ../../patches/libbs2b-msvc.patch
-
-      - name: Configure libbs2b
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libbs2b-${{env.libbs2b_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
-
-      - name: Build libbs2b
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libbs2b-${{env.libbs2b_version}}/build
-        run: cmake --build .
-
-      - name: Install libbs2b
-        shell: cmd
-        working-directory: sources/libbs2b-${{env.libbs2b_version}}/build
-        run: cmake --install .
-
-
-      - name: Download libebur128
-        shell: bash
-        working-directory: downloads
-        run: curl -o libebur128-${{env.libebur128_version}}.tar.gz ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}.tar.gz
-
-      - name: Extract libebur128
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
-
-      - name: Configure libebur128
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/libebur128-${{env.libebur128_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
-
-      - name: Build libebur128
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/libebur128-${{env.libebur128_version}}/build
-        run: cmake --build .
-
-      - name: Install libebur128
-        shell: cmd
-        working-directory: sources/libebur128-${{env.libebur128_version}}/build
-        run: cmake --install .
-
-
       - name: Download ffmpeg
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
 
       - name: Checkout ffmpeg
         shell: bash
-        working-directory: sources/ffmpeg
+        working-directory: build/ffmpeg
         run: git checkout meson-${{env.ffmpeg_version}}
 
       - name: Configure ffmpeg
@@ -1927,19 +2117,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/ffmpeg
+        working-directory: build/ffmpeg
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Dgpl=enabled build
 
       - name: Build ffmpeg
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/ffmpeg/build
+        working-directory: build/ffmpeg/build
         run: ninja
 
       - name: Install ffmpeg
         shell: cmd
-        working-directory: sources/ffmpeg/build
+        working-directory: build/ffmpeg/build
         run: ninja install
 
 
@@ -1950,7 +2140,7 @@ jobs:
 
       - name: Extract Chromaprint
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/chromaprint-${{env.chromaprint_version}}.tar.gz
 
       - name: Configure Chromaprint
@@ -1959,20 +2149,26 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/chromaprint-${{env.chromaprint_version}}
+        working-directory: build/chromaprint-${{env.chromaprint_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=${{env.prefix_path_backslash}}
 
       - name: Build Chromaprint
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/chromaprint-${{env.chromaprint_version}}/build
+        working-directory: build/chromaprint-${{env.chromaprint_version}}/build
         run: cmake --build .
 
       - name: Install Chromaprint
         shell: cmd
-        working-directory: sources/chromaprint-${{env.chromaprint_version}}/build
+        working-directory: build/chromaprint-${{env.chromaprint_version}}/build
         run: cmake --install .
+
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
 
 
       - name: Download GStreamer
@@ -1982,7 +2178,7 @@ jobs:
 
       - name: Extract GStreamer
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gstreamer-${{env.gstreamer_version}}.tar.xz
 
       - name: Configure GStreamer
@@ -1992,19 +2188,19 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
-        working-directory: sources/gstreamer-${{env.gstreamer_version}}
+        working-directory: build/gstreamer-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled build
 
       - name: Build GStreamer
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/gstreamer-${{env.gstreamer_version}}/build
+        working-directory: build/gstreamer-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install GStreamer
         shell: cmd
-        working-directory: sources/gstreamer-${{env.gstreamer_version}}/build
+        working-directory: build/gstreamer-${{env.gstreamer_version}}/build
         run: ninja install
 
 
@@ -2015,12 +2211,12 @@ jobs:
 
       - name: Extract gst-plugins-base
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
 
       - name: Patch gst-plugins-base
         shell: bash
-        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-base-${{env.gstreamer_version}}
         run: patch -p3 < ../../patches/gst-plugins-base-discoverer.patch
 
       - name: Configure gst-plugins-base
@@ -2030,19 +2226,19 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
-        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-base-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dexamples=disabled -Dtests=disabled -Dtools=enabled -Ddoc=disabled -Dorc=enabled -Dadder=enabled -Dapp=enabled -Daudioconvert=enabled -Daudiomixer=enabled -Daudiorate=enabled -Daudioresample=enabled -Daudiotestsrc=enabled -Dcompositor=disabled -Dencoding=disabled -Dgio=enabled -Dgio-typefinder=enabled -Doverlaycomposition=disabled -Dpbtypes=enabled -Dplayback=enabled -Drawparse=disabled -Dsubparse=disabled -Dtcp=enabled -Dtypefind=enabled -Dvideoconvertscale=disabled -Dvideorate=disabled -Dvideotestsrc=disabled -Dvolume=enabled -Dalsa=disabled -Dcdparanoia=disabled -Dlibvisual=disabled -Dogg=enabled -Dopus=enabled -Dpango=disabled -Dtheora=disabled -Dtremor=disabled -Dvorbis=enabled -Dx11=disabled -Dxshm=disabled -Dxvideo=disabled -Dxi=disabled -Dgl=disabled -Dgl-graphene=disabled -Dgl-jpeg=disabled -Dgl-png=disabled build
 
       - name: Build gst-plugins-base
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-base-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install gst-plugins-base
         shell: cmd
-        working-directory: sources/gst-plugins-base-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-base-${{env.gstreamer_version}}/build
         run: ninja install
 
 
@@ -2053,7 +2249,7 @@ jobs:
 
       - name: Extract gst-plugins-good
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gst-plugins-good-${{env.gstreamer_version}}.tar.xz
 
       - name: Configure gst-plugins-good
@@ -2062,19 +2258,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/gst-plugins-good-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-good-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dorc=enabled -Dalpha=disabled -Dapetag=enabled -Daudiofx=enabled -Daudioparsers=enabled -Dauparse=disabled -Dautodetect=enabled -Davi=disabled -Dcutter=disabled -Ddebugutils=disabled -Ddeinterlace=disabled -Ddtmf=disabled -Deffectv=disabled -Dequalizer=enabled -Dflv=disabled -Dflx=disabled -Dgoom=disabled -Dgoom2k1=disabled -Dicydemux=enabled -Did3demux=enabled -Dimagefreeze=disabled -Dinterleave=disabled -Disomp4=enabled -Dlaw=disabled -Dlevel=disabled -Dmatroska=disabled -Dmonoscope=disabled -Dmultifile=disabled -Dmultipart=disabled -Dreplaygain=enabled -Drtp=enabled -Drtpmanager=disabled -Drtsp=enabled -Dshapewipe=disabled -Dsmpte=disabled -Dspectrum=enabled -Dudp=enabled -Dvideobox=disabled -Dvideocrop=disabled -Dvideofilter=disabled -Dvideomixer=disabled -Dwavenc=enabled -Dwavparse=enabled -Dxingmux=enabled -Dy4m=disabled -Daalib=disabled -Dbz2=disabled -Dcairo=disabled -Ddirectsound=enabled -Ddv=disabled -Ddv1394=disabled -Dflac=enabled -Dgdk-pixbuf=disabled -Dgtk3=disabled -Djack=disabled -Djpeg=disabled -Dlame=enabled -Dlibcaca=disabled -Dmpg123=enabled -Doss=disabled -Doss4=disabled -Dosxaudio=disabled -Dosxvideo=disabled -Dpng=disabled -Dpulse=disabled -Dqt5=disabled -Dshout2=disabled -Dsoup=enabled -Dspeex=enabled -Dtaglib=enabled -Dtwolame=enabled -Dvpx=disabled -Dwaveform=enabled -Dwavpack=enabled -Dximagesrc=disabled -Dv4l2=disabled -Dv4l2-libv4l2=disabled -Dv4l2-gudev=disabled -Dhls-crypto=openssl build
 
       - name: Build gst-plugins-good
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/gst-plugins-good-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-good-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install gst-plugins-good
         shell: cmd
-        working-directory: sources/gst-plugins-good-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-good-${{env.gstreamer_version}}/build
         run: ninja install
 
 
@@ -2085,12 +2281,12 @@ jobs:
 
       - name: Extract gst-plugins-bad
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
 
       - name: Patch gst-plugins-bad
         shell: bash
-        working-directory: sources/gst-plugins-bad-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
         run: |
           patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
           sed -i 's/c:\\msvc_x86_64\\lib/${{env.prefix_path_backslash2}}\\lib/g' ext/faad/meson.build
@@ -2105,19 +2301,19 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
-        working-directory: sources/gst-plugins-bad-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dexamples=disabled -Dtests=disabled -Dexamples=disabled -Dgpl=enabled -Dorc=enabled -Daccurip=disabled -Dadpcmdec=disabled -Dadpcmenc=disabled -Daiff=enabled -Dasfmux=enabled -Daudiobuffersplit=disabled -Daudiofxbad=disabled -Daudiolatency=disabled -Daudiomixmatrix=disabled -Daudiovisualizers=disabled -Dautoconvert=disabled -Dbayer=disabled -Dcamerabin2=disabled -Dcodecalpha=disabled -Dcodectimestamper=disabled -Dcoloreffects=disabled -Ddebugutils=disabled -Ddvbsubenc=disabled -Ddvbsuboverlay=disabled -Ddvdspu=disabled -Dfaceoverlay=disabled -Dfestival=disabled -Dfieldanalysis=disabled -Dfreeverb=disabled -Dfrei0r=disabled -Dgaudieffects=disabled -Dgdp=disabled -Dgeometrictransform=disabled -Did3tag=enabled -Dinter=disabled -Dinterlace=disabled -Divfparse=disabled -Divtc=disabled -Djp2kdecimator=disabled -Djpegformat=disabled -Dlibrfb=disabled -Dmidi=disabled -Dmpegdemux=disabled -Dmpegpsmux=disabled -Dmpegtsdemux=disabled -Dmpegtsmux=disabled -Dmxf=disabled -Dnetsim=disabled -Donvif=disabled -Dpcapparse=disabled -Dpnm=disabled -Dproxy=disabled -Dqroverlay=disabled -Dqsv=disabled -Drawparse=disabled -Dremovesilence=enabled -Drist=disabled -Drtmp2=disabled -Drtp=disabled -Dsdp=disabled -Dsegmentclip=disabled -Dsiren=disabled -Dsmooth=disabled -Dspeed=disabled -Dsubenc=disabled -Dswitchbin=disabled -Dtimecode=disabled -Dvideofilters=disabled -Dvideoframe_audiolevel=disabled -Dvideoparsers=disabled -Dvideosignal=disabled -Dvmnc=disabled -Dy4m=disabled -Dopencv=disabled -Dwayland=disabled -Dx11=disabled -Daes=enabled -Daom=disabled -Davtp=disabled -Damfcodec=disabled -Dandroidmedia=disabled -Dapplemedia=disabled -Dasio=disabled -Dassrender=disabled -Dbluez=enabled -Dbs2b=enabled -Dbz2=disabled -Dchromaprint=enabled -Dclosedcaption=disabled -Dcolormanagement=disabled -Dcurl=disabled -Dcurl-ssh2=disabled -Dd3dvideosink=disabled -Dd3d11=disabled -Ddash=enabled -Ddc1394=disabled -Ddecklink=disabled -Ddirectfb=disabled -Ddirectsound=enabled -Ddirectshow=disabled -Ddtls=disabled -Ddts=disabled -Ddvb=disabled -Dfaac=enabled -Dfaad=enabled -Dfbdev=disabled -Dfdkaac=enabled -Dflite=disabled -Dfluidsynth=disabled -Dgl=disabled -Dgme=enabled -Dgs=disabled -Dgsm=disabled -Dgtk3=disabled -Dipcpipeline=disabled -Diqa=disabled -Dkate=disabled -Dkms=disabled -Dladspa=disabled -Dldac=disabled -Dlibde265=disabled -Dopenaptx=disabled -Dlv2=disabled -Dmediafoundation=disabled -Dmicrodns=disabled -Dmodplug=disabled -Dmpeg2enc=disabled -Dmplex=disabled -Dmsdk=disabled -Dmusepack=enabled -Dneon=disabled -Dnvcodec=disabled -Donnx=disabled -Dopenal=disabled -Dopenexr=disabled -Dopenh264=disabled -Dopenjpeg=disabled -Dopenmpt=enabled -Dopenni2=disabled -Dopensles=disabled -Dopus=enabled -Dresindvd=disabled -Drsvg=disabled -Drtmp=disabled -Dsbc=disabled -Dsctp=disabled -Dshm=disabled -Dsmoothstreaming=disabled -Dsndfile=disabled -Dsoundtouch=disabled -Dspandsp=disabled -Dsrt=disabled -Dsrtp=disabled -Dsvthevcenc=disabled -Dteletext=disabled -Dtinyalsa=disabled -Dtranscode=disabled -Dttml=disabled -Duvch264=disabled -Dva=disabled -Dvoaacenc=disabled -Dvoamrwbenc=disabled -Dvulkan=disabled -Dwasapi=enabled -Dwasapi2=enabled -Dwebp=disabled -Dwebrtc=disabled -Dwebrtcdsp=disabled -Dwildmidi=disabled -Dwic=disabled -Dwin32ipc=disabled -Dwinks=disabled -Dwinscreencap=disabled -Dx265=disabled -Dzbar=disabled -Dzxing=disabled -Dwpe=disabled -Dmagicleap=disabled -Dv4l2codecs=disabled -Disac=disabled -Dhls=enabled build
 
       - name: Build gst-plugins-bad
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/gst-plugins-bad-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install gst-plugins-bad
         shell: cmd
-        working-directory: sources/gst-plugins-bad-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}/build
         run: ninja install
 
 
@@ -2128,7 +2324,7 @@ jobs:
 
       - name: Extract gst-plugins-ugly
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
 
       - name: Configure gst-plugins-ugly
@@ -2136,17 +2332,17 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/gst-plugins-ugly-${{env.gstreamer_version}}
+        working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Ddoc=disabled -Dgpl=enabled -Dorc=enabled -Dasfdemux=enabled -Ddvdlpcmdec=disabled -Ddvdsub=disabled -Drealmedia=disabled -Da52dec=disabled -Damrnb=disabled -Damrwbdec=disabled -Dcdio=disabled -Ddvdread=disabled -Dmpeg2dec=disabled -Dsidplay=disabled -Dx264=disabled build
 
       - name: Build gst-plugins-ugly
         env:
           CL: "/MP"
-        working-directory: sources/gst-plugins-ugly-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install gst-plugins-ugly
-        working-directory: sources/gst-plugins-ugly-${{env.gstreamer_version}}/build
+        working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}/build
         run: ninja install
 
 
@@ -2157,7 +2353,7 @@ jobs:
 
       - name: Extract gst-libav
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/gst-libav-${{env.gstreamer_version}}.tar.xz
 
       - name: Configure gst-libav
@@ -2167,251 +2363,26 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
-        working-directory: sources/gst-libav-${{env.gstreamer_version}}
+        working-directory: build/gst-libav-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Ddoc=disabled build
 
       - name: Build gst-libav
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/gst-libav-${{env.gstreamer_version}}/build
+        working-directory: build/gst-libav-${{env.gstreamer_version}}/build
         run: ninja
 
       - name: Install gst-libav
         shell: cmd
-        working-directory: sources/gst-libav-${{env.gstreamer_version}}/build
+        working-directory: build/gst-libav-${{env.gstreamer_version}}/build
         run: ninja install
 
 
-      - name: Download icu
+      - name: Cleanup build directory
         shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
-
-      - name: Extract icu
-        shell: bash
-        working-directory: sources
-        run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
-
-      - name: Patch icu
-        shell: bash
-        working-directory: sources/icu
-        run: patch -p1 < ../../patches/icu-uwp.patch
-
-      - name: Build icu
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/icu/source/allinone
-        run: msbuild allinone.sln /property:Configuration=${{matrix.buildtype}} /p:platform=${{env.msbuild_platform}}
-
-      - name: Install icu
-        shell: bash
-        working-directory: sources/icu
-        run: |
-          cp -r include/unicode ${{env.prefix_path_unix}}/include/
-          cp ${{env.libdir}}/{*.lib,*.pdb,*.exp} ${{env.prefix_path_unix}}/lib/
-          cp ${{env.bindir}}/{*.dll,*.exe} ${{env.prefix_path_unix}}/bin/
-
-
-      - name: Download expat
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/expat/expat/${{env.expat_version}}/expat-${{env.expat_version}}.tar.bz2
-
-      - name: Extract expat
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/expat-${{env.expat_version}}.tar.bz2
-
-      - name: Configure expat
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/expat-${{env.expat_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
-
-      - name: Build expat
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/expat-${{env.expat_version}}/build
-        run: cmake --build .
-
-      - name: Install expat
-        shell: cmd
-        working-directory: sources/expat-${{env.expat_version}}/build
-        run: cmake --install .
-
-
-      - name: Download freetype
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
-
-      - name: Extract freetype (boostrap)
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
-
-      - name: Configure freetype (boostrap)
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/freetype-${{env.freetype_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
-
-      - name: Build freetype (boostrap)
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/freetype-${{env.freetype_version}}/build
-        run: cmake --build .
-
-      - name: Install freetype (boostrap)
-        shell: cmd
-        working-directory: sources/freetype-${{env.freetype_version}}/build
-        run: cmake --install .
-
-      - name: Copy freetype (debug)
-        if: matrix.buildtype == 'debug'
-        shell: bash
-        run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
-
-
-      - name: Download harfbuzz
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/harfbuzz/harfbuzz/releases/download/${{env.harfbuzz_version}}/harfbuzz-${{env.harfbuzz_version}}.tar.xz
-
-      - name: Extract harfbuzz
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/harfbuzz-${{env.harfbuzz_version}}.tar.xz
-
-      - name: Configure harfbuzz
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/harfbuzz-${{env.harfbuzz_version}}
-        run: meson setup --buildtype=${{matrix.buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
-
-      - name: Build harfbuzz
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/harfbuzz-${{env.harfbuzz_version}}/build
-        run: ninja
-
-      - name: Install harfbuzz
-        shell: cmd
-        working-directory: sources/harfbuzz-${{env.harfbuzz_version}}/build
-        run: ninja install
-
-
-      - name: Delete freetype bootstrap
-        shell: bash
-        working-directory: sources
-        run: rm -rf freetype-${{env.freetype_version}}
-
-      - name: Extract freetype
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
-
-      - name: Configure freetype
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/freetype-${{env.freetype_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
-
-      - name: Build freetype
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: sources/freetype-${{env.freetype_version}}/build
-        run: cmake --build .
-
-      - name: Install freetype
-        shell: cmd
-        working-directory: sources/freetype-${{env.freetype_version}}/build
-        run: cmake --install .
-
-      - name: Copy freetype (debug)
-        if: matrix.buildtype == 'debug'
-        shell: bash
-        run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
-
-
-      - name: Download abseil-cpp
-        shell: bash
-        working-directory: downloads
-        run: wget -t 3 https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
-
-      - name: Extract abseil-cpp
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/${{env.abseil_cpp_version}}.tar.gz
-
-      - name: Configure abseil-cpp
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/abseil-cpp-${{env.abseil_cpp_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
-
-      - name: Build abseil-cpp
-        env:
-          CL: "/MP"
-        working-directory: sources/abseil-cpp-${{env.abseil_cpp_version}}/build
-        run: cmake --build .
-
-      - name: Install abseil-cpp
-        working-directory: sources/abseil-cpp-${{env.abseil_cpp_version}}/build
-        run: cmake --install .
-
-
-      - name: Download Protobuf
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-${{env.protobuf_version}}.tar.gz
-
-      - name: Extract Protobuf
-        shell: bash
-        working-directory: sources
-        run: tar -xf ../downloads/protobuf-${{env.protobuf_version}}.tar.gz
-
-      - name: Configure Protobuf
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/protobuf-${{env.protobuf_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_EXAMPLES=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=ON -Dprotobuf_WITH_ZLIB=ON -Dprotobuf_ABSL_PROVIDER="package"
-
-      - name: Build Protobuf
-        env:
-          CL: "/MP"
-        working-directory: sources/protobuf-${{env.protobuf_version}}/build
-        run: cmake --build .
-
-      - name: Install Protobuf
-        working-directory: sources/protobuf-${{env.protobuf_version}}/build
-        run: cmake --install .
-
-      - name: Install Protobuf pkgconfig file
-        working-directory: sources/protobuf-${{env.protobuf_version}}/build
-        run: copy protobuf.pc ${{env.prefix_path_backslash}}\lib\pkgconfig\
+        working-directory: build
+        run: rm -rf *
 
 
       - name: Download qtbase
@@ -2421,13 +2392,9 @@ jobs:
 
       - name: Extract qtbase
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
-      - name: Copy sqlite3
-        shell: bash
-        working-directory: sources
-        run: cp sqlite-*/sqlite3.{c,h} qtbase-everywhere-src-${{env.qt_version}}/src/3rdparty/sqlite/
 
       - name: Delete harfbuzz.pc
         shell: bash
@@ -2439,7 +2406,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}
+        working-directory: build/qtbase-everywhere-src-${{env.qt_version}}
         run: >
           cmake -S . -B build
           -G Ninja
@@ -2493,12 +2460,12 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}/build
+        working-directory: build/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
       - name: Install qtbase
         shell: cmd
-        working-directory: sources/qtbase-everywhere-src-${{env.qt_version}}/build
+        working-directory: build/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --install .
 
 
@@ -2509,7 +2476,7 @@ jobs:
 
       - name: Extract qttools
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: tar -xf ../downloads/qttools-everywhere-src-${{env.qt_version}}.tar.xz
 
       - name: Configure qttools
@@ -2518,7 +2485,7 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}
+        working-directory: build/qttools-everywhere-src-${{env.qt_version}}
         run: |
           mkdir build
           cd build
@@ -2528,23 +2495,23 @@ jobs:
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}/build
+        working-directory: build/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
       - name: Install qttools
         shell: cmd
-        working-directory: sources/qttools-everywhere-src-${{env.qt_version}}/build
+        working-directory: build/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --install .
 
 
       - name: Download qtsparkle
         shell: bash
-        working-directory: sources
+        working-directory: build
         run: git clone https://github.com/davidsansome/qtsparkle qtsparkle-git
 
       - name: Patch qtsparkle
         shell: bash
-        working-directory: sources/qtsparkle-git
+        working-directory: build/qtsparkle-git
         run: patch -p1 < ../../patches/qtsparkle-msvc.patch
 
       - name: Configure qtsparkle
@@ -2553,19 +2520,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: sources/qtsparkle-git
+        working-directory: build/qtsparkle-git
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH="${{env.prefix_path_backslash}}\lib\cmake" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_forwardslash}}"
 
       - name: Build qtsparkle
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: sources/qtsparkle-git/build
+        working-directory: build/qtsparkle-git/build
         run: cmake --build .
 
       - name: Install qtsparkle
         shell: cmd
-        working-directory: sources/qtsparkle-git/build
+        working-directory: build/qtsparkle-git/build
         run: cmake --install .
 
       - name: Create qtsparkle pkg-config file
@@ -2581,6 +2548,80 @@ jobs:
           echo "Description: Qt auto-updater lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Libs: -L${{env.prefix_path_forwardslash}} -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Cflags: -I${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
+
+
+      - name: Download abseil-cpp
+        shell: bash
+        working-directory: downloads
+        run: wget -t 3 https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
+
+      - name: Extract abseil-cpp
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/${{env.abseil_cpp_version}}.tar.gz
+
+      - name: Configure abseil-cpp
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+
+      - name: Build abseil-cpp
+        env:
+          CL: "/MP"
+        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}/build
+        run: cmake --build .
+
+      - name: Install abseil-cpp
+        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}/build
+        run: cmake --install .
+
+
+      - name: Download Protobuf
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-${{env.protobuf_version}}.tar.gz
+
+      - name: Extract Protobuf
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/protobuf-${{env.protobuf_version}}.tar.gz
+
+      - name: Configure Protobuf
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/protobuf-${{env.protobuf_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{matrix.buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_EXAMPLES=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=ON -Dprotobuf_WITH_ZLIB=ON -Dprotobuf_ABSL_PROVIDER="package"
+
+      - name: Build Protobuf
+        env:
+          CL: "/MP"
+        working-directory: build/protobuf-${{env.protobuf_version}}/build
+        run: cmake --build .
+
+      - name: Install Protobuf
+        working-directory: build/protobuf-${{env.protobuf_version}}/build
+        run: cmake --install .
+
+      - name: Install Protobuf pkgconfig file
+        working-directory: build/protobuf-${{env.protobuf_version}}/build
+        run: copy protobuf.pc ${{env.prefix_path_backslash}}\lib\pkgconfig\
+
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
 
 
       - name: Create archive
@@ -2645,9 +2686,10 @@ jobs:
           echo "" >> "${{env.release_notes_file}}"
           echo "Libraries:" >> "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
-          echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
+          echo "* PkgConf ${{env.pkgconf_version}}" >> "${{env.release_notes_file}}"
+          echo "* mimalloc ${{env.mimalloc_version}}" >> "${{env.release_notes_file}}"
           echo "* zlib ${{env.zlib_version}}" >> "${{env.release_notes_file}}"
-          echo "* OpenSSL ${{env.openssl_version}}" >> "${{env.release_notes_file}}"
+          echo "* openssl ${{env.openssl_version}}" >> "${{env.release_notes_file}}"
           echo "* GnuTLS ${{env.gnutls_version}}" >> "${{env.release_notes_file}}"
           echo "* libng ${{env.libpng_version}}" >> "${{env.release_notes_file}}"
           echo "* libjpeg-turbo ${{env.libjpeg_turbo_version}}" >> "${{env.release_notes_file}}"
@@ -2655,41 +2697,45 @@ jobs:
           echo "* bzip2 ${{env.bzip2_version}}" >> "${{env.release_notes_file}}"
           echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
           echo "* Brotli ${{env.brotli_version}}" >> "${{env.release_notes_file}}"
+          echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
           echo "* Pixmap ${{env.pixmap_version}}" >> "${{env.release_notes_file}}"
+          echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
+          echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
           echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
           echo "* nghttp2 ${{env.nghttp2_version}}" >> "${{env.release_notes_file}}"
+          echo "* dlfcn ${{env.dlfcn_version}}" >> "${{env.release_notes_file}}"
+          echo "* libpsl ${{env.libpsl_version}}" >> "${{env.release_notes_file}}"
+          echo "* orc ${{env.orc_version}}" >> "${{env.release_notes_file}}"
           echo "* SQLite ${{env.sqlite3_version}}" >> "${{env.release_notes_file}}"
+          echo "* GLib ${{env.glib_version}}" >> "${{env.release_notes_file}}"
+          echo "* libsoup ${{env.libsoup_version}}" >> "${{env.release_notes_file}}"
+          echo "* GLib Networking ${{env.glib_networking_version}}" >> "${{env.release_notes_file}}"
+          echo "* FreeType ${{env.freetype_version}}" >> "${{env.release_notes_file}}"
+          echo "* Harfbuzz ${{env.harfbuzz_version}}" >> "${{env.release_notes_file}}"
           echo "* libogg ${{env.libogg_version}}" >> "${{env.release_notes_file}}"
           echo "* libvorbis ${{env.libvorbis_version}}" >> "${{env.release_notes_file}}"
           echo "* FLAC ${{env.flac_version}}" >> "${{env.release_notes_file}}"
           echo "* WavPack ${{env.wavpack_version}}" >> "${{env.release_notes_file}}"
           echo "* Opus Codec ${{env.opus_version}}" >> "${{env.release_notes_file}}"
           echo "* opusfile ${{env.opusfile_version}}" >> "${{env.release_notes_file}}"
-          echo "* MPG123 ${{env.mpg123_version}}" >> "${{env.release_notes_file}}"
+          echo "* Speex ${{env.speex_version}}" >> "${{env.release_notes_file}}"
+          echo "* mpg123 ${{env.mpg123_version}}" >> "${{env.release_notes_file}}"
           echo "* LAME ${{env.lame_version}}" >> "${{env.release_notes_file}}"
           echo "* TwoLAME ${{env.twolame_version}}" >> "${{env.release_notes_file}}"
-          echo "* TagLib ${{env.taglib_version}}" >> "${{env.release_notes_file}}"
-          echo "* dlfcn ${{env.dlfcn_version}}" >> "${{env.release_notes_file}}"
-          echo "* fftw ${{env.fftw_version}}" >> "${{env.release_notes_file}}"
-          echo "* GLib ${{env.glib_version}}" >> "${{env.release_notes_file}}"
-          echo "* GLib Networking ${{env.glib_networking_version}}" >> "${{env.release_notes_file}}"
-          echo "* libpsl ${{env.libpsl_version}}" >> "${{env.release_notes_file}}"
-          echo "* libsoup ${{env.libsoup_version}}" >> "${{env.release_notes_file}}"
-          echo "* orc ${{env.orc_version}}" >> "${{env.release_notes_file}}"
           echo "* Musepack ${{env.musepack_version}}" >> "${{env.release_notes_file}}"
           echo "* libopenmpt ${{env.libopenmpt_version}}" >> "${{env.release_notes_file}}"
           echo "* libgme ${{env.libgme_version}}" >> "${{env.release_notes_file}}"
+          echo "* faad2 ${{env.faad2_version}}" >> "${{env.release_notes_file}}"
           echo "* fdk-aac ${{env.fdk_aac_version}}" >> "${{env.release_notes_file}}"
+          echo "* TagLib ${{env.taglib_version}}" >> "${{env.release_notes_file}}"
           echo "* libbs2b ${{env.libbs2b_version}}" >> "${{env.release_notes_file}}"
           echo "* libebur128 ${{env.libebur128_version}}" >> "${{env.release_notes_file}}"
+          echo "* FFTW ${{env.fftw_version}}" >> "${{env.release_notes_file}}"
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
-          echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
-          echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
-          echo "* FreeType ${{env.freetype_version}}" >> "${{env.release_notes_file}}"
-          echo "* Harfbuzz ${{env.harfbuzz_version}}" >> "${{env.release_notes_file}}"
-          echo "* Protobuf ${{env.protobuf_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
+          echo "* abseil-cpp ${{env.abseil_cpp_version}}" >> "${{env.release_notes_file}}"
+          echo "* Protobuf ${{env.protobuf_version}}" >> "${{env.release_notes_file}}"
 
       - name: Create Release
         env:
