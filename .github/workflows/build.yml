@@ -8,7 +8,7 @@ env:
 
   win_flex_bison_version: '2.5.25'
 
-  pkgconf_version: '2.0.0'
+  pkgconf_version: '2.0.1'
 
   mimalloc_version: '2.1.2'
 
