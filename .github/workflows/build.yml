@@ -870,7 +870,7 @@ jobs:
         env:
           CL: "/MP"
         working-directory: build/boost_${{env.boost_version_underscore}}
-        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path}}" --exec-prefix="${{env.prefix_path}}\bin" --libdir="${{env.prefix_path}}\lib" --includedir="${{env.prefix_path}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{matrix.buildtype}} install || goto end
+        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{matrix.buildtype}} install
 
 
       - name: Cleanup build directory
