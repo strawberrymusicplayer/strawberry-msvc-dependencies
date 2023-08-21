@@ -28,7 +28,7 @@ env:
 
   xz_version: '5.4.4'
 
-  brotli_version: '1.0.9'
+  brotli_version: '1.1.0rc'
 
   icu4c_version: '73.2'
 
