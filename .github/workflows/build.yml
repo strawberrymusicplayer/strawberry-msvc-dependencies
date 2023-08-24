@@ -48,7 +48,7 @@ env:
 
   orc_version: '0.4.34'
 
-  sqlite3_version: '3420000'
+  sqlite3_version: '3430000'
 
   glib_version: '2.77.2'
 
