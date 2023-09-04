@@ -40,7 +40,7 @@ env:
 
   libxml2_version: '2.11.5'
 
-  nghttp2_version: '1.55.1'
+  nghttp2_version: '1.56.0'
 
   dlfcn_version: '1.4.1'
 
