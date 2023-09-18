@@ -106,7 +106,7 @@ env:
 
   qt_version: '6.5.2'
 
-  abseil_cpp_version: '20230802.0'
+  abseil_cpp_version: '20230802.1'
 
   protobuf_version: '24.3'
 
