@@ -289,6 +289,9 @@ function update_package() {
     "ffmpeg")
       package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
       ;;
+    "kdsingleapplication")
+      package_version_latest=$(wget -q -O- 'https://github.com/KDAB/KDSingleApplication/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
