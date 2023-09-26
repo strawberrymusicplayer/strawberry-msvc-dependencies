@@ -106,6 +106,8 @@ env:
 
   qt_version: '6.5.2'
 
+  kdsingleapplication_version: '1.0.0'
+
   abseil_cpp_version: '20230802.1'
 
   protobuf_version: '24.3'
@@ -2553,6 +2555,35 @@ jobs:
           echo "Description: Qt auto-updater lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Libs: -L${{env.prefix_path_forwardslash}} -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Cflags: -I${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+
+
+      - name: Download KDSingleApplication
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/KDAB/KDSingleApplication/releases/download/v${{env.kdsingleapplication_version}}/kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz
+
+      - name: Extract KDSingleApplication
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz
+
+      - name: Configure KDSingleApplication
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DKDSingleApplication_QT6=ON
+
+      - name: Build KDSingleApplication
+        env:
+          CL: "/MP"
+        working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}/build
+        run: cmake --build .
+
+      - name: Install KDSingleApplication
+        working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}/build
+        run: cmake --install .
 
 
       - name: Cleanup build directory
