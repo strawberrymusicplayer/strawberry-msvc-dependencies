@@ -2677,6 +2677,12 @@ jobs:
     needs:
       - build-windows-msvc
     steps:
+
+      - name: Install packages
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: sudo apt install -y git hub
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
