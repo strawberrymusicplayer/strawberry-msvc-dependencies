@@ -2398,11 +2398,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/qtbase-everywhere-src-${{env.qt_version}}.tar.xz
 
-
-      - name: Delete harfbuzz.pc
-        shell: bash
-        run: rm -f "${{env.prefix_path_unix}}/lib/pkgconfig/harfbuzz.pc"
-
       - name: Configure qtbase
         shell: cmd
         env:
