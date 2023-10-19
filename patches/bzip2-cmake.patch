@@ -58,7 +58,7 @@ index 0000000..91153c1
 --- /dev/null
 +++ b/bzip2.pc.in
 @@ -0,0 +1,11 @@
-+prefix=@BZIP2_PREFIX@
++prefix=@CMAKE_INSTALL_PREFIX@
 +exec_prefix=${prefix}
 +libdir=${prefix}/lib
 +includedir=${prefix}/include
@@ -67,7 +67,7 @@ index 0000000..91153c1
 +Description: bzip2
 +Version: 1.0.6
 +Requires: 
-+Libs: -L${libdir} -l@bzname@
++Libs: -L${libdir} -lbz2
 +Cflags: -I${includedir}
 \ No newline at end of file
 diff --git a/bzlib.h b/bzlib.h
