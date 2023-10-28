@@ -600,6 +600,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/pcre2-${{env.pcre2_version}}.tar.bz2
 
+      - name: Patch pcre2
+        shell: bash
+        working-directory: build/pcre2-${{env.pcre2_version}}
+        run: patch -p1 < ../../patches/pcre2-cmake.patch
+
       - name: Configure pcre2
         shell: cmd
         env:
@@ -620,11 +625,6 @@ jobs:
         shell: cmd
         working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --install .
-
-      - name: copy pcre2 lib (debug)
-        if: env.buildtype == 'debug'
-        shell: cmd
-        run: copy "${{env.prefix_path_backslash}}\lib\pcre2-8d.lib" "${{env.prefix_path_backslash}}\lib\pcre2-8.lib"
 
 
       - name: Download bzip2
