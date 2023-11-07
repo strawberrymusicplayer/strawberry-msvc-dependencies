@@ -86,7 +86,7 @@ env:
 
   libgme_version: '0.6.3'
 
-  faad2_version: '2.10.1'
+  faad2_version: '2.11.0'
 
   fdk_aac_version: '2.0.2'
 
@@ -1903,9 +1903,7 @@ jobs:
       - name: Install faad2
         shell: cmd
         working-directory: build/faad2-${{env.faad2_version}}/build
-        run: |
-          cmake --install .
-          copy ..\include\*.h ${{env.prefix_path_backslash}}\include\
+        run: cmake --install . --config ${{env.cmake_buildtype}}
 
 
       - name: Download faac
