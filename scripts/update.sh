@@ -334,7 +334,7 @@ function update_package() {
 
 }
 
-cmds="dirname cat head tail cut sort tr grep sed wget curl jq git gh"
+cmds="dirname cat head tail cut sort tr grep sed curl jq git gh"
 cmds_missing=
 for cmd in ${cmds}; do
   which "${cmd}" >/dev/null 2>&1
