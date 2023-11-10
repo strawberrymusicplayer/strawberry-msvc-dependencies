@@ -32,7 +32,7 @@ env:
 
   icu4c_version: '74.1'
 
-  pixmap_version: '0.42.2'
+  pixman_version: '0.42.2'
 
   expat_version: '2.5.0'
 
@@ -790,12 +790,12 @@ jobs:
       - name: Download pixman
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.cairographics.org/releases/pixman-${{env.pixmap_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://www.cairographics.org/releases/pixman-${{env.pixman_version}}.tar.gz
 
       - name: Extract pixman
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/pixman-${{env.pixmap_version}}.tar.gz
+        run: tar -xf ../downloads/pixman-${{env.pixman_version}}.tar.gz
 
       - name: Configure pixman
         shell: cmd
@@ -803,19 +803,19 @@ jobs:
           CL: "/MP"
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: build/pixman-${{env.pixmap_version}}
+        working-directory: build/pixman-${{env.pixman_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
 
       - name: Build pixman
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: build/pixman-${{env.pixmap_version}}/build
+        working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja
 
       - name: Install pixman
         shell: cmd
-        working-directory: build/pixman-${{env.pixmap_version}}/build
+        working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja install
 
 
@@ -2734,7 +2734,7 @@ jobs:
           echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
           echo "* Brotli ${{env.brotli_version}}" >> "${{env.release_notes_file}}"
           echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
-          echo "* Pixmap ${{env.pixmap_version}}" >> "${{env.release_notes_file}}"
+          echo "* Pixmap ${{env.pixman_version}}" >> "${{env.release_notes_file}}"
           echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
           echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
           echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
