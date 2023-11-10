@@ -18,6 +18,7 @@
 #
 
 ci_file=".github/workflows/build.yml"
+curl_options="-s -f -L"
 
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
 function status() { echo "[$(timestamp)] $*"; }
@@ -130,167 +131,167 @@ function update_package() {
 
   case ${package_name} in
     "nasm")
-      package_version_latest=$(wget -q -O- 'https://www.nasm.us/pub/nasm/releasebuilds/?C=M;O=D' | sed -n 's,.*href="\([0-9\.]*[^a-z]\)/".*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://www.nasm.us/pub/nasm/releasebuilds/?C=M;O=D' | sed -n 's,.*href="\([0-9\.]*[^a-z]\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "yasm")
-      package_version_latest=$(wget -q -O- 'https://github.com/yasm/yasm/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
-      ;;
-    "boost")
-      package_version_latest=$(wget -q -O- 'https://www.boost.org/users/download/' | sed -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | grep -v beta | sort -V | tail -1)
-      ;;
-    "pkgconf")
-      package_version_latest=$(wget -q -O- 'https://github.com/pkgconf/pkgconf/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^pkgconf\-//g' | sort -V | tail -1)
-      ;;
-    "zlib")
-      package_version_latest=$(wget -q -O- 'https://zlib.net/' | sed -n 's,.*zlib-\([0-9][^>]*\)\.tar.*,\1,ip' | sort -V | tail -1)
-      ;;
-    "openssl")
-      package_version_latest=$(wget -q -O- 'https://www.openssl.org/source/' | sed -n 's,.*openssl-\([0-9][0-9a-z.]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "gnutls")
-      package_version_latest=$(wget -q -O- 'https://github.com/ShiftMediaProject/gnutls/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sort -V | tail -1)
-      ;;
-    "libpng")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/p/libpng/code/ref/master/tags/' | sed -n 's,.*<a[^>]*>v\([0-9][^<]*\)<.*,\1,p' | grep -v alpha | grep -v beta | grep -v rc | sort -V | tail -1)
-      ;;
-    "libjpeg_turbo")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/libjpeg-turbo/files/' | sed -n 's,.*/projects/.*/\([0-9][^"%]*\)/".*,\1,p' | sort -V | tail -1)
-      ;;
-    "pcre2")
-      package_version_latest=$(wget -q -O- 'https://github.com/PhilipHazel/pcre2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^pcre2\-//g' | sort -V | tail -1)
-      ;;
-    "bzip2")
-      package_version_latest=$(wget -q -O- 'https://sourceware.org/pub/bzip2/' | grep 'bzip2-' | sed -n 's,.*bzip2-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "xz")
-      package_version_latest=$(wget -q -O- 'https://tukaani.org/xz/' | sed -n 's,.*xz-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
-      ;;
-    "brotli")
-      package_version_latest=$(wget -q -O- 'https://github.com/google/brotli/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v 'rc$' | sed 's/^v//g' | sort -V | tail -1)
-      ;;
-    "pixmap")
-      package_version_latest=$(wget -q -O- 'https://www.cairographics.org/releases/?C=M;O=D' | sed -n 's,.*"pixman-\([0-9][^"]*\)\.tar.*,\1,p' | head -1)
-      ;;
-    "libxml2")
-      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/libxml2/tags' | sed -n "s,.*<a [^>]\+>v\([0-9,\.]\+\)<.*,\\1,p" | head -1)
-      ;;
-    "nghttp2")
-      package_version_latest=$(wget -q -O- 'https://github.com/nghttp2/nghttp2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
-      ;;
-    "sqlite3")
-      package_version_latest=$(wget -q -O- 'https://www.sqlite.org/download.html' | sed -n 's,.*sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "libogg")
-      package_version_latest=$(wget -q -O- 'https://www.xiph.org/downloads/' | sed -n 's,.*libogg-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "libvorbis")
-      package_version_latest=$(wget -q -O- 'https://www.xiph.org/downloads/' | sed -n 's,.*libvorbis-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "flac")
-      package_version_latest=$(wget -q -O- 'https://github.com/xiph/flac' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sort -V | tail -1)
-      ;;
-    "wavpack")
-      package_version_latest=$(wget -q -O- 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
-      ;;
-    "opus")
-      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
-      ;;
-    "opusfile")
-      package_version_latest=$(wget -q -O- 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
-      ;;
-    "speex")
-      package_version_latest=$(wget -q -O- 'https://downloads.xiph.org/releases/speex/' | sed -n 's,.*<a href="speex-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)
-      ;;
-    "mpg123")
-      package_version_latest=$(wget -q -O- 'https://www.mpg123.de/download/' | sed -n 's,.*<a href="mpg123-\([0-9][^>]*\)\.tar\.bz2">.*,\1,p' | grep -v 'beta' | grep -v 'svn' | sort -V | tail -1)
-      ;;
-    "lame")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/p/lame/svn/HEAD/tree/tags' | grep RELEASE_ | sed -n 's,.*RELEASE__\([0-9_][^<]*\)<.*,\1,p' | tr '_' '.' | sort -V | tail -1)
-      ;;
-    "twolame")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/twolame/files/twolame/' | sed -n 's,^.*twolame/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
-      ;;
-    "taglib")
-      package_version_latest=$(wget -q -O- 'https://github.com/taglib/taglib/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
-      ;;
-    "dlfcn")
-      package_version_latest=$(wget -q -O- 'https://github.com/dlfcn-win32/dlfcn-win32/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^r' | sed 's/^v//g' | sort -V | tail -1)
-      ;;
-    "fftw")
-      package_version_latest=$(wget -q -O- 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
-      ;;
-    "glib")
-      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/glib/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9.]\+\)<.*,\1,p" | sort -V | tail -1)
-      ;;
-    "glib_networking")
-      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/glib-networking/tags' | sed -n "s,.*glib-networking-\([0-9]\+\.[0-9]*[0-9]*\.[^']*\)\.tar.*,\1,p" | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -V | tail -1)
-      ;;
-    "libpsl")
-      package_version_latest=$(wget -q -O- 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | sed 's/^libpsl-//g' | sort -V | tail -1)
-      ;;
-    "libsoup")
-      package_version_latest=$(wget -q -O- 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
-      ;;
-    "orc")
-      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/orc/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]*\.[0-9]*\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
-      ;;
-    "libopenmpt")
-      package_version_latest=$(wget -q -O- 'https://lib.openmpt.org/files/libopenmpt/src/' | sed -n 's,.*libopenmpt-\([0-9][^>]*\)+release\.autotools\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "libgme")
-      package_version_latest=$(wget -q -O- 'https://bitbucket.org/mpyne/game-music-emu/downloads/' | sed -n 's,.*game-music-emu-\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "musepack")
-      package_version_latest=$(wget -q -O- 'https://www.musepack.net/index.php?pg=src' | sed -n 's,.*musepack_src_r\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "fdk_aac")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/opencore-amr/files/fdk-aac/' | sed -n 's,.*fdk-aac-\([0-9.]*\)\.tar.*,\1,p' | sort -V | tail -1)
-      ;;
-    "libbs2b")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/bs2b/files/libbs2b/' | sed -n 's,.*<a href="/projects/bs2b/files/libbs2b/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
-      ;;
-    "chromaprint")
-      package_version_latest=$(wget -q -O- 'https://github.com/acoustid/chromaprint/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
-      ;;
-    "gstreamer")
-      package_version_latest=$(wget -q -O- 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
-      ;;
-    "icu4c")
-      package_version_latest=$(wget -q -O- 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | grep -v '^\*name$' | sort -V | tail -1)
-      ;;
-    "expat")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/expat/files/expat/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
-      ;;
-    "freetype")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/freetype/files/freetype2/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
-      ;;
-    "harfbuzz")
-      package_version_latest=$(wget -q -O- 'https://github.com/harfbuzz/harfbuzz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
-      ;;
-    "abseil_cpp")
-      package_version_latest=$(wget -q -O- 'https://github.com/abseil/abseil-cpp/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | head -1)
-      ;;
-    "protobuf")
-      package_version_latest=$(wget -q -O- 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
-      ;;
-    "qt")
-      qt_major_version=$(wget -q -O- "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
-      package_version_latest=$(wget -q -O- "https://download.qt.io/official_releases/qt/${qt_major_version}/" | sed -n 's,.*href="\([0-9]*\.[0-9]*\.[^/]*\)/".*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/yasm/yasm/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
       ;;
     "win_flex_bison")
-      package_version_latest=$(wget -q -O- 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
+      ;;
+    "pkgconf")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/pkgconf/pkgconf/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^pkgconf\-//g' | sort -V | tail -1)
+      ;;
+    "zlib")
+      package_version_latest=$(curl ${curl_options} 'https://zlib.net/' | sed -n 's,.*zlib-\([0-9][^>]*\)\.tar.*,\1,ip' | sort -V | tail -1)
+      ;;
+    "openssl")
+      package_version_latest=$(curl ${curl_options} 'https://www.openssl.org/source/' | sed -n 's,.*openssl-\([0-9][0-9a-z.]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "gnutls")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/ShiftMediaProject/gnutls/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sort -V | tail -1)
+      ;;
+    "libpng")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/p/libpng/code/ref/master/tags/' | sed -n 's,.*<a[^>]*>v\([0-9][^<]*\)<.*,\1,p' | grep -v alpha | grep -v beta | grep -v rc | sort -V | tail -1)
+      ;;
+    "libjpeg_turbo")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/libjpeg-turbo/files/' | sed -n 's,.*/projects/.*/\([0-9][^"%]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
+    "pcre2")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/PhilipHazel/pcre2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^pcre2\-//g' | sort -V | tail -1)
+      ;;
+    "bzip2")
+      package_version_latest=$(curl ${curl_options} 'https://sourceware.org/pub/bzip2/' | grep 'bzip2-' | sed -n 's,.*bzip2-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "xz")
+      package_version_latest=$(curl ${curl_options} 'https://tukaani.org/xz/' | sed -n 's,.*xz-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
+      ;;
+    "brotli")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/google/brotli/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v 'rc$' | sed 's/^v//g' | sort -V | tail -1)
+      ;;
+    "icu4c")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/unicode-org/icu/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/release\-//g' | tr '\-' '\.' | grep -v '^\*name$' | sort -V | tail -1)
+      ;;
+    "pixmap")
+      package_version_latest=$(curl ${curl_options} 'https://www.cairographics.org/releases/?C=M;O=D' | sed -n 's,.*"pixman-\([0-9][^"]*\)\.tar.*,\1,p' | head -1)
+      ;;
+    "expat")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/expat/files/expat/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
+    "boost")
+      package_version_latest=$(curl ${curl_options} 'https://www.boost.org/users/download/' | sed -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | grep -v beta | sort -V | tail -1)
+      ;;
+    "libxml2")
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libxml2/tags' | sed -n "s,.*<a [^>]\+>v\([0-9,\.]\+\)<.*,\\1,p" | head -1)
+      ;;
+    "nghttp2")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/nghttp2/nghttp2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
+      ;;
+    "dlfcn")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/dlfcn-win32/dlfcn-win32/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^r' | sed 's/^v//g' | sort -V | tail -1)
+      ;;
+    "libpsl")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | sed 's/^libpsl-//g' | sort -V | tail -1)
+      ;;
+    "orc")
+      package_version_latest=$(curl ${curl_options} 'https://cgit.freedesktop.org/gstreamer/orc/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]*\.[0-9]*\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
+      ;;
+    "sqlite3")
+      package_version_latest=$(curl ${curl_options} 'https://www.sqlite.org/download.html' | sed -n 's,.*sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "glib")
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/glib/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9.]\+\)<.*,\1,p" | sort -V | tail -1)
+      ;;
+    "libsoup")
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
+      ;;
+    "glib_networking")
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/glib-networking/tags' | sed -n "s,.*glib-networking-\([0-9]\+\.[0-9]*[0-9]*\.[^']*\)\.tar.*,\1,p" | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -V | tail -1)
+      ;;
+    "freetype")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/freetype/files/freetype2/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
+    "harfbuzz")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/harfbuzz/harfbuzz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
+      ;;
+    "libogg")
+      package_version_latest=$(curl ${curl_options} 'https://www.xiph.org/downloads/' | sed -n 's,.*libogg-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "libvorbis")
+      package_version_latest=$(curl ${curl_options} 'https://www.xiph.org/downloads/' | sed -n 's,.*libvorbis-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "flac")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/xiph/flac' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sort -V | tail -1)
+      ;;
+    "wavpack")
+      package_version_latest=$(curl ${curl_options} 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
+      ;;
+    "opus")
+      package_version_latest=$(curl ${curl_options} 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
+      ;;
+    "opusfile")
+      package_version_latest=$(curl ${curl_options} 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
+      ;;
+    "speex")
+      package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/speex/' | sed -n 's,.*<a href="speex-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)
+      ;;
+    "mpg123")
+      package_version_latest=$(curl ${curl_options} 'https://www.mpg123.de/download/' | sed -n 's,.*<a href="mpg123-\([0-9][^>]*\)\.tar\.bz2">.*,\1,p' | grep -v 'beta' | grep -v 'svn' | sort -V | tail -1)
+      ;;
+    "lame")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/p/lame/svn/HEAD/tree/tags' | grep RELEASE_ | sed -n 's,.*RELEASE__\([0-9_][^<]*\)<.*,\1,p' | tr '_' '.' | sort -V | tail -1)
+      ;;
+    "twolame")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/twolame/files/twolame/' | sed -n 's,^.*twolame/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
+    "musepack")
+      package_version_latest=$(curl ${curl_options} 'https://www.musepack.net/index.php?pg=src' | sed -n 's,.*musepack_src_r\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "libopenmpt")
+      package_version_latest=$(curl ${curl_options} 'https://lib.openmpt.org/files/libopenmpt/src/' | sed -n 's,.*libopenmpt-\([0-9][^>]*\)+release\.autotools\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "libgme")
+      package_version_latest=$(curl ${curl_options} 'https://bitbucket.org/mpyne/game-music-emu/downloads/' | sed -n 's,.*game-music-emu-\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "faad2")
-      package_version_latest=$(wget -q -O- 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^\*name$' | sed 's/_/\./g' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/knik0/faad2/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | grep -v '^\*name$' | sed 's/_/\./g' | sort -V | tail -1)
+      ;;
+    "fdk_aac")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/opencore-amr/files/fdk-aac/' | sed -n 's,.*fdk-aac-\([0-9.]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      ;;
+    "taglib")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/taglib/taglib/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
+      ;;
+    "libbs2b")
+      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/bs2b/files/libbs2b/' | sed -n 's,.*<a href="/projects/bs2b/files/libbs2b/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "libebur128")
-      package_version_latest=$(wget -q -O- 'https://github.com/jiixyj/libebur128/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/jiixyj/libebur128/tags' | sed -n 's#.*releases/tag/\([^"]*\).*#\1#p' | sed 's/^v//g' | sort -V | tail -1)
+      ;;
+    "fftw")
+      package_version_latest=$(curl ${curl_options} 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
       ;;
     "ffmpeg")
       package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
       ;;
+    "chromaprint")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/acoustid/chromaprint/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
+      ;;
+    "gstreamer")
+      package_version_latest=$(curl ${curl_options} 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
+      ;;
+    "qt")
+      qt_major_version=$(curl ${curl_options} "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} "https://download.qt.io/official_releases/qt/${qt_major_version}/" | sed -n 's,.*href="\([0-9]*\.[0-9]*\.[^/]*\)/".*,\1,p' | sort -V | tail -1)
+      ;;
     "kdsingleapplication")
-      package_version_latest=$(wget -q -O- 'https://github.com/KDAB/KDSingleApplication/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/KDAB/KDSingleApplication/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
+      ;;
+    "abseil_cpp")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/abseil/abseil-cpp/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | head -1)
+      ;;
+    "protobuf")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/protocolbuffers/protobuf/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
       ;;
     *)
       package_version_latest=
