@@ -86,7 +86,7 @@ env:
 
   libgme_version: '0.6.3'
 
-  faad2_version: '2.11.0'
+  faad2_version: '2.11.1'
 
   fdk_aac_version: '2.0.2'
 
