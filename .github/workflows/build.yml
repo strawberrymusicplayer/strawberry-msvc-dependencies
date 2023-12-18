@@ -102,7 +102,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.22.7'
+  gstreamer_version: '1.22.8'
 
   qt_version: '6.6.1'
 
