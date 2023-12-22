@@ -106,7 +106,7 @@ env:
 
   qt_version: '6.6.1'
 
-  kdsingleapplication_version: '1.0.0'
+  kdsingleapplication_version: '1.1.0'
 
   abseil_cpp_version: '20230802.1'
 
@@ -2560,11 +2560,6 @@ jobs:
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz
-
-      - name: Patch KDSingleApplication
-        shell: bash
-        working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}
-        run: patch -p1 < ../../patches/kdsingleapplication.patch
 
       - name: Configure KDSingleApplication
         env:
