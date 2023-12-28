@@ -1,8 +1,19 @@
+From 8cfd1a1db021fff3575dc835bcafea54b38a00cb Mon Sep 17 00:00:00 2001
+From: Jonas Kvinge <jonas@jkvinge.net>
+Date: Thu, 28 Dec 2023 22:38:24 +0100
+Subject: [PATCH] pcre2-config.cmake.in: Fix PCRE2 library names
+
+Fix library names for 16bit, 32bit and posix which incorrectly points to 8bit.
+Also add IMPORTED_IMPLIB to fix https://bugreports.qt.io/browse/QTBUG-117907
+---
+ cmake/pcre2-config.cmake.in | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
 diff --git a/cmake/pcre2-config.cmake.in b/cmake/pcre2-config.cmake.in
-index b313d6d..30f015d 100644
+index b313d6df7..12f3a35ad 100644
 --- a/cmake/pcre2-config.cmake.in
 +++ b/cmake/pcre2-config.cmake.in
-@@ -52,15 +52,11 @@ else ()
+@@ -52,9 +52,9 @@ else ()
    endif ()
  endif ()
  find_library(PCRE2_8BIT_LIBRARY NAMES ${PCRE2_PREFIX}${PCRE2_8BIT_NAME}${PCRE2_SUFFIX} ${PCRE2_PREFIX}${PCRE2_8BIT_NAME}d${PCRE2_SUFFIX} DOC "8 bit PCRE2 library")
@@ -14,14 +25,8 @@ index b313d6d..30f015d 100644
 +find_library(PCRE2_POSIX_LIBRARY NAMES ${PCRE2_PREFIX}${PCRE2_POSIX_NAME}${PCRE2_SUFFIX} ${PCRE2_PREFIX}${PCRE2_POSIX_NAME}d${PCRE2_SUFFIX} DOC "8 bit POSIX PCRE2 library")
  unset(PCRE2_NON_STANDARD_LIB_PREFIX)
  unset(PCRE2_NON_STANDARD_LIB_SUFFIX)
--unset(PCRE2_8BIT_NAME)
--unset(PCRE2_16BIT_NAME)
--unset(PCRE2_32BIT_NAME)
--unset(PCRE2_POSIX_NAME)
- 
- # Set version
- if (PCRE2_INCLUDE_DIR)
-@@ -126,6 +122,7 @@ if (PCRE2_FOUND)
+ unset(PCRE2_8BIT_NAME)
+@@ -126,6 +126,7 @@ if (PCRE2_FOUND)
      endif ()
      set_target_properties(PCRE2::${component} PROPERTIES
        IMPORTED_LOCATION "${PCRE2_${component}_LIBRARY}"
@@ -29,15 +34,3 @@ index b313d6d..30f015d 100644
        INTERFACE_INCLUDE_DIRECTORIES "${PCRE2_INCLUDE_DIR}"
      )
      if (component STREQUAL "POSIX")
-@@ -140,6 +137,11 @@ if (PCRE2_FOUND)
-   endforeach()
- endif ()
- 
-+unset(PCRE2_8BIT_NAME)
-+unset(PCRE2_16BIT_NAME)
-+unset(PCRE2_32BIT_NAME)
-+unset(PCRE2_POSIX_NAME)
-+
- mark_as_advanced(
-   PCRE2_INCLUDE_DIR
- )
