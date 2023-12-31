@@ -859,7 +859,7 @@ jobs:
       - name: Download Boost
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://boostorg.jfrog.io/artifactory/main/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.bz2
+        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/boost/boost/${{env.boost_version}}/boost_${{env.boost_version_underscore}}.tar.bz2
 
       - name: Extract Boost
         shell: bash
