@@ -2658,9 +2658,10 @@ jobs:
         shell: bash
         run: tar -cJf strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz --transform "s,^c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}},strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}," ${{env.prefix_path_unix}}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: releases
+          name: strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}
           path: strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz
 
 
