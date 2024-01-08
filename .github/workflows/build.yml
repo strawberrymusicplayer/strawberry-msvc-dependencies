@@ -2024,10 +2024,15 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/libbs2b-${{env.libbs2b_version}}.tar.bz2
 
-      - name: Patch libbs2b
+      - name: Patch libbs2b msvc
         shell: bash
         working-directory: build/libbs2b-${{env.libbs2b_version}}
         run: patch -p1 < ../../patches/libbs2b-msvc.patch
+
+      - name: Patch libbs2b clipping
+        shell: bash
+        working-directory: build/libbs2b-${{env.libbs2b_version}}
+        run: patch -p1 < ../../patches/libbs2b-clipping.patch
 
       - name: Configure libbs2b
         shell: cmd
