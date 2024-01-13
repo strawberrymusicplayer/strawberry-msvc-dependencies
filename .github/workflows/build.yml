@@ -1025,11 +1025,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/libpsl-${{env.libpsl_version}}.tar.gz
 
-      - name: Patch libpsl
-        shell: bash
-        working-directory: build/libpsl-${{env.libpsl_version}}
-        run: patch -p1 < ../../patches/libpsl-time.patch
-
       - name: Configure libpsl
         shell: cmd
         env:
