@@ -259,6 +259,9 @@ function update_package() {
     "fdk_aac")
       package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/opencore-amr/files/fdk-aac/' | sed -n 's,.*fdk-aac-\([0-9.]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
+    "utfcpp")
+      package_version_latest=$(curl ${curl_options} 'https://github.com/nemtrif/utfcpp/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
+      ;;
     "taglib")
       package_version_latest=$(curl ${curl_options} 'https://github.com/taglib/taglib/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'beta' | sort -V | tail -1)
       ;;
