@@ -46,7 +46,7 @@ env:
 
   libpsl_version: '0.21.5'
 
-  orc_version: '0.4.35'
+  orc_version: '0.4.36'
 
   sqlite3_version: '3450000'
 
