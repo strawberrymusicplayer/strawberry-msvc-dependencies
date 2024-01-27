@@ -1,0 +1,56 @@
+From 31e5d6853f80641d60a0d14ffb137169dfa77617 Mon Sep 17 00:00:00 2001
+From: Jonas Kvinge <jonas@jkvinge.net>
+Date: Sat, 27 Jan 2024 23:27:15 +0100
+Subject: [PATCH] FileStream: Fix opening long paths on Windows
+
+To make sure paths longer than MAX_PATH (260) can be opened, prefix local paths with `\\?\`, and UNC paths with `\\?\UNC\`.
+
+I've tested on Windows 10 22H2 (Build 19045.3930), even when setting LongPathsEnabled to 1 in the registry, it still won't open files with long paths without prefixing them.
+
+For more information see.: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry
+---
+ taglib/toolkit/tfilestream.cpp | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/taglib/toolkit/tfilestream.cpp b/taglib/toolkit/tfilestream.cpp
+index f1233436e..0e1701972 100644
+--- a/taglib/toolkit/tfilestream.cpp
++++ b/taglib/toolkit/tfilestream.cpp
+@@ -49,6 +49,10 @@ namespace
+ 
+   const FileHandle InvalidFileHandle = INVALID_HANDLE_VALUE;
+ 
++  const std::wstring LongLocalPathPrefix = L"\\\\?\\";
++  const std::wstring UNCPathPrefix = L"\\\\";
++  const std::wstring LongUNCPathPrefix = L"\\\\?\\UNC\\";
++
+   FileHandle openFile(const FileName &path, bool readOnly)
+   {
+     const DWORD access = readOnly ? GENERIC_READ : (GENERIC_READ | GENERIC_WRITE);
+@@ -56,7 +60,25 @@ namespace
+ #if defined (PLATFORM_WINRT)
+     return CreateFile2(path.wstr().c_str(), access, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
+ #else
+-    return CreateFileW(path.wstr().c_str(), access, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
++    std::wstring fixed_path;
++    if (path.wstr().length() > MAX_PATH && path.wstr().compare(0, LongLocalPathPrefix.length(), LongLocalPathPrefix) != 0 && path.wstr().compare(0, LongUNCPathPrefix.length(), LongUNCPathPrefix) != 0)
++    {
++      if (path.wstr().compare(0, UNCPathPrefix.length(), UNCPathPrefix) == 0)
++      {
++        fixed_path.append(LongUNCPathPrefix);
++        fixed_path.append(path.wstr().substr(2));
++      }
++      else
++      {
++        fixed_path.append(LongLocalPathPrefix);
++        fixed_path.append(path.wstr());
++      }
++    }
++    else
++    {
++      fixed_path = path.wstr();
++    }
++    return CreateFileW(fixed_path.c_str(), access, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+ #endif
+   }
+ 
