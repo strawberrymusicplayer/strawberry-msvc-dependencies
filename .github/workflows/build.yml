@@ -2021,6 +2021,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/taglib-${{env.taglib_version}}.tar.gz
 
+      - name: Patch TagLib
+        shell: bash
+        working-directory: build/taglib-${{env.taglib_version}}
+        run: patch -p1 < ../../patches/taglib-longpaths.patch
+
       - name: Configure TagLib
         shell: cmd
         env:
