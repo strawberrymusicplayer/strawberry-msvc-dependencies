@@ -32,7 +32,7 @@ env:
 
   icu4c_version: '74.1'
 
-  pixman_version: '0.43.0'
+  pixman_version: '0.43.2'
 
   expat_version: '2.5.0'
 
