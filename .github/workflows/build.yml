@@ -674,7 +674,7 @@ jobs:
       - name: Download xz
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/lzmautils/xz-${{env.xz_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/tukaani-project/xz/releases/download/v${{env.xz_version}}//xz-${{env.xz_version}}.tar.xz
 
       - name: Extract xz
         shell: bash
