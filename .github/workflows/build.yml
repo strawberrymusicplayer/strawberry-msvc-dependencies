@@ -1795,6 +1795,21 @@ jobs:
           copy libmpcdec\*.lib ${{env.prefix_path_backslash}}\lib\
           copy libmpcdec\*.dll ${{env.prefix_path_backslash}}\bin\
 
+      - name: Create mpcdec.pc
+        shell: bash
+        run: |
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Name: mpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Description: mpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "URL: https://www.musepack.net/" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Version: ${{env.musepack_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lmpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+
 
       - name: Download libopenmpt
         shell: bash
@@ -1940,6 +1955,21 @@ jobs:
         run: |
           copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\libfaac.lib
           copy bin\${{env.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
+
+      - name: Create faac.pc
+        shell: bash
+        run: |
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Name: faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Description: faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "URL: https://github.com/knik0/faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Version: 1.30" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lfaac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
 
 
       - name: Download fdk-aac
@@ -2327,12 +2357,7 @@ jobs:
       - name: Patch gst-plugins-bad
         shell: bash
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
-        run: |
-          patch -p1 < ../../patches/gst-plugins-bad-libpaths.patch
-          sed -i 's/c:\\msvc_x86_64\\lib/${{env.prefix_path_backslash2}}\\lib/g' ext/faad/meson.build
-          sed -i 's/c:\\msvc_x86_64\\lib/${{env.prefix_path_backslash2}}\\lib/g' ext/faac/meson.build
-          sed -i 's/c:\\msvc_x86_64\\lib/${{env.prefix_path_backslash2}}\\lib/g' ext/musepack/meson.build
-          sed -i 's/c:\\msvc_x86_64\\lib/${{env.prefix_path_backslash2}}\\lib/g' ext/gme/meson.build
+        run: patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd

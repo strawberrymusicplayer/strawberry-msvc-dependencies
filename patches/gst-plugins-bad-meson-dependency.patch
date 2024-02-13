@@ -1,15 +1,22 @@
 diff --git a/ext/faac/meson.build b/ext/faac/meson.build
-index e885781..33b47e5 100644
+index 4b1e54c..4003f77 100644
 --- a/ext/faac/meson.build
 +++ b/ext/faac/meson.build
-@@ -1,4 +1,4 @@
+@@ -1,10 +1,6 @@
 -faac_dep = cc.find_library('faac', required : get_option('faac'))
-+faac_dep = cc.find_library('faac', dirs: 'c:\msvc_x86_64\lib', required : get_option('faac'))
- have_faac_h = cc.has_header_symbol('faac.h', 'faacEncOpen')
- if not have_faac_h and get_option('faac').enabled()
-   error('faac plugin enabled: found libfaac, but not faac.h')
+-have_faac_h = cc.has_header_symbol('faac.h', 'faacEncOpen')
+-if not have_faac_h and get_option('faac').enabled()
+-  error('faac plugin enabled: found libfaac, but not faac.h')
+-endif
++faac_dep = dependency('faac', version : '>= 1.30', required : get_option('faac'))
+ 
+-if faac_dep.found() and have_faac_h
++if faac_dep.found()
+   gstfaac = library('gstfaac',
+     'gstfaac.c',
+     c_args : gst_plugins_bad_args,
 diff --git a/ext/faad/meson.build b/ext/faad/meson.build
-index 2e633bd..b3f4d09 100644
+index e7ba28c..dc52e8d 100644
 --- a/ext/faad/meson.build
 +++ b/ext/faad/meson.build
 @@ -16,7 +16,7 @@ if have_faad and not have_faad_2_7 and faad_opt.enabled()
@@ -17,12 +24,12 @@ index 2e633bd..b3f4d09 100644
  endif
  
 -faad_dep = cc.find_library('faad', required : faad_opt)
-+faad_dep = cc.find_library('faad', dirs: 'c:\msvc_x86_64\lib', required : faad_opt)
++faad_dep = dependency('faad2', version : '>= 2.11.1', required: faad_opt)
  
  if faad_dep.found() and have_faad_2_7
    gstfaad = library('gstfaad',
 diff --git a/ext/gme/meson.build b/ext/gme/meson.build
-index dd02be8..34e5dab 100644
+index 3f31e9c..0271e5d 100644
 --- a/ext/gme/meson.build
 +++ b/ext/gme/meson.build
 @@ -4,7 +4,7 @@ endif
@@ -30,17 +37,17 @@ index dd02be8..34e5dab 100644
  have_gme = cc.has_header ('gme/gme.h')
  if have_gme
 -  gme_dep = cc.find_library('gme', required: get_option('gme'))
-+  gme_dep = cc.find_library('gme', dirs: 'c:\msvc_x86_64\lib', required: get_option('gme'))
++  gme_dep = dependency('libgme', version : '>= 0.6.3', required: get_option('gme'))
    have_gme = gme_dep.found()
  endif
  
 diff --git a/ext/musepack/meson.build b/ext/musepack/meson.build
-index 128871f..3881433 100644
+index 1cec04d..ad38229 100644
 --- a/ext/musepack/meson.build
 +++ b/ext/musepack/meson.build
 @@ -1,4 +1,4 @@
 -mpcdec_dep = cc.find_library('mpcdec', required: get_option('musepack'))
-+mpcdec_dep = cc.find_library('mpcdec', dirs: 'c:\msvc_x86_64\lib', required: get_option('musepack'))
++mpcdec_dep = dependency('mpcdec', required: get_option('musepack'))
  
  if mpcdec_dep.found() and cc.has_header_symbol('mpc/mpcdec.h', 'mpc_demux_init', dependencies: mpcdec_dep)
    gstmusepack = library('gstmusepack',
