@@ -1,0 +1,45 @@
+From 62f09513e5630ba8d3d6eff8ed32cc7f8ceb4196 Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Sat, 12 Aug 2023 10:43:14 +1000
+Subject: [PATCH] audiobasesink: Don't wait on gap events
+
+Don't call wait_event() at all for gap events, as basesink will
+end up waiting for the time that the gap event would be rendered
+out at the audio device. There's no need to render it at all,
+just treat it as a handy point to resync the audio if needed,
+let the ringbuffer render silence, and place the next buffer
+into the ringbuffer where it belongs.
+
+The only thing we really need to do is make sure the ringbuffer
+and clock are running, and wait for preroll.
+
+Fixes https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/2749
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5178>
+---
+ .../gst-libs/gst/audio/gstaudiobasesink.c                | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/subprojects/gst-plugins-base/gst-libs/gst/audio/gstaudiobasesink.c b/subprojects/gst-plugins-base/gst-libs/gst/audio/gstaudiobasesink.c
+index 891941d128f..1f843acf448 100644
+--- a/subprojects/gst-plugins-base/gst-libs/gst/audio/gstaudiobasesink.c
++++ b/subprojects/gst-plugins-base/gst-libs/gst/audio/gstaudiobasesink.c
+@@ -1124,6 +1124,15 @@ gst_audio_base_sink_wait_event (GstBaseSink * bsink, GstEvent * event)
+       /* Make sure the ringbuffer will start again if interrupted during event_wait() */
+       g_atomic_int_set (&sink->eos_rendering, 1);
+       clear_force_start_flag = TRUE;
++
++      /* For gap events, don't actually wait for the clock to
++       * reach that time, or it will drain the ringbuffer, just
++       * ensure we're prerolled and let the next actual buffer
++       * get rendered where it belongs */
++      if (GST_EVENT_TYPE (event) == GST_EVENT_GAP) {
++        ret = gst_base_sink_do_preroll (bsink, GST_MINI_OBJECT_CAST (event));
++        goto done;
++      }
+       break;
+     default:
+       break;
+-- 
+GitLab
+
