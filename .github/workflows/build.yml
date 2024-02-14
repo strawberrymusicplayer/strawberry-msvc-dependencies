@@ -106,7 +106,7 @@ env:
 
   gstreamer_version: '1.22.10'
 
-  qt_version: '6.6.1'
+  qt_version: '6.6.2'
 
   kdsingleapplication_version: '1.1.0'
 
