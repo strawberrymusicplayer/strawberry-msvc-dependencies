@@ -319,7 +319,7 @@ function update_package() {
     status "${package_name}: ${package_version_current} is the latest"
   else
     branch="${package_name}_$(echo ${package_version_latest} | sed 's/\./_/g')"
-    git branch | grep "${branch}" >/dev/null 2>&1
+    git branch | tr -d '[:blank:]' | grep "^${branch}\$" >/dev/null 2>&1
     if [ $? -ne 0 ]; then
       status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
       git checkout -b "${branch}" || exit 1
