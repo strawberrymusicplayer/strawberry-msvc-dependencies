@@ -479,6 +479,59 @@ jobs:
         working-directory: build/openssl-${{env.openssl_version}}
         run: nmake install_sw
 
+      - name: Copy openssl libs
+        shell: cmd
+        run: |
+          copy ${{env.prefix_path_backslash}}\lib\libssl.lib ${{env.prefix_path_backslash}}\lib\ssl.lib
+          copy ${{env.prefix_path_backslash}}\lib\libcrypto.lib ${{env.prefix_path_backslash}}\lib\crypto.lib
+
+      - name: Generate openssl pc
+        shell: bash
+        run: |
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "exec_prefix=\${prefix}" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "libdir=\${exec_prefix}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "includedir=\${prefix}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "Name: OpenSSL" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "Description: Secure Sockets Layer and cryptography libraries and tools" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "Version: ${{env.openssl_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo "Requires: libssl libcrypto" >>${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "exec_prefix=\${prefix}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "libdir=\${exec_prefix}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "includedir=\${prefix}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "enginesdir=\${libdir}/engines-3" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "modulesdir=\${libdir}/ossl-modules" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Name: OpenSSL-libcrypto" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Description: OpenSSL cryptography library" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Version: ${{env.openssl_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Libs: -L\${libdir} -lcrypto" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Libs.private: -lz -ldl -pthread " >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo "Cflags: -DOPENSSL_LOAD_CONF -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "exec_prefix=\${prefix}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "libdir=\${exec_prefix}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "includedir=\${prefix}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Name: OpenSSL-libssl" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Description: Secure Sockets Layer and cryptography libraries and tools" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Version: ${{env.openssl_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Requires.private: libcrypto" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Libs: -L\${libdir} -lssl" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "Cflags: -DOPENSSL_LOAD_CONF -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/openssl.pc
+          echo
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/libcrypto.pc
+          echo
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
+
 
       - name: Download GnuTLS
         shell: bash
