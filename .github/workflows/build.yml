@@ -1311,11 +1311,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/glib-networking-${{env.glib_networking_version}}.tar.xz
 
-      - name: Patch glib-networking
-        shell: bash
-        working-directory: build/glib-networking-${{env.glib_networking_version}}
-        run: patch -p1 < ../../patches/glib-networking-tests.patch
-
       - name: Configure glib-networking
         shell: cmd
         env:
