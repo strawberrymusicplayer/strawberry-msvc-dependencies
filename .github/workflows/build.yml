@@ -2492,6 +2492,7 @@ jobs:
           patch -p3 < ../../patches/gst-plugins-bad-wasapi2-1.patch
           patch -p3 < ../../patches/gst-plugins-bad-wasapi2-2.patch
           patch -p3 < ../../patches/gst-plugins-bad-wasapi-exclusive.patch
+          patch -p3 < ../../patches/gst-plugins-bad-asiosink.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd
