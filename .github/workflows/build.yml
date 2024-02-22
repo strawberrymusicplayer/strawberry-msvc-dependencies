@@ -162,6 +162,11 @@ jobs:
           echo "prefix_path_forwardslash=c:/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
           echo "prefix_path_unix=/c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
 
+      - name: Set lib postfix
+        if: env.buildtype == 'debug'
+        shell: bash
+        run: echo "lib_postfix=d" >> $GITHUB_ENV
+
       - name: Set arch variables (x86)
         if: matrix.arch == 'x86'
         shell: bash
@@ -839,6 +844,59 @@ jobs:
           cp -r include/unicode ${{env.prefix_path_unix}}/include/
           cp ${{env.libdir}}/{*.lib,*.pdb,*.exp} ${{env.prefix_path_unix}}/lib/
           cp ${{env.bindir}}/{*.dll,*.exe} ${{env.prefix_path_unix}}/bin/
+
+      - name: Generate icu pc
+        shell: bash
+        run: |
+          echo "prefix=${{env.prefix_path_forwardslash}}" > ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "exec_prefix=\${prefix}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "libdir=\${exec_prefix}/lib" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "includedir=\${prefix}/include" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "Name: icu-uc" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "Description: International Components for Unicode: Common and Data libraries" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "Version: ${{env.icu4c_version}}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "Libs: -L\${libdir} -licuuc${{env.lib_postfix}} -licudt" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo "Libs.private: -lpthread -lm" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo
+          echo "prefix=${{env.prefix_path_forwardslash}}" > ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "exec_prefix=\${prefix}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "libdir=\${exec_prefix}/lib" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "includedir=\${prefix}/include" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "Name: icu-i18n" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "Description: International Components for Unicode: Stream and I/O Library" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "Version: ${{env.icu4c_version}}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "Libs: -licuin${{env.lib_postfix}}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo "Requires: icu-uc" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo
+          echo "prefix=${{env.prefix_path_forwardslash}}" > ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "exec_prefix=\${prefix}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "libdir=\${exec_prefix}/lib" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "includedir=\${prefix}/include" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "Name: icu-io" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "Description: International Components for Unicode: Stream and I/O Library" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "Version: ${{env.icu4c_version}}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "Libs: -licuio${{env.lib_postfix}}" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "Requires: icu-i18n" >> ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/icu-uc.pc
+          echo
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/icu-i18n.pc
+          echo
+          echo "${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc:"
+          cat ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
+
+      - name: Verify icu
+        shell: cmd
+        env:
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        run: |
+          pkg-config icu-uc --libs
+          pkg-config icu-i18n --libs
+          pkg-config icu-io --libs
 
 
       - name: Download pixman
