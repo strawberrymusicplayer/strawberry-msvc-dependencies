@@ -2925,7 +2925,7 @@ jobs:
           echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
           echo "* Brotli ${{env.brotli_version}}" >> "${{env.release_notes_file}}"
           echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
-          echo "* Pixmap ${{env.pixman_version}}" >> "${{env.release_notes_file}}"
+          echo "* pixman ${{env.pixman_version}}" >> "${{env.release_notes_file}}"
           echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
           echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
           echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
