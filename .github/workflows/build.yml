@@ -131,11 +131,26 @@ env:
 
 jobs:
 
-  build-windows-msvc:
+  setup:
+    name: Setup
+    if: (!contains(github.event.head_commit.message, 'skip ci'))
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{steps.set_release_tag.outputs.release_tag}}
+    steps:
+      - name: Set release tag
+        id: set_release_tag
+        shell: bash
+        run: echo "release_tag=release-$GITHUB_RUN_ID" >> $GITHUB_OUTPUT
+
+  build:
     name: Build Windows MSVC
-    runs-on: windows-2022
+    needs:
+      - setup
 
     if: (!contains(github.event.head_commit.message, 'skip ci'))
+
+    runs-on: windows-2022
 
     strategy:
       matrix:
@@ -2848,63 +2863,14 @@ jobs:
         shell: bash
         run: tar -cJf strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz --transform "s,^c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}},strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}," ${{env.prefix_path_unix}}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}
-          path: strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz
-
-
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release'
-    needs:
-      - build-windows-msvc
-    steps:
-
-      - name: Install packages
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: sudo apt install -y git hub
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set release tag
-        run: echo "release_tag=release-$GITHUB_RUN_ID" >> $GITHUB_ENV
-
       - name: Set have release
-        run: echo "have_release=$(git tag -l | grep ${{env.release_tag}} >/dev/null 2>&1 && echo 1 || echo 0)" >> $GITHUB_ENV
-
-      - name: Delete existing release
-        if: env.have_release == '1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          hub release delete "${{env.release_tag}}"
-          git tag -d "${{env.release_tag}}"
-          git push --delete origin "${{env.release_tag}}"
-
-      - name: Delete old releases
+        shell: bash
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          while [ "$(git tag | wc -l)" -ge "${{env.max_releases}}" ]; do
-            oldest_tag=$(git tag | head -1)
-            hub release delete "$oldest_tag"
-            git tag -d "$oldest_tag"
-            git push --delete origin "$oldest_tag"
-          done
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: releases
+        run: echo "have_release=$(gh release view "${{needs.setup.outputs.release_tag}}" | grep "${{needs.setup.outputs.release_tag}}" >/dev/null 2>&1 && echo 1 || echo 0)" >> $GITHUB_ENV
 
       - name: Set release notes file
+        shell: bash
         run: echo "release_notes_file=release_notes.txt" >> $GITHUB_ENV
 
       - name: Create release notes
@@ -2964,14 +2930,45 @@ jobs:
           echo "* abseil-cpp ${{env.abseil_cpp_version}}" >> "${{env.release_notes_file}}"
           echo "* Protobuf ${{env.protobuf_version}}" >> "${{env.release_notes_file}}"
 
-      - name: Create Release
+      - name: Create new release
+        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh release create -d -F "${{env.release_notes_file}}" -t "Strawberry MSVC Dependencies Release $GITHUB_RUN_ID" "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
+
+      - name: Update existing release
+        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release == '1'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh release upload "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
+
+
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release'
+    needs:
+      - setup
+      - build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh release edit --draft=false --latest "${{needs.setup.outputs.release_tag}}"
+
+      - name: Delete old releases
+        shell: bash
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
-          set -x
-          files=()
-          for file in $(find releases -type f); do
-            echo "Adding file: ${file}"
-            files+=("-a" "${file}")
+          while [ "$(git tag | wc -l)" -ge "${{env.max_releases}}" ]; do
+            oldest_tag=$(git tag | head -1)
+            gh release delete "${oldest_tag}"
+            git tag -d "${oldest_tag}"
+            git push --delete origin "${oldest_tag}"
           done
-          hub release create -t "$GITHUB_SHA" "${files[@]}" -F "${{env.release_notes_file}}" "${{env.release_tag}}"
