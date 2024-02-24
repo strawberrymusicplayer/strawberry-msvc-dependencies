@@ -1,5 +1,20 @@
+From 06dc931b52fbd858640506616f5a1a928792b27c Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Tue, 20 Feb 2024 20:38:55 +0900
+Subject: [PATCH] asiosink: Fix channel selection
+
+Fixing copy paste mistake
+
+Fixes: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/3321
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6170>
+---
+ .../sys/asio/gstasioobject.cpp                |  2 +-
+ .../gst-plugins-bad/sys/asio/gstasiosink.cpp  | 40 ++++++++-----------
+ .../gst-plugins-bad/sys/asio/gstasiosrc.cpp   | 30 ++++++--------
+ 3 files changed, 30 insertions(+), 42 deletions(-)
+
 diff --git a/subprojects/gst-plugins-bad/sys/asio/gstasioobject.cpp b/subprojects/gst-plugins-bad/sys/asio/gstasioobject.cpp
-index 675ffc89ad..c14b1dd73b 100644
+index 675ffc89ad1..c14b1dd73b6 100644
 --- a/subprojects/gst-plugins-bad/sys/asio/gstasioobject.cpp
 +++ b/subprojects/gst-plugins-bad/sys/asio/gstasioobject.cpp
 @@ -734,7 +734,7 @@ gst_asio_object_thread_func (GstAsioObject * self)
@@ -12,7 +27,7 @@ index 675ffc89ad..c14b1dd73b 100644
  
    asio_rst = asio_handle->getSampleRate (&self->sample_rate);
 diff --git a/subprojects/gst-plugins-bad/sys/asio/gstasiosink.cpp b/subprojects/gst-plugins-bad/sys/asio/gstasiosink.cpp
-index 492e8fbb47..46b805ff5c 100644
+index 492e8fbb47d..46b805ff5c9 100644
 --- a/subprojects/gst-plugins-bad/sys/asio/gstasiosink.cpp
 +++ b/subprojects/gst-plugins-bad/sys/asio/gstasiosink.cpp
 @@ -27,6 +27,7 @@
@@ -106,7 +121,7 @@ index 492e8fbb47..46b805ff5c 100644
      gst_clear_object (&ringbuffer);
      goto out;
 diff --git a/subprojects/gst-plugins-bad/sys/asio/gstasiosrc.cpp b/subprojects/gst-plugins-bad/sys/asio/gstasiosrc.cpp
-index 47bbad5f08..b0f8b159fc 100644
+index 47bbad5f089..b0f8b159fcb 100644
 --- a/subprojects/gst-plugins-bad/sys/asio/gstasiosrc.cpp
 +++ b/subprojects/gst-plugins-bad/sys/asio/gstasiosrc.cpp
 @@ -27,6 +27,7 @@
@@ -183,3 +198,6 @@ index 47bbad5f08..b0f8b159fc 100644
      GST_WARNING_OBJECT (self, "Failed to configure ringbuffer");
      gst_clear_object (&ringbuffer);
      goto out;
+-- 
+GitLab
+
