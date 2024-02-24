@@ -1,0 +1,50 @@
+From 06b9864dae79d1d784d28b91247bc87fc2d57a9d Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Wed, 21 Feb 2024 21:46:49 +0900
+Subject: [PATCH] wasapi2: Fix task memory leak
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6169>
+---
+ .../gst-plugins-bad/sys/wasapi2/gstwasapi2ringbuffer.cpp    | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/subprojects/gst-plugins-bad/sys/wasapi2/gstwasapi2ringbuffer.cpp b/subprojects/gst-plugins-bad/sys/wasapi2/gstwasapi2ringbuffer.cpp
+index eaaad9506ef..86addc82320 100644
+--- a/subprojects/gst-plugins-bad/sys/wasapi2/gstwasapi2ringbuffer.cpp
++++ b/subprojects/gst-plugins-bad/sys/wasapi2/gstwasapi2ringbuffer.cpp
+@@ -1002,6 +1002,7 @@ gst_wasapi2_ring_buffer_prepare_loopback_client (GstWasapi2RingBuffer * self)
+   hr = gst_wasapi2_ring_buffer_initialize_audio_client (self, client_handle,
+       mix_format, &period, 0, GST_WASAPI2_CLIENT_DEVICE_CLASS_RENDER,
+       nullptr, FALSE);
++  CoTaskMemFree (mix_format);
+ 
+   if (!gst_wasapi2_result (hr)) {
+     GST_ERROR_OBJECT (self, "Failed to initialize audio client");
+@@ -1146,8 +1147,6 @@ gst_wasapi2_ring_buffer_acquire (GstAudioRingBuffer * buf,
+     gst_audio_ring_buffer_set_channel_positions (buf, position);
+   g_free (position);
+ 
+-  CoTaskMemFree (mix_format);
+-
+   if (!gst_wasapi2_result (hr)) {
+     GST_ERROR_OBJECT (self, "Failed to init audio client");
+     goto error;
+@@ -1213,12 +1212,15 @@ gst_wasapi2_ring_buffer_acquire (GstAudioRingBuffer * buf,
+   gst_audio_format_info_fill_silence (buf->spec.info.finfo,
+       buf->memory, buf->size);
+ 
++  CoTaskMemFree (mix_format);
++
+   return TRUE;
+ 
+ error:
+   GST_WASAPI2_CLEAR_COM (self->render_client);
+   GST_WASAPI2_CLEAR_COM (self->capture_client);
+   GST_WASAPI2_CLEAR_COM (self->volume_object);
++  CoTaskMemFree (mix_format);
+ 
+   gst_wasapi2_ring_buffer_post_open_error (self);
+ 
+-- 
+GitLab
+

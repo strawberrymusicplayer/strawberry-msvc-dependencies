@@ -2499,9 +2499,10 @@ jobs:
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
         run: |
           patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
-          patch -p3 < ../../patches/gst-plugins-bad-wasapi2-1.patch
-          patch -p3 < ../../patches/gst-plugins-bad-wasapi2-2.patch
-          patch -p3 < ../../patches/gst-plugins-bad-wasapi-exclusive.patch
+          patch -p3 < ../../patches/gst-plugins-bad-wasapi-alloc-free-mismatch.patch
+          patch -p3 < ../../patches/gst-plugins-bad-wasapi2-choppy-rendering.patch
+          patch -p3 < ../../patches/gst-plugins-bad-wasapi2-respect-ringbuffer-buffer-latency-time.patch
+          patch -p3 < ../../patches/gst-plugins-bad-wasapi2-fix-task-memory-leak.patch
           patch -p3 < ../../patches/gst-plugins-bad-asiosink.patch
 
       - name: Configure gst-plugins-bad

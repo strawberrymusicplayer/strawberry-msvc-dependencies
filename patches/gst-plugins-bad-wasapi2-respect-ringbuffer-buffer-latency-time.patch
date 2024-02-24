@@ -1,11 +1,14 @@
-From 95e3e48e8e5d7130d79697ae02c46e7d9052b7a4 Mon Sep 17 00:00:00 2001
+From 354af30d9ff3c133c084bb306868e5a3f6f4589f Mon Sep 17 00:00:00 2001
 From: Seungha Yang <seungha@centricular.com>
 Date: Mon, 19 Feb 2024 20:57:26 +0900
 Subject: [PATCH] wasapi2: Respect ringbuffer buffer/latency time
 
 Decide buffer size based on configured buffer/latency time
-if low-latency is disabled so that ringbuffer can buffers more
+if low-latency is disabled, so that ringbuffer can buffer more
 than minimum required size.
+
+Fixes: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/2870
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6141>
 ---
  .../sys/wasapi2/gstwasapi2ringbuffer.cpp      | 37 +++++++++++++++----
  1 file changed, 29 insertions(+), 8 deletions(-)
