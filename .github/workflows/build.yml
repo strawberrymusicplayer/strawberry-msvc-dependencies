@@ -54,7 +54,7 @@ env:
 
   libsoup_version: '3.4.4'
 
-  glib_networking_version: '2.78.0'
+  glib_networking_version: '2.78.1'
 
   freetype_version: '2.13.2'
 
