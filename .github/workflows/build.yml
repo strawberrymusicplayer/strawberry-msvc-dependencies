@@ -40,7 +40,7 @@ env:
 
   libxml2_version: '2.12.5'
 
-  nghttp2_version: '1.59.0'
+  nghttp2_version: '1.60.0'
 
   dlfcn_version: '1.4.1'
 
@@ -1060,7 +1060,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/nghttp2-${{env.nghttp2_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DENABLE_SHARED_LIB=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
 
       - name: Build nghttp2
         shell: cmd
