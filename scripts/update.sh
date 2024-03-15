@@ -176,7 +176,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://www.cairographics.org/releases/?C=M;O=D' | sed -n 's,.*"pixman-\([0-9][^"]*\)\.tar.*,\1,p' | head -1)
       ;;
     "expat")
-      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/expat/files/expat/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/libexpat/libexpat/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/R_//g' | tr '_' '.' | sort -V | tail -1)
       ;;
     "boost")
       package_version_latest=$(curl ${curl_options} 'https://www.boost.org/users/download/' | sed -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | grep -v beta | sort -V | tail -1)
