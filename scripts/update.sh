@@ -164,7 +164,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://sourceware.org/pub/bzip2/' | grep 'bzip2-' | sed -n 's,.*bzip2-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "xz")
-      package_version_latest=$(curl ${curl_options} 'https://tukaani.org/xz/' | sed -n 's,.*xz-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://github.com/tukaani-project/xz/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/v//g' | sort -V | tail -1)
       ;;
     "brotli")
       package_version_latest=$(curl ${curl_options} 'https://github.com/google/brotli/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v 'rc$' | grep -v 'null' | sed 's/^v//g' | sort -V | tail -1)
