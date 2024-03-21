@@ -104,7 +104,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.24.0'
+  gstreamer_version: '1.24.1'
 
   qt_version: '6.6.2'
 
@@ -2444,11 +2444,6 @@ jobs:
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/gst-plugins-base-${{env.gstreamer_version}}.tar.xz
-
-      - name: Patch gst-plugins-base
-        shell: bash
-        working-directory: build/gst-plugins-base-${{env.gstreamer_version}}
-        run: patch -p3 -R < ../../patches/gst-plugins-base-audiobasesink-gap.patch
 
       - name: Configure gst-plugins-base
         shell: cmd
