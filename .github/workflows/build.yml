@@ -74,7 +74,7 @@ env:
 
   speex_version: '1.2.1'
 
-  mpg123_version: '1.32.5'
+  mpg123_version: '1.32.6'
 
   lame_version: '3.100'
 
