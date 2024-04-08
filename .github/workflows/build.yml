@@ -110,7 +110,7 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
-  abseil_cpp_version: '20240116.1'
+  abseil_cpp_version: '20240116.2'
 
   protobuf_version: '26.1'
 
