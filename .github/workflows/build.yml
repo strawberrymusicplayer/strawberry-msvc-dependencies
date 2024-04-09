@@ -92,7 +92,7 @@ env:
 
   utfcpp_version: '4.0.5'
 
-  taglib_version: '2.0'
+  taglib_version: '2.0.1'
 
   libbs2b_version: '3.1.0'
 
@@ -2173,11 +2173,6 @@ jobs:
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/taglib-${{env.taglib_version}}.tar.gz
-
-      - name: Patch TagLib
-        shell: bash
-        working-directory: build/taglib-${{env.taglib_version}}
-        run: patch -p1 < ../../patches/taglib-longpaths.patch
 
       - name: Configure TagLib
         shell: cmd
