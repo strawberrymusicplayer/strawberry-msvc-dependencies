@@ -742,36 +742,33 @@ jobs:
       - name: Download xz
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/lzmautils/xz-${{env.xz_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/tukaani-project/xz/releases/download/v${{env.xz_version}}/xz-${{env.xz_version}}.tar.xz
 
       - name: Extract xz
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/xz-${{env.xz_version}}.tar.xz
 
-      - name: Upgrade xz project
+      - name: Configure xz
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
-        run: start /w devenv.exe xz_win.sln /upgrade
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/xz-${{env.xz_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF
 
       - name: Build xz
         shell: cmd
         env:
           CL: "/MP"
-        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
-        run: msbuild xz_win.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
+        working-directory: build/xz-${{env.xz_version}}/build
+        run: cmake --build .
 
       - name: Install xz
         shell: cmd
-        working-directory: build/xz-${{env.xz_version}}/windows/vs2019
-        run: |
-          copy ${{env.buildtype}}\${{env.msbuild_platform}}\liblzma_dll\*.lib ${{env.prefix_path_backslash}}\lib\
-          copy ${{env.buildtype}}\${{env.msbuild_platform}}\liblzma_dll\*.dll ${{env.prefix_path_backslash}}\bin\
-          copy ..\..\src\liblzma\api\*.h ${{env.prefix_path_backslash}}\include\
-          mkdir ${{env.prefix_path_backslash}}\include\lzma
-          copy ..\..\src\liblzma\api\lzma\*.* ${{env.prefix_path_backslash}}\include\lzma\
+        working-directory: build/xz-${{env.xz_version}}/build
+        run: cmake --install .
 
 
       - name: Download brotli
