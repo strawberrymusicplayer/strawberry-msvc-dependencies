@@ -112,7 +112,7 @@ env:
 
   abseil_cpp_version: '20240116.2'
 
-  protobuf_version: '27.0'
+  protobuf_version: '27.1'
 
   asiosdk_version: '2.3.3_2019-06-14'
 
