@@ -827,6 +827,13 @@ jobs:
         shell: bash
         run: cp ${{env.prefix_path_unix}}/lib/libiconvD.lib ${{env.prefix_path_unix}}/lib/libiconv.lib
 
+
+      - name: Cleanup build directory
+        shell: bash
+        working-directory: build
+        run: rm -rf *
+
+
       - name: Download icu
         shell: bash
         working-directory: downloads
