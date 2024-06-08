@@ -153,6 +153,8 @@ jobs:
     runs-on: windows-2022
 
     strategy:
+      fail-fast: false
+
       matrix:
        arch: [ x86_64, x86 ]
        buildtype: [ release, debug ]
