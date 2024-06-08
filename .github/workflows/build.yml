@@ -844,17 +844,12 @@ jobs:
         working-directory: build
         run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
 
-      - name: Patch icu
-        shell: bash
-        working-directory: build/icu
-        run: patch -p1 < ../../patches/icu-uwp.patch
-
       - name: Build icu
         shell: cmd
         env:
           CL: "/MP"
         working-directory: build/icu/source/allinone
-        run: msbuild allinone.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
+        run: msbuild allinone.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}} /p:SkipUWP=true /p:Skipuconv=true
 
       - name: Install icu
         shell: bash
