@@ -1,5 +1,5 @@
 diff --git a/source/allinone/allinone.sln b/source/allinone/allinone.sln
-index a7d032e..9d67d69 100644
+index fbc9745..eaa14d5 100644
 --- a/source/allinone/allinone.sln
 +++ b/source/allinone/allinone.sln
 @@ -1,6 +1,6 @@
@@ -7,11 +7,11 @@ index a7d032e..9d67d69 100644
 -# Visual Studio 15
 -VisualStudioVersion = 15.0.27130.2036
 +# Visual Studio Version 17
-+VisualStudioVersion = 17.4.33110.190
++VisualStudioVersion = 17.10.34928.147
  MinimumVisualStudioVersion = 10.0.40219.1
- Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cal", "..\samples\cal\cal.vcxproj", "{F7659D77-09CF-4FE9-ACEE-927287AA9509}"
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cintltst", "..\test\cintltst\cintltst.vcxproj", "{3D1246AE-1B32-479B-BECA-AEFA97BE2321}"
  	ProjectSection(ProjectDependencies) = postProject
-@@ -189,17 +189,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testplug", "..\tools\icuinf
+@@ -177,17 +177,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testplug", "..\tools\icuinf
  EndProject
  Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "makedata_uwp", "..\data\makedata_uwp.vcxproj", "{B1D53358-37BD-48BC-B27C-68BAF1E78508}"
  EndProject
@@ -29,7 +29,7 @@ index a7d032e..9d67d69 100644
  Global
  	GlobalSection(SolutionConfigurationPlatforms) = preSolution
  		Debug|ARM = Debug|ARM
-@@ -700,38 +689,6 @@ Global
+@@ -664,38 +653,6 @@ Global
  		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|Win32.Build.0 = Release|Win32
  		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|x64.ActiveCfg = Release|x64
  		{B1D53358-37BD-48BC-B27C-68BAF1E78508}.Release|x64.Build.0 = Release|x64
