@@ -1,0 +1,1071 @@
+diff --git a/source/common/common.vcxproj b/source/common/common.vcxproj
+index 2ec8ab4..ea379aa 100644
+--- a/source/common/common.vcxproj
++++ b/source/common/common.vcxproj
+@@ -8,7 +8,7 @@
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
+   </PropertyGroup>
+-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <!-- The following import will include the 'default' configuration options for VS projects. -->
+   <Import Project="..\allinone\Build.Windows.ProjectConfiguration.props" />
+   <!-- The following import will include the library configuration options for VS projects. -->
+@@ -55,6 +55,7 @@
+       <PreprocessorDefinitions>RBBI_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\$(IcuBinOutputDir)\icuuc$(IcuMajorVersion)d.dll</OutputFile>
+@@ -67,6 +68,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\$(IcuBinOutputDir)\icuuc$(IcuMajorVersion).dll</OutputFile>
+@@ -402,4 +405,4 @@
+   <Import Project="$(SolutionDir)\Windows.CopyUnicodeHeaderFiles.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/common/common.vcxproj.filters b/source/common/common.vcxproj.filters
+index 08ceaed..9db6acb 100644
+--- a/source/common/common.vcxproj.filters
++++ b/source/common/common.vcxproj.filters
+@@ -825,30 +825,15 @@
+     <ClInclude Include="umapfile.h">
+       <Filter>data &amp; memory</Filter>
+     </ClInclude>
+-    <CustomBuild Include="unicode\locdspnm.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\simpleformatter.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+     <ClInclude Include="ustrfmt.h">
+       <Filter>formatting</Filter>
+     </ClInclude>
+     <ClInclude Include="util.h">
+       <Filter>formatting</Filter>
+     </ClInclude>
+-    <CustomBuild Include="unicode\ucurr.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+     <ClInclude Include="ucurrimp.h">
+       <Filter>formatting</Filter>
+     </ClInclude>
+-    <CustomBuild Include="unicode\udisplaycontext.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uldnames.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+     <ClInclude Include="punycode.h">
+       <Filter>idna</Filter>
+     </ClInclude>
+@@ -1026,285 +1011,4 @@
+       <Filter>configuration</Filter>
+     </ResourceCompile>
+   </ItemGroup>
+-  <ItemGroup>
+-    <CustomBuild Include="unicode\ubidi.h">
+-      <Filter>bidi</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ushape.h">
+-      <Filter>bidi</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\brkiter.h">
+-      <Filter>break iteration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\dbbi.h">
+-      <Filter>break iteration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\rbbi.h">
+-      <Filter>break iteration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ubrk.h">
+-      <Filter>break iteration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\strenum.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uenum.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\docmain.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\errorcode.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\icudataver.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\platform.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ptypes.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\putil.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\std_string.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uconfig.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\umachine.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\urename.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utrace.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utypes.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uvernum.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uversion.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucnv.h">
+-      <Filter>conversion</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucnv_cb.h">
+-      <Filter>conversion</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucnv_err.h">
+-      <Filter>conversion</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucnvsel.h">
+-      <Filter>conversion</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\localpointer.h">
+-      <Filter>data &amp; memory</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uclean.h">
+-      <Filter>data &amp; memory</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\udata.h">
+-      <Filter>data &amp; memory</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uobject.h">
+-      <Filter>data &amp; memory</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\dtintrv.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\parseerr.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\parsepos.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\umisc.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\idna.h">
+-      <Filter>idna</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uidna.h">
+-      <Filter>idna</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\localebuilder.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ulocbuilder.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\localematcher.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\locid.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\resbund.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucat.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uloc.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ulocale.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ures.h">
+-      <Filter>locales &amp; resources</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\caniter.h">
+-      <Filter>normalization</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\normalizer2.h">
+-      <Filter>normalization</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\normlzr.h">
+-      <Filter>normalization</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unorm.h">
+-      <Filter>normalization</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unorm2.h">
+-      <Filter>normalization</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\symtable.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uchar.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unifilt.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unifunct.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unimatch.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uniset.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uscript.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uset.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\usetiter.h">
+-      <Filter>properties &amp; sets</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\usprep.h">
+-      <Filter>sprep</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\bytestream.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\casemap.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\char16ptr.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\chariter.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\edits.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\rep.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\schriter.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\stringpiece.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucasemap.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uchriter.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\uiter.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\unistr.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\urep.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ustring.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utext.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utf.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utf16.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utf32.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utf8.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\utf_old.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\bytestrie.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\bytestriebuilder.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\messagepattern.h">
+-      <Filter>formatting</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\appendable.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ustringtrie.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucharstrie.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucharstriebuilder.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ucptrie.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\umutablecptrie.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\enumset.h">
+-      <Filter>data &amp; memory</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\icuplug.h">
+-      <Filter>configuration</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\stringtriebuilder.h">
+-      <Filter>collections</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\stringoptions.h">
+-      <Filter>strings</Filter>
+-    </CustomBuild>
+-  </ItemGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/data/makedata.vcxproj b/source/data/makedata.vcxproj
+index 40b3ccb..a853c77 100644
+--- a/source/data/makedata.vcxproj
++++ b/source/data/makedata.vcxproj
+@@ -26,7 +26,7 @@
+     <NMakeBuildCommandLine>NMAKE /f makedata.mak ICUMAKE="$(ProjectDir)\" CFG=$(MakeCFG) DEBUG=$(DebugBuild)</NMakeBuildCommandLine>
+     <NMakeReBuildCommandLine>NMAKE /f makedata.mak ICUMAKE="$(ProjectDir)\" CFG=$(MakeCFG) clean all</NMakeReBuildCommandLine>
+     <NMakeCleanCommandLine>NMAKE /f makedata.mak ICUMAKE="$(ProjectDir)\" CFG=$(MakeCFG) clean</NMakeCleanCommandLine>
+-    <NMakeOutput/>
++    <NMakeOutput />
+     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+     <NMakeIncludeSearchPath>$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+@@ -146,4 +146,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/extra/uconv/uconv.vcxproj b/source/extra/uconv/uconv.vcxproj
+index 40956b3..98256d9 100644
+--- a/source/extra/uconv/uconv.vcxproj
++++ b/source/extra/uconv/uconv.vcxproj
+@@ -59,6 +59,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -69,6 +70,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/i18n/i18n.vcxproj b/source/i18n/i18n.vcxproj
+index 80daa9e..f57c7c4 100644
+--- a/source/i18n/i18n.vcxproj
++++ b/source/i18n/i18n.vcxproj
+@@ -56,6 +56,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -69,6 +70,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -521,4 +524,4 @@
+   <Import Project="$(SolutionDir)\Windows.CopyUnicodeHeaderFiles.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/i18n/i18n.vcxproj.filters b/source/i18n/i18n.vcxproj.filters
+index 487ba81..a8d9686 100644
+--- a/source/i18n/i18n.vcxproj.filters
++++ b/source/i18n/i18n.vcxproj.filters
+@@ -222,9 +222,6 @@
+     <ClCompile Include="messageformat2_checker.cpp">
+       <Filter>formatting</Filter>
+     </ClCompile>
+-    <ClCompile Include="messageformat2_context.cpp">
+-      <Filter>formatting</Filter>
+-    </ClCompile>
+     <ClCompile Include="messageformat2_data_model.cpp">
+       <Filter>formatting</Filter>
+     </ClCompile>
+@@ -1325,4 +1322,4 @@
+       <Filter>misc</Filter>
+     </ResourceCompile>
+   </ItemGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/io/io.vcxproj b/source/io/io.vcxproj
+index 08d6b7c..dcb93ef 100644
+--- a/source/io/io.vcxproj
++++ b/source/io/io.vcxproj
+@@ -56,6 +56,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+@@ -70,6 +71,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\$(IcuBinOutputDir)\icuio$(IcuMajorVersion).dll</OutputFile>
+@@ -112,4 +115,4 @@
+   <Import Project="$(SolutionDir)\Windows.CopyUnicodeHeaderFiles.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/io/io.vcxproj.filters b/source/io/io.vcxproj.filters
+index 01d1c3c..362923c 100644
+--- a/source/io/io.vcxproj.filters
++++ b/source/io/io.vcxproj.filters
+@@ -77,12 +77,4 @@
+       <Filter>Resource Files</Filter>
+     </ResourceCompile>
+   </ItemGroup>
+-  <ItemGroup>
+-    <CustomBuild Include="unicode\ustdio.h">
+-      <Filter>Header Files</Filter>
+-    </CustomBuild>
+-    <CustomBuild Include="unicode\ustream.h">
+-      <Filter>Header Files</Filter>
+-    </CustomBuild>
+-  </ItemGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/stubdata/stubdata.vcxproj b/source/stubdata/stubdata.vcxproj
+index d0e728d..60cd482 100644
+--- a/source/stubdata/stubdata.vcxproj
++++ b/source/stubdata/stubdata.vcxproj
+@@ -64,12 +64,15 @@
+   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <!-- Options that are common to all 'Release' project configurations -->
+   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -83,4 +86,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/test/cintltst/cintltst.vcxproj b/source/test/cintltst/cintltst.vcxproj
+index d7c4b7b..2e2659e 100644
+--- a/source/test/cintltst/cintltst.vcxproj
++++ b/source/test/cintltst/cintltst.vcxproj
+@@ -52,6 +52,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icutestd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -62,6 +63,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icutest.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -106,7 +109,7 @@
+     <ClCompile Include="stdnmtst.c" />
+     <ClCompile Include="ucnvseltst.c" />
+     <ClCompile Include="ucsdetst.c" />
+-    <ClCompile Include="udatatst.c"/>
++    <ClCompile Include="udatatst.c" />
+     <ClCompile Include="ccaltst.c" />
+     <ClCompile Include="cdateintervalformattest.c" />
+     <ClCompile Include="cdattst.c" />
+@@ -200,4 +203,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/test/cintltst/cintltst.vcxproj.filters b/source/test/cintltst/cintltst.vcxproj.filters
+index 7b61c18..ebf5b49 100644
+--- a/source/test/cintltst/cintltst.vcxproj.filters
++++ b/source/test/cintltst/cintltst.vcxproj.filters
+@@ -216,15 +216,6 @@
+     <ClCompile Include="ulistfmttest.c">
+       <Filter>formatting</Filter>
+     </ClCompile>
+-    <ClInclude Include="unumberformattertst.c">
+-      <Filter>formatting</Filter>
+-    </ClInclude>
+-    <ClInclude Include="uformattedvaluetst.c">
+-      <Filter>formatting</Filter>
+-    </ClInclude>
+-    <ClInclude Include="unumberrangeformattertst.c">
+-      <Filter>formatting</Filter>
+-    </ClInclude>
+     <ClCompile Include="cldrtest.c">
+       <Filter>locales &amp; resources</Filter>
+     </ClCompile>
+@@ -321,6 +312,9 @@
+     <ClCompile Include="cbiditransformtst.c">
+       <Filter>bidi</Filter>
+     </ClCompile>
++    <ClCompile Include="unumberformattertst.c" />
++    <ClCompile Include="uformattedvaluetst.c" />
++    <ClCompile Include="unumberrangeformattertst.c" />
+   </ItemGroup>
+   <ItemGroup>
+     <ClInclude Include="cbiditst.h">
+@@ -432,4 +426,4 @@
+       <Filter>sprep &amp; idna</Filter>
+     </ClInclude>
+   </ItemGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/test/intltest/intltest.vcxproj b/source/test/intltest/intltest.vcxproj
+index 1017605..a0513e9 100644
+--- a/source/test/intltest/intltest.vcxproj
++++ b/source/test/intltest/intltest.vcxproj
+@@ -53,6 +53,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icutud.lib;icutestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -63,6 +64,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icutu.lib;icutest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -380,4 +383,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/test/iotest/iotest.vcxproj b/source/test/iotest/iotest.vcxproj
+index f924c3d..7b73af7 100644
+--- a/source/test/iotest/iotest.vcxproj
++++ b/source/test/iotest/iotest.vcxproj
+@@ -52,6 +52,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icuiod.lib;icutestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -62,6 +63,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icuio.lib;icutest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/ctestfw/ctestfw.vcxproj b/source/tools/ctestfw/ctestfw.vcxproj
+index 66ec8ea..684f63c 100644
+--- a/source/tools/ctestfw/ctestfw.vcxproj
++++ b/source/tools/ctestfw/ctestfw.vcxproj
+@@ -50,6 +50,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\..\$(IcuBinOutputDir)\icutest$(IcuMajorVersion)d.exe</OutputFile>
+@@ -63,6 +64,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\..\$(IcuBinOutputDir)\icutest$(IcuMajorVersion).exe</OutputFile>
+@@ -92,4 +95,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/source/tools/genbrk/genbrk.vcxproj b/source/tools/genbrk/genbrk.vcxproj
+index 7671579..7ce3c3b 100644
+--- a/source/tools/genbrk/genbrk.vcxproj
++++ b/source/tools/genbrk/genbrk.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/genccode/genccode.vcxproj b/source/tools/genccode/genccode.vcxproj
+index 9443749..e65850f 100644
+--- a/source/tools/genccode/genccode.vcxproj
++++ b/source/tools/genccode/genccode.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gencfu/gencfu.vcxproj b/source/tools/gencfu/gencfu.vcxproj
+index e2a0d08..0b21e33 100644
+--- a/source/tools/gencfu/gencfu.vcxproj
++++ b/source/tools/gencfu/gencfu.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gencmn/gencmn.vcxproj b/source/tools/gencmn/gencmn.vcxproj
+index f076d62..7c15ece 100644
+--- a/source/tools/gencmn/gencmn.vcxproj
++++ b/source/tools/gencmn/gencmn.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gencnval/gencnval.vcxproj b/source/tools/gencnval/gencnval.vcxproj
+index fd9a179..3bd3e51 100644
+--- a/source/tools/gencnval/gencnval.vcxproj
++++ b/source/tools/gencnval/gencnval.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gendict/gendict.vcxproj b/source/tools/gendict/gendict.vcxproj
+index f869374..f034131 100644
+--- a/source/tools/gendict/gendict.vcxproj
++++ b/source/tools/gendict/gendict.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gennorm2/gennorm2.vcxproj b/source/tools/gennorm2/gennorm2.vcxproj
+index b906d78..143b630 100644
+--- a/source/tools/gennorm2/gennorm2.vcxproj
++++ b/source/tools/gennorm2/gennorm2.vcxproj
+@@ -70,6 +70,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -80,6 +81,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/genrb/derb.vcxproj b/source/tools/genrb/derb.vcxproj
+index 409761b..69e5209 100644
+--- a/source/tools/genrb/derb.vcxproj
++++ b/source/tools/genrb/derb.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icuiod.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icuio.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/genrb/genrb.vcxproj b/source/tools/genrb/genrb.vcxproj
+index e94de0a..52665de 100644
+--- a/source/tools/genrb/genrb.vcxproj
++++ b/source/tools/genrb/genrb.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gensprep/gensprep.vcxproj b/source/tools/gensprep/gensprep.vcxproj
+index c0ce109..60a83fe 100644
+--- a/source/tools/gensprep/gensprep.vcxproj
++++ b/source/tools/gensprep/gensprep.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/gentest/gentest.vcxproj b/source/tools/gentest/gentest.vcxproj
+index 9d031fb..285a9b6 100644
+--- a/source/tools/gentest/gentest.vcxproj
++++ b/source/tools/gentest/gentest.vcxproj
+@@ -53,6 +53,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutestd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -63,6 +64,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutest.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/icuexportdata/icuexportdata.vcxproj b/source/tools/icuexportdata/icuexportdata.vcxproj
+index c77c02f..12e4210 100644
+--- a/source/tools/icuexportdata/icuexportdata.vcxproj
++++ b/source/tools/icuexportdata/icuexportdata.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/icuinfo/icuinfo.vcxproj b/source/tools/icuinfo/icuinfo.vcxproj
+index 64c8300..862c6bd 100644
+--- a/source/tools/icuinfo/icuinfo.vcxproj
++++ b/source/tools/icuinfo/icuinfo.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icuind.lib;icutud.lib;icutestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icuin.lib;icutu.lib;icutest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/icuinfo/testplug.vcxproj b/source/tools/icuinfo/testplug.vcxproj
+index 2ea4246..87a1c07 100644
+--- a/source/tools/icuinfo/testplug.vcxproj
++++ b/source/tools/icuinfo/testplug.vcxproj
+@@ -51,6 +51,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\..\$(IcuBinOutputDir)\testplug.dll</OutputFile>
+diff --git a/source/tools/icupkg/icupkg.vcxproj b/source/tools/icupkg/icupkg.vcxproj
+index 55d45bd..fb94b73 100644
+--- a/source/tools/icupkg/icupkg.vcxproj
++++ b/source/tools/icupkg/icupkg.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/makeconv/makeconv.vcxproj b/source/tools/makeconv/makeconv.vcxproj
+index 3def33e..c490774 100644
+--- a/source/tools/makeconv/makeconv.vcxproj
++++ b/source/tools/makeconv/makeconv.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/pkgdata/pkgdata.vcxproj b/source/tools/pkgdata/pkgdata.vcxproj
+index 1805d8a..5e38fe9 100644
+--- a/source/tools/pkgdata/pkgdata.vcxproj
++++ b/source/tools/pkgdata/pkgdata.vcxproj
+@@ -55,6 +55,7 @@
+     <ClCompile>
+       <BrowseInformation>true</BrowseInformation>
+       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuucd.lib;icutud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+@@ -65,6 +66,8 @@
+     <ClCompile>
+       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>icuuc.lib;icutu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+diff --git a/source/tools/toolutil/toolutil.vcxproj b/source/tools/toolutil/toolutil.vcxproj
+index 98a4932..fe7d88b 100644
+--- a/source/tools/toolutil/toolutil.vcxproj
++++ b/source/tools/toolutil/toolutil.vcxproj
+@@ -79,6 +79,9 @@
+       </DataExecutionPrevention>
+       <ImportLibrary>..\..\..\lib\icutu.lib</ImportLibrary>
+     </Link>
++    <ClCompile>
++      <AdditionalOptions>/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++    </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <Midl>
+@@ -110,6 +113,7 @@
+     </Midl>
+     <ClCompile>
+       <WholeProgramOptimization>true</WholeProgramOptimization>
++      <AdditionalOptions>/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <OutputFile>..\..\..\bin64\icutu$(IcuMajorVersion).dll</OutputFile>
+@@ -126,6 +130,9 @@
+       <ProgramDatabaseFile>.\..\..\..\lib64\icutud.pdb</ProgramDatabaseFile>
+       <ImportLibrary>..\..\..\lib64\icutud.lib</ImportLibrary>
+     </Link>
++    <ClCompile>
++      <AdditionalOptions>/D "_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" %(AdditionalOptions)</AdditionalOptions>
++    </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Platform)'=='ARM'">
+     <ClCompile>
+@@ -248,4 +255,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
