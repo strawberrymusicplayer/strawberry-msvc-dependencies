@@ -118,8 +118,6 @@ env:
 
   max_releases: '6'
 
-  wget_options: '-t 20 --retry-connrefused'
-
   curl_options: '-f -O -L --connect-timeout 15 -m 30 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
 
   sourceforge_mirror: 'downloads.sourceforge.net'
@@ -178,6 +176,11 @@ jobs:
           echo "prefix_path_forwardslash=c:/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
           echo "prefix_path_unix=/c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
 
+      - name: Cleanup PATH
+        uses: egor-tensin/cleanup-path@v4
+        with:
+          dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\3.9.13\x64;C:\hostedtoolcache\windows\Python\3.9.13\x64\Scripts
+
       - name: Set lib postfix
         if: env.buildtype == 'debug'
         shell: bash
@@ -231,18 +234,11 @@ jobs:
 
       - name: Delete conflicting libraries
         shell: bash
-        run: rm -rf /c/msys64 /c/mingw32 /c/mingw64 /c/strawberry/c "/c/program files/OpenSSL" /c/mysql "C:/program files/MySQL" "/c/program files/postgresql"
+        run: rm -rf /c/{msys64,mingw32,mingw64} /c/strawberry/c "/c/program files/OpenSSL"
 
       - name: Delete conflicting icu
         shell: bash
-        run: |
-          find "/c/program files (x86)/windows kits/" -iname 'icu*.lib' -delete
-          find "/c/program files (x86)/windows kits/" -iname 'icu*.h' -delete
-
-      - name: Install wget
-        shell: cmd
-        run: choco install wget
-
+        run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -2951,7 +2947,7 @@ jobs:
       - name: Download abseil-cpp
         shell: bash
         working-directory: downloads
-        run: wget -t 3 https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
 
       - name: Extract abseil-cpp
         shell: bash
