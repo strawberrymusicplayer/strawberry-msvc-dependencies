@@ -242,11 +242,6 @@ jobs:
         shell: bash
         run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
 
-      - name: Install cargo-c
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        run: cargo install cargo-c
-
       - name: Setup Python
         uses: actions/setup-python@v5
 
@@ -2748,6 +2743,11 @@ jobs:
         working-directory: build/gst-libav-${{env.gstreamer_version}}/build
         run: ninja install
 
+
+      - name: Install cargo-c
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        run: cargo install cargo-c
 
       - name: Download gst-plugins-rs
         if: matrix.arch == 'x86_64'
