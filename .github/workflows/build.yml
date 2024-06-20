@@ -106,6 +106,8 @@ env:
 
   gstreamer_version: '1.24.5'
 
+  gstreamer_plugins_rs_version: '0.12.6'
+
   qt_version: '6.7.2'
 
   kdsingleapplication_version: '1.1.0'
@@ -179,7 +181,7 @@ jobs:
       - name: Cleanup PATH
         uses: egor-tensin/cleanup-path@v4
         with:
-          dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\3.9.13\x64;C:\hostedtoolcache\windows\Python\3.9.13\x64\Scripts
+          dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\3.9.13\x64;C:\hostedtoolcache\windows\Python\3.9.13\x64\Scripts;C:\Users\runneradmin\.cargo\bin
 
       - name: Set lib postfix
         if: env.buildtype == 'debug'
@@ -239,6 +241,11 @@ jobs:
       - name: Delete conflicting icu
         shell: bash
         run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
+
+      - name: Install cargo-c
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        run: cargo install cargo-c
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -2739,6 +2746,46 @@ jobs:
       - name: Install gst-libav
         shell: cmd
         working-directory: build/gst-libav-${{env.gstreamer_version}}/build
+        run: ninja install
+
+
+      - name: Download gst-plugins-rs
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build
+        run: git clone -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+
+      - name: Configure gst-plugins-rs
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        env:
+          CL: "/MP"
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
+        working-directory: build/gst-plugins-rs
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
+
+      - name: Copy dependencies
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build/gst-plugins-rs/build
+        run: |
+          mkdir -p target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps
+          cp -v ${{env.prefix_path_unix}}/lib/{glib-2.0.lib,gobject-2.0.lib,gio-2.0.lib,intl.lib,gstreamer-1.0.lib,gstbase-1.0.lib} target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps/
+
+      - name: Build gst-plugins-rs
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/gst-plugins-rs/build
+        run: ninja
+
+      - name: Install gst-plugins-rs
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        working-directory: build/gst-plugins-rs/build
         run: ninja install
 
 
