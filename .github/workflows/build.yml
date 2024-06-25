@@ -20,7 +20,7 @@ env:
 
   libpng_version: '1.6.43'
 
-  libjpeg_turbo_version: '3.0.1'
+  libjpeg_turbo_version: '6.1.21'
 
   pcre2_version: '10.44'
 
