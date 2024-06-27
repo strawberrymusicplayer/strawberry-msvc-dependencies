@@ -58,7 +58,7 @@ env:
 
   freetype_version: '2.13.2'
 
-  harfbuzz_version: '8.5.0'
+  harfbuzz_version: '9.0.0'
 
   libogg_version: '1.3.5'
 
@@ -1396,7 +1396,7 @@ jobs:
       - name: Extract harfbuzz
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/harfbuzz-${{env.harfbuzz_version}}.tar.xz
+        run: tar -xf ../downloads/harfbuzz-${{env.harfbuzz_version}}.tar.xz || true
 
       - name: Configure harfbuzz
         shell: cmd
