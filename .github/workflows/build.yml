@@ -3001,6 +3001,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/${{env.abseil_cpp_version}}.tar.gz
 
+      - name: Patch abseil-cpp
+        shell: bash
+        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}
+        run: patch -p1 < ../../patches/abseil-cpp-cmake.patch
+
       - name: Configure abseil-cpp
         env:
           CL: "/MP"
