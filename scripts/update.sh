@@ -275,7 +275,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
       ;;
     "ffmpeg")
-      package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
+      package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | grep -v '^7' | sort -V | tail -1)
       ;;
     "chromaprint")
       package_version_latest=$(curl ${curl_options} 'https://github.com/acoustid/chromaprint/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
