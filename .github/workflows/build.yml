@@ -100,7 +100,7 @@ env:
 
   fftw_version: '3.3.10'
 
-  ffmpeg_version: '6.1.1'
+  ffmpeg_version: '7.0.2'
 
   chromaprint_version: '1.5.1'
 
