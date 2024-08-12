@@ -2918,7 +2918,7 @@ jobs:
       - name: Patch qtsparkle
         shell: bash
         working-directory: build/qtsparkle-git
-        run: patch -p1 < ../../patches/qtsparkle-msvc.patch
+        run: patch -p1 < ../../patches/qtsparkle-fixes.patch
 
       - name: Configure qtsparkle
         shell: cmd
