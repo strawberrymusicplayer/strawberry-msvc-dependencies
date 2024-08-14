@@ -36,7 +36,7 @@ env:
 
   expat_version: '2.6.2'
 
-  boost_version: '1.85.0'
+  boost_version: '1.86.0'
 
   libxml2_version: '2.13.3'
 
