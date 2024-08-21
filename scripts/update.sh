@@ -194,7 +194,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://github.com/rockdaboot/libpsl/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | sed 's/^libpsl-//g' | sort -V | tail -1)
       ;;
     "orc")
-      package_version_latest=$(curl ${curl_options} 'https://cgit.freedesktop.org/gstreamer/orc/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]*\.[0-9]*\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://gstreamer.freedesktop.org/src/orc' | sed -n "s,.*orc-\([0-9]*\.[0-9]*\.[0-9]*\)\.tar\.xz.*,\\1,p" | sort -V | tail -1)
       ;;
     "sqlite3")
       package_version_latest=$(curl ${curl_options} 'https://www.sqlite.org/download.html' | sed -n 's,.*sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
@@ -281,7 +281,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://github.com/acoustid/chromaprint/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | grep -v 'rc' | sort -V | tail -1)
       ;;
     "gstreamer")
-      package_version_latest=$(curl ${curl_options} 'https://cgit.freedesktop.org/gstreamer/gstreamer/refs/tags' | sed -n "s,.*<a href='[^']*/tag/?h=[^0-9]*\\([0-9]\..[02468]\.[0-9][^']*\\)'.*,\\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://gstreamer.freedesktop.org/src/gstreamer' | sed -n "s,.*gstreamer-\([0-9]\.[0-9][02468]\.[0-9]*\)\.tar\.xz.*,\\1,p" | sort -V | tail -1)
       ;;
     "qt")
       qt_major_version=$(curl ${curl_options} "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
