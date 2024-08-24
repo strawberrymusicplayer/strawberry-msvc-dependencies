@@ -92,7 +92,7 @@ env:
 
   utfcpp_version: '4.0.5'
 
-  taglib_version: '2.0.1'
+  taglib_version: '2.0.2'
 
   libbs2b_version: '3.1.0'
 
