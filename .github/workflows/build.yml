@@ -1139,21 +1139,6 @@ jobs:
         working-directory: build/getopt-win/build
         run: cmake --install .
 
-      - name: Create getopt.pc
-        shell: bash
-        run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "Name: getopt-win" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "Description: Full getopt port for unicode and multibyte windows applications" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "URL: https://github.com/ludvikjerabek/getopt-win" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "Version: 1.1.0" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lgetopt" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/getopt.pc
-
 
       - name: Download dlfcn-win32
         shell: bash
