@@ -38,7 +38,7 @@ env:
 
   boost_version: '1.86.0'
 
-  libxml2_version: '2.13.3'
+  libxml2_version: '2.13.4'
 
   nghttp2_version: '1.63.0'
 
