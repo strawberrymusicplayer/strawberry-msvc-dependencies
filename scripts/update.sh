@@ -191,7 +191,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libxml2/tags' | sed -n "s,.*<a [^>]\+>v\([0-9,\.]\+\)<.*,\\1,p" | head -1)
       ;;
     "nghttp2")
-      package_version_latest=$(curl ${curl_options} 'https://github.com/nghttp2/nghttp2/releases' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | sed 's/^v//g' | sort -V | tail -1)
+      package_version_latest=$(latest_github_release "nghttp2" "nghttp2")
       ;;
     "dlfcn")
       package_version_latest=$(latest_github_release "dlfcn-win32" "dlfcn-win32")
@@ -294,7 +294,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} "https://download.qt.io/official_releases/qt/${qt_major_version}/" | sed -n 's,.*href="\([0-9]*\.[0-9]*\.[^/]*\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "kdsingleapplication")
-      package_version_latest=$(curl ${curl_options} 'https://github.com/KDAB/KDSingleApplication/releases/latest' | sed -n 's,.*releases/tag/\([^"&;]*\)".*,\1,p' | grep -v '^\*name$' | sed 's/^v//g' | head -1)
+      package_version_latest=$(latest_github_release "KDAB" "KDSingleApplication")
       ;;
     "abseil_cpp")
       package_version_latest=$(latest_github_release "abseil" "abseil-cpp")
