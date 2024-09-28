@@ -112,10 +112,6 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
-  abseil_cpp_version: '20240722.0'
-
-  protobuf_version: '28.2'
-
   asiosdk_version: '2.3.3_2019-06-14'
 
   max_releases: '6'
@@ -3023,74 +3019,6 @@ jobs:
         run: rm -rf *
 
 
-      - name: Download abseil-cpp
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/abseil/abseil-cpp/archive/refs/tags/${{env.abseil_cpp_version}}.tar.gz
-
-      - name: Extract abseil-cpp
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/${{env.abseil_cpp_version}}.tar.gz
-
-      - name: Configure abseil-cpp
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
-
-      - name: Build abseil-cpp
-        env:
-          CL: "/MP"
-        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}/build
-        run: cmake --build .
-
-      - name: Install abseil-cpp
-        working-directory: build/abseil-cpp-${{env.abseil_cpp_version}}/build
-        run: cmake --install .
-
-
-      - name: Download Protobuf
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/protocolbuffers/protobuf/releases/download/v${{env.protobuf_version}}/protobuf-${{env.protobuf_version}}.tar.gz
-
-      - name: Extract Protobuf
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/protobuf-${{env.protobuf_version}}.tar.gz
-
-      - name: Configure Protobuf
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: build/protobuf-${{env.protobuf_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_EXAMPLES=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=ON -Dprotobuf_WITH_ZLIB=ON -Dprotobuf_ABSL_PROVIDER="package"
-
-      - name: Build Protobuf
-        env:
-          CL: "/MP"
-        working-directory: build/protobuf-${{env.protobuf_version}}/build
-        run: cmake --build .
-
-      - name: Install Protobuf
-        working-directory: build/protobuf-${{env.protobuf_version}}/build
-        run: cmake --install .
-
-      - name: Install Protobuf pkgconfig file
-        working-directory: build/protobuf-${{env.protobuf_version}}/build
-        run: copy protobuf.pc ${{env.prefix_path_backslash}}\lib\pkgconfig\
-
-
-      - name: Cleanup build directory
-        shell: bash
-        working-directory: build
-        run: rm -rf *
-
-
       - name: Create archive
         shell: bash
         run: tar -cJf strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz --transform "s,^c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}},strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}," ${{env.prefix_path_unix}}
@@ -3159,8 +3087,6 @@ jobs:
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
-          echo "* abseil-cpp ${{env.abseil_cpp_version}}" >> "${{env.release_notes_file}}"
-          echo "* Protobuf ${{env.protobuf_version}}" >> "${{env.release_notes_file}}"
 
       - name: Create new release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
