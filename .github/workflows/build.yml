@@ -1002,24 +1002,19 @@ jobs:
         working-directory: build
         run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.bz2
 
-      - name: Copy Boost
-        shell: bash
-        working-directory: build
-        run: cp -r boost_${{env.boost_version_underscore}}/boost ${{env.prefix_path_unix}}/include/
+      - name: Configure Boost
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/boost_${{env.boost_version_underscore}}
+        run: bootstrap.bat
 
-      #- name: Configure Boost
-        #shell: cmd
-        #env:
-          #CL: "/MP"
-        #working-directory: build/boost_${{env.boost_version_underscore}}
-        #run: bootstrap.bat
-
-      #- name: Build and install Boost
-        #shell: cmd
-        #env:
-          #CL: "/MP"
-        #working-directory: build/boost_${{env.boost_version_underscore}}
-        #run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
+      - name: Build and install Boost
+        shell: cmd
+        env:
+          CL: "/MP"
+        working-directory: build/boost_${{env.boost_version_underscore}}
+        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
 
 
       - name: Cleanup build directory
