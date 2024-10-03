@@ -2980,8 +2980,8 @@ jobs:
           echo "Name: qtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Version: " >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Description: Qt auto-updater lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}} -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
 
 
       - name: Download KDSingleApplication
