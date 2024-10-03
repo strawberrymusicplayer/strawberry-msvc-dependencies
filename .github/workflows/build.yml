@@ -112,6 +112,8 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
+  gettext_version: '0.22.5a'
+
   asiosdk_version: '2.3.3_2019-06-14'
 
   max_releases: '6'
@@ -308,6 +310,24 @@ jobs:
         shell: pwsh
         run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+
+      - name: Download gettext
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.22.5a-v1.17/gettext${{env.gettext_version}}-iconv1.17-static-64.zip
+
+      - name: Create gettext directory
+        shell: cmd
+        run: mkdir c:\gettext
+
+      - name: Extract gettext
+        shell: cmd
+        working-directory: c:\gettext
+        run: 7z x "${{github.workspace}}\downloads\gettext${{env.gettext_version}}-iconv1.17-static-64.zip"
+
+      - name: Add gettext to PATH
+        shell: pwsh
+        run: echo "c:\gettext" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
 
       - name: Download pkgconf
