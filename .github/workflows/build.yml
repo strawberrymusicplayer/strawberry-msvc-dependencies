@@ -2319,7 +2319,7 @@ jobs:
           echo "Name: FFTW" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
           echo "Description: fast Fourier transform library" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
           echo "Version: ${{env.fftw_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Libs: -L\${libdir} -lfftw3" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Libs: -L\${libdir} -lfftw3-3" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
 
 
