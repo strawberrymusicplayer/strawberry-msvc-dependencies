@@ -2336,11 +2336,25 @@ jobs:
 
       - name: Install FFTW
         working-directory: downloads/fftw
-        run: |          
+        run: |
           lib /machine:${{env.arch_short}} /def:libfftw3-3.def
           xcopy /s /y *.dll ${{env.prefix_path_backslash}}\bin\
           xcopy /s /y libfftw3-3.lib ${{env.prefix_path_backslash}}\lib\
           xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
+
+      - name: Create fftw3.pc
+        shell: bash
+        run: |
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Name: FFTW" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Description: fast Fourier transform library" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Version: ${{env.fftw_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Libs: -L\${libdir} -lfftw3" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
 
 
       - name: Download ffmpeg
