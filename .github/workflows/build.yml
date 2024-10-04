@@ -10,8 +10,6 @@ env:
 
   pkgconf_version: '2.3.0'
 
-  mimalloc_version: '2.1.2'
-
   zlib_version: '1.3.1'
 
   openssl_version: '3.3.2'
@@ -366,38 +364,6 @@ jobs:
       - name: Copy pkgconf
         shell: cmd
         run: copy ${{env.prefix_path_backslash}}\bin\pkgconf.exe ${{env.prefix_path_backslash}}\bin\pkg-config.exe
-
-
-      - name: Download mimalloc
-        shell: bash
-        working-directory: downloads
-        run: curl -o mimalloc-${{env.mimalloc_version}}.tar.gz ${{env.curl_options}} https://github.com/microsoft/mimalloc/archive/refs/tags/v${{env.mimalloc_version}}.tar.gz
-
-      - name: Extract mimalloc
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/mimalloc-${{env.mimalloc_version}}.tar.gz
-
-      - name: Configure mimalloc
-        shell: cmd
-        env:
-          CL: "/MP"
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: build/mimalloc-${{env.mimalloc_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
-
-      - name: Build mimalloc
-        shell: cmd
-        env:
-          CL: "/MP"
-        working-directory: build/mimalloc-${{env.mimalloc_version}}/build
-        run: cmake --build .
-
-      - name: Install mimalloc
-        shell: cmd
-        working-directory: build/mimalloc-${{env.mimalloc_version}}/build
-        run: cmake --install .
 
 
       - name: Download yasm
@@ -3073,7 +3039,6 @@ jobs:
           echo "Libraries:" >> "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
           echo "* PkgConf ${{env.pkgconf_version}}" >> "${{env.release_notes_file}}"
-          echo "* mimalloc ${{env.mimalloc_version}}" >> "${{env.release_notes_file}}"
           echo "* zlib ${{env.zlib_version}}" >> "${{env.release_notes_file}}"
           echo "* openssl ${{env.openssl_version}}" >> "${{env.release_notes_file}}"
           echo "* GnuTLS ${{env.gnutls_version}}" >> "${{env.release_notes_file}}"
