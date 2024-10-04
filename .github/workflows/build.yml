@@ -617,8 +617,8 @@ jobs:
           echo "Description: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "URL: https://www.gnutls.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Version: ${{env.gnutls_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lgnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Libs: -L\${libdir} -lgnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
 
       - name: Download libpng
@@ -1293,10 +1293,10 @@ jobs:
           echo "Name: SQLite" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "Description: SQL database engine" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "URL: https://www.sqlite.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
-          echo "Version: 3.38.1" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lsqlite3" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Version: ${{env.sqlite3_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Libs: -L\${libdir} -lsqlite3" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "Libs.private: -lz -ldl" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
 
 
       - name: Download GLib
@@ -1868,8 +1868,8 @@ jobs:
           echo "Description: encoder that converts audio to the MP3 file format." >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "URL: https://lame.sourceforge.io/" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
           echo "Version: ${{env.lame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lmp3lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Libs: -L\${libdir} -lmp3lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
 
 
       - name: Download twolame
@@ -1929,8 +1929,8 @@ jobs:
           echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "URL: https://www.twolame.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Version: ${{env.twolame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -ltwolame_dll" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Libs: -L\${libdir} -ltwolame_dll" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
 
 
       - name: Download musepack
@@ -1984,8 +1984,8 @@ jobs:
           echo "Description: mpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
           echo "URL: https://www.musepack.net/" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
           echo "Version: ${{env.musepack_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lmpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Libs: -L\${libdir} -lmpcdec" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mpcdec.pc
 
 
       - name: Download libopenmpt
@@ -2145,8 +2145,8 @@ jobs:
           echo "Description: faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "URL: https://github.com/knik0/faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "Version: 1.30" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lfaac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Libs: -L\${libdir} -lfaac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
 
 
       - name: Download fdk-aac
@@ -3013,8 +3013,8 @@ jobs:
           echo "Name: qtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Version: " >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
           echo "Description: Qt auto-updater lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Libs: -L${{env.prefix_path_forwardslash}}/lib -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Cflags: -I${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Libs: -L\${libdir} -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
 
 
       - name: Download KDSingleApplication
