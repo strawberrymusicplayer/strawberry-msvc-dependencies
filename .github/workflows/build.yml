@@ -112,7 +112,7 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
-  gettext_version: '0.22.5a'
+  gettext_version: '0.22.5a-v1.17'
 
   asiosdk_version: '2.3.3_2019-06-14'
 
@@ -194,6 +194,7 @@ jobs:
           echo "msbuild_platform=win32" >> $GITHUB_ENV
           echo "arch_short=x86" >> $GITHUB_ENV
           echo "arch_win=win32" >> $GITHUB_ENV
+          echo "arch_bits=32" >> $GITHUB_ENV
           echo "libdir=lib" >> $GITHUB_ENV
           echo "bindir=bin" >> $GITHUB_ENV
 
@@ -205,6 +206,7 @@ jobs:
           echo "msbuild_platform=x64" >> $GITHUB_ENV
           echo "arch_short=x64" >> $GITHUB_ENV
           echo "arch_win=win64" >> $GITHUB_ENV
+          echo "arch_bits=64" >> $GITHUB_ENV
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
 
@@ -219,6 +221,8 @@ jobs:
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "expat_version_underscore=$(echo ${{env.expat_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
+          echo "gettext_only_version=$(echo ${{env.gettext_version}} | cut -d '-' -f 1)" >> $GITHUB_ENV
+          echo "gettext_iconv_version=$(echo ${{env.gettext_version}} | cut -d '-' -f 2 | sed 's/^v//g')" >> $GITHUB_ENV
 
       - name: Create directories
         shell: bash
@@ -314,20 +318,20 @@ jobs:
       - name: Download gettext
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.22.5a-v1.17/gettext${{env.gettext_version}}-iconv1.17-static-64.zip
-
-      - name: Create gettext directory
-        shell: cmd
-        run: mkdir c:\gettext
+        run: curl ${{env.curl_options}} https://github.com/mlocati/gettext-iconv-windows/releases/download/v${{env.gettext_only_version}}-v${{env.gettext_iconv_version}}/gettext${{env.gettext_only_version}}-iconv${{env.gettext_iconv_version}}-static-${{env.arch_bits}}.zip
 
       - name: Extract gettext
         shell: cmd
-        working-directory: c:\gettext
-        run: 7z x "${{github.workspace}}\downloads\gettext${{env.gettext_version}}-iconv1.17-static-64.zip"
+        working-directory: build
+        run: |
+          mkdir gettext
+          cd gettext
+          7z x "..\..\downloads\gettext${{env.gettext_only_version}}-iconv${{env.gettext_iconv_version}}-static-${{env.arch_bits}}.zip"
 
-      - name: Add gettext to PATH
-        shell: pwsh
-        run: echo "c:\gettext" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install gettext
+        shell: bash
+        working-directory: build/gettext
+        run: cp -v bin/*.exe ${{env.prefix_path_forwardslash}}/bin/
 
 
       - name: Download pkgconf
@@ -3102,6 +3106,7 @@ jobs:
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
+          echo "* gettext ${{env.gettext_version}}" >> "${{env.release_notes_file}}"
 
       - name: Create new release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
