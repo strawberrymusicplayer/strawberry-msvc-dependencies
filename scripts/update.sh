@@ -302,6 +302,9 @@ function update_package() {
     "protobuf")
       package_version_latest=$(latest_github_release "protocolbuffers" "protobuf")
       ;;
+    "gettext")
+      package_version_latest=$(latest_github_release "mlocati" "gettext-iconv-windows")
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
