@@ -2780,7 +2780,14 @@ jobs:
         if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: build
-        run: git clone -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+        #run: git clone -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+        run: git clone --depth 1 --recurse-submodules "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+
+      - name: Patch gst-plugins-rs
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build/gst-plugins-rs
+        run: patch -p1 < ../../patches/gst-spotify-access-token.patch
 
       - name: Configure gst-plugins-rs
         if: matrix.arch == 'x86_64'
