@@ -2793,14 +2793,6 @@ jobs:
         working-directory: build/gst-plugins-rs
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
 
-      - name: Copy dependencies
-        if: matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: build/gst-plugins-rs/build
-        run: |
-          mkdir -p target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps
-          cp -v ${{env.prefix_path_unix}}/lib/{glib-2.0.lib,gobject-2.0.lib,gio-2.0.lib,intl.lib,gstreamer-1.0.lib,gstbase-1.0.lib} target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps/
-
       - name: Build gst-plugins-rs
         if: matrix.arch == 'x86_64'
         shell: cmd
