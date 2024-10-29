@@ -2772,47 +2772,39 @@ jobs:
 
 
       - name: Install cargo-c
-        if: false && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
         shell: cmd
         run: cargo install cargo-c
 
+      - name: Create build directory
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        run: mkdir c:\build
+
       - name: Download gst-plugins-rs
-        if: false && matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: build
-        run: git clone -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+        if: matrix.arch == 'x86_64'
+        shell: cmd
+        working-directory: c:/build
+        #run: git clone --depth 1 --recurse-submodules -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
+        run: git clone --depth 1 --recurse-submodules "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
 
       - name: Configure gst-plugins-rs
-        if: false && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
-        working-directory: build/gst-plugins-rs
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
-
-      - name: Copy dependencies
-        if: false && matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: build/gst-plugins-rs/build
-        run: |
-          mkdir -p target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps
-          cp -v ${{env.prefix_path_unix}}/lib/{glib-2.0.lib,gobject-2.0.lib,gio-2.0.lib,intl.lib,gstreamer-1.0.lib,gstbase-1.0.lib} target/${{matrix.arch}}-pc-windows-msvc/${{env.buildtype}}/deps/
+        working-directory: c:/build/gst-plugins-rs
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
 
       - name: Build gst-plugins-rs
-        if: false && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
+        continue-on-error: true
         shell: cmd
-        env:
-          CL: -MP
-        working-directory: build/gst-plugins-rs/build
+        working-directory: c:/build/gst-plugins-rs/build
         run: ninja
 
       - name: Install gst-plugins-rs
-        if: false && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
         shell: cmd
-        working-directory: build/gst-plugins-rs/build
+        working-directory: c:/build/gst-plugins-rs/build
         run: ninja install
 
 
