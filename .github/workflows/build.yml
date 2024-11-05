@@ -30,7 +30,7 @@ env:
 
   icu4c_version: '76.1'
 
-  pixman_version: '0.43.4'
+  pixman_version: '0.44.0'
 
   expat_version: '2.6.4'
 
@@ -906,7 +906,7 @@ jobs:
       - name: Extract pixman
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/pixman-${{env.pixman_version}}.tar.gz
+        run: tar -xf ../downloads/pixman-${{env.pixman_version}}.tar.gz || true
 
       - name: Configure pixman
         shell: cmd
