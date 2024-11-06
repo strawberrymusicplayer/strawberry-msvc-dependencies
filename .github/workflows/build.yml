@@ -48,7 +48,7 @@ env:
 
   sqlite3_version: '3470000'
 
-  glib_version: '2.82.2'
+  glib_version: '2.83.0'
 
   libsoup_version: '3.6.0'
 
