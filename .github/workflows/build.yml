@@ -345,14 +345,14 @@ jobs:
       - name: Configure pkgconf
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dtests=disabled build
 
       - name: Build pkgconf
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}/build
         run: ninja
 
@@ -379,7 +379,7 @@ jobs:
       - name: Configure yasm
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/yasm-${{env.yasm_version}}
@@ -388,7 +388,7 @@ jobs:
       - name: Build yasm
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --build .
 
@@ -411,7 +411,7 @@ jobs:
       - name: Configure zlib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/zlib-${{env.zlib_version}}
@@ -420,7 +420,7 @@ jobs:
       - name: Build zlib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --build .
 
@@ -456,7 +456,7 @@ jobs:
         if: env.buildtype == 'release'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
@@ -466,7 +466,7 @@ jobs:
         if: env.buildtype == 'debug'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
@@ -475,7 +475,7 @@ jobs:
       - name: Build openssl
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/openssl-${{env.openssl_version}}
         run: nmake
 
@@ -605,7 +605,7 @@ jobs:
       - name: Configure libpng
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libpng-${{env.libpng_version}}
@@ -614,7 +614,7 @@ jobs:
       - name: Build libpng
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --build .
 
@@ -637,14 +637,14 @@ jobs:
       - name: Configure libjpeg-turbo
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON
 
       - name: Build libjpeg-turbo
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
         run: cmake --build .
 
@@ -667,7 +667,7 @@ jobs:
       - name: Configure pcre2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pcre2-${{env.pcre2_version}}
@@ -676,7 +676,7 @@ jobs:
       - name: Build pcre2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --build .
 
@@ -704,7 +704,7 @@ jobs:
       - name: Configure bzip2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/bzip2-${{env.bzip2_version}}
@@ -713,7 +713,7 @@ jobs:
       - name: Build bzip2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/bzip2-${{env.bzip2_version}}/build
         run: cmake --build .
 
@@ -736,7 +736,7 @@ jobs:
       - name: Configure xz
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/xz-${{env.xz_version}}
@@ -745,7 +745,7 @@ jobs:
       - name: Build xz
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/xz-${{env.xz_version}}/build
         run: cmake --build .
 
@@ -768,7 +768,7 @@ jobs:
       - name: Configure brotli
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/brotli-${{env.brotli_version}}
@@ -777,7 +777,7 @@ jobs:
       - name: Build brotli
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/brotli-${{env.brotli_version}}/build_dir
         run: cmake --build .
 
@@ -795,7 +795,7 @@ jobs:
       - name: Build libiconv
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libiconv-for-Windows
         run: msbuild libiconv.sln /property:Configuration=${{env.buildtype}}
 
@@ -832,7 +832,7 @@ jobs:
       - name: Build icu
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/icu/source/allinone
         run: msbuild allinone.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}} /p:SkipUWP=true
 
@@ -911,7 +911,7 @@ jobs:
       - name: Configure pixman
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pixman-${{env.pixman_version}}
@@ -920,7 +920,7 @@ jobs:
       - name: Build pixman
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja
 
@@ -943,7 +943,7 @@ jobs:
       - name: Configure expat
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/expat-${{env.expat_version}}
@@ -952,7 +952,7 @@ jobs:
       - name: Build expat
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/expat-${{env.expat_version}}/build
         run: cmake --build .
 
@@ -975,14 +975,14 @@ jobs:
       - name: Configure Boost
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
         run: bootstrap.bat
 
       - name: Build and install Boost
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
         run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --without-mpi --without-python --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
 
@@ -1006,7 +1006,7 @@ jobs:
       - name: Configure libxml2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libxml2-v${{env.libxml2_version}}
@@ -1015,7 +1015,7 @@ jobs:
       - name: Build libxml2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libxml2-v${{env.libxml2_version}}/build
         run: cmake --build .
 
@@ -1043,7 +1043,7 @@ jobs:
       - name: Configure nghttp2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/nghttp2-${{env.nghttp2_version}}
@@ -1052,7 +1052,7 @@ jobs:
       - name: Build nghttp2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/nghttp2-${{env.nghttp2_version}}/build
         run: cmake --build .
 
@@ -1070,7 +1070,7 @@ jobs:
       - name: Configure libffi
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libffi
@@ -1079,7 +1079,7 @@ jobs:
       - name: Build libffi
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libffi/build
         run: ninja
 
@@ -1102,7 +1102,7 @@ jobs:
       - name: Configure getopt-win
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/getopt-win
@@ -1111,7 +1111,7 @@ jobs:
       - name: Build getopt-win
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/getopt-win/build
         run: cmake --build .
 
@@ -1134,7 +1134,7 @@ jobs:
       - name: Configure dlfcn-win32
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/dlfcn-win32-${{env.dlfcn_version}}
@@ -1143,7 +1143,7 @@ jobs:
       - name: Build dlfcn-win32
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/dlfcn-win32-${{env.dlfcn_version}}/build
         run: cmake --build .
 
@@ -1166,7 +1166,7 @@ jobs:
       - name: Configure libpsl
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_backslash}}\include
@@ -1178,7 +1178,7 @@ jobs:
       - name: Build libpsl
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libpsl-${{env.libpsl_version}}/build
         run: ninja
 
@@ -1201,7 +1201,7 @@ jobs:
       - name: Configure orc
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/orc-${{env.orc_version}}
@@ -1210,7 +1210,7 @@ jobs:
       - name: Build orc
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/orc-${{env.orc_version}}/build
         run: ninja
 
@@ -1233,7 +1233,7 @@ jobs:
       - name: Build SQlite
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
@@ -1278,7 +1278,7 @@ jobs:
       - name: Configure GLib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_backslash}}\include
@@ -1290,7 +1290,7 @@ jobs:
       - name: Build GLib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/glib-${{env.glib_version}}/build
         run: ninja
 
@@ -1313,7 +1313,7 @@ jobs:
       - name: Configure libsoup
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libsoup-${{env.libsoup_version}}
@@ -1322,7 +1322,7 @@ jobs:
       - name: Build libsoup
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libsoup-${{env.libsoup_version}}/build
         run: ninja
 
@@ -1345,7 +1345,7 @@ jobs:
       - name: Configure glib-networking
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/glib-networking-${{env.glib_networking_version}}
@@ -1354,7 +1354,7 @@ jobs:
       - name: Build glib-networking
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/glib-networking-${{env.glib_networking_version}}/build
         run: ninja
 
@@ -1377,7 +1377,7 @@ jobs:
       - name: Configure freetype (boostrap)
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/freetype-${{env.freetype_version}}
@@ -1386,7 +1386,7 @@ jobs:
       - name: Build freetype (boostrap)
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --build .
 
@@ -1414,7 +1414,7 @@ jobs:
       - name: Configure harfbuzz
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_backslash}}\include
@@ -1427,7 +1427,7 @@ jobs:
       - name: Build harfbuzz
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}/build
         run: ninja
 
@@ -1450,7 +1450,7 @@ jobs:
       - name: Configure freetype
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/freetype-${{env.freetype_version}}
@@ -1459,7 +1459,7 @@ jobs:
       - name: Build freetype
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --build .
 
@@ -1493,7 +1493,7 @@ jobs:
       - name: Configure libogg
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libogg-${{env.libogg_version}}
@@ -1502,7 +1502,7 @@ jobs:
       - name: Build libogg
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libogg-${{env.libogg_version}}/build
         run: cmake --build .
 
@@ -1525,7 +1525,7 @@ jobs:
       - name: Configure libvorbis
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libvorbis-${{env.libvorbis_version}}
@@ -1534,7 +1534,7 @@ jobs:
       - name: Build libvorbis
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libvorbis-${{env.libvorbis_version}}/build
         run: cmake --build .
 
@@ -1561,7 +1561,7 @@ jobs:
       - name: Configure flac
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/flac-${{env.flac_version}}
@@ -1570,7 +1570,7 @@ jobs:
       - name: Build flac
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --build .
 
@@ -1602,7 +1602,7 @@ jobs:
       - name: Configure wavpack
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/wavpack-${{env.wavpack_version}}
@@ -1611,7 +1611,7 @@ jobs:
       - name: Build wavpack
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/wavpack-${{env.wavpack_version}}/build
         run: cmake --build .
 
@@ -1644,7 +1644,7 @@ jobs:
       - name: Configure opus
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/opus-${{env.opus_version}}
@@ -1653,7 +1653,7 @@ jobs:
       - name: Build opus
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/opus-${{env.opus_version}}/build
         run: cmake --build .
 
@@ -1681,7 +1681,7 @@ jobs:
       - name: Configure opusfile
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/opusfile-${{env.opusfile_version}}
@@ -1690,7 +1690,7 @@ jobs:
       - name: Build opusfile
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/opusfile-${{env.opusfile_version}}/build
         run: cmake --build .
 
@@ -1718,7 +1718,7 @@ jobs:
       - name: Configure speex
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/speex-Speex-${{env.speex_version}}
@@ -1727,7 +1727,7 @@ jobs:
       - name: Build speex
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/speex-Speex-${{env.speex_version}}/build
         run: cmake --build .
 
@@ -1757,7 +1757,7 @@ jobs:
       - name: Configure mpg123
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/mpg123-${{env.mpg123_version}}
@@ -1766,7 +1766,7 @@ jobs:
       - name: Build mpg123
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/mpg123-${{env.mpg123_version}}/build
         run: cmake --build .
 
@@ -1802,7 +1802,7 @@ jobs:
         if: matrix.arch == 'x86'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
 
@@ -1810,7 +1810,7 @@ jobs:
         if: matrix.arch == 'x86_64'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
 
@@ -1869,14 +1869,14 @@ jobs:
       - name: Build twolame
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: msbuild libtwolame_dll.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
 
       - name: Install twolame
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
@@ -1917,7 +1917,7 @@ jobs:
       - name: Configure musepack
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/musepack_src_r${{env.musepack_version}}
@@ -1926,7 +1926,7 @@ jobs:
       - name: Build musepack
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/musepack_src_r${{env.musepack_version}}/build
         run: cmake --build .
 
@@ -1977,14 +1977,14 @@ jobs:
       - name: Configure libopenmpt
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libopenmpt
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
       - name: Build libopenmpt
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libopenmpt/build
         run: cmake --build .
 
@@ -2007,14 +2007,14 @@ jobs:
       - name: Configure libgme
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/game-music-emu-${{env.libgme_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build libgme
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/game-music-emu-${{env.libgme_version}}/build
         run: cmake --build .
 
@@ -2044,14 +2044,14 @@ jobs:
       - name: Configure faad2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/faad2-${{env.faad2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
       - name: Build faad2
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/faad2-${{env.faad2_version}}/build
         run: cmake --build .
 
@@ -2074,21 +2074,21 @@ jobs:
       - name: Upgrade faac project
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/faac/project/msvc
         run: start /w devenv.exe faac.sln /upgrade
 
       - name: Build faac
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/faac/project/msvc
         run: msbuild faac.sln /p:Configuration=${{env.buildtype}} /p:Platform=${{env.msbuild_platform}}
 
       - name: Install faac headers
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/faac
         run: copy include\*.h ${{env.prefix_path_backslash}}\include\
 
@@ -2128,7 +2128,7 @@ jobs:
       - name: Configure fdk-aac
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/fdk-aac-${{env.fdk_aac_version}}
@@ -2137,7 +2137,7 @@ jobs:
       - name: Build fdk-aac
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/fdk-aac-${{env.fdk_aac_version}}/build
         run: cmake --build .
 
@@ -2160,7 +2160,7 @@ jobs:
       - name: Configure utfcpp
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/utfcpp-${{env.utfcpp_version}}
@@ -2169,7 +2169,7 @@ jobs:
       - name: Build utfcpp
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/utfcpp-${{env.utfcpp_version}}/build
         run: cmake --build .
 
@@ -2192,7 +2192,7 @@ jobs:
       - name: Configure TagLib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/taglib-${{env.taglib_version}}
@@ -2201,7 +2201,7 @@ jobs:
       - name: Build TagLib
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/taglib-${{env.taglib_version}}/build
         run: cmake --build .
 
@@ -2234,7 +2234,7 @@ jobs:
       - name: Configure libbs2b
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libbs2b-${{env.libbs2b_version}}
@@ -2243,7 +2243,7 @@ jobs:
       - name: Build libbs2b
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libbs2b-${{env.libbs2b_version}}/build
         run: cmake --build .
 
@@ -2266,7 +2266,7 @@ jobs:
       - name: Configure libebur128
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libebur128-${{env.libebur128_version}}
@@ -2275,7 +2275,7 @@ jobs:
       - name: Build libebur128
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --build .
 
@@ -2336,7 +2336,7 @@ jobs:
       - name: Configure ffmpeg
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/ffmpeg
@@ -2345,7 +2345,7 @@ jobs:
       - name: Build ffmpeg
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/ffmpeg/build
         run: ninja
 
@@ -2368,7 +2368,7 @@ jobs:
       - name: Configure Chromaprint
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/chromaprint-${{env.chromaprint_version}}
@@ -2377,7 +2377,7 @@ jobs:
       - name: Build Chromaprint
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/chromaprint-${{env.chromaprint_version}}/build
         run: cmake --build .
 
@@ -2421,7 +2421,7 @@ jobs:
       - name: Configure GStreamer
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
@@ -2452,7 +2452,7 @@ jobs:
       - name: Build GStreamer
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gstreamer-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2475,7 +2475,7 @@ jobs:
       - name: Configure gst-plugins-base
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
@@ -2522,7 +2522,7 @@ jobs:
       - name: Build gst-plugins-base
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-plugins-base-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2545,7 +2545,7 @@ jobs:
       - name: Configure gst-plugins-good
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}
@@ -2599,7 +2599,7 @@ jobs:
       - name: Build gst-plugins-good
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2627,7 +2627,7 @@ jobs:
       - name: Configure gst-plugins-bad
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
@@ -2682,7 +2682,7 @@ jobs:
       - name: Build gst-plugins-bad
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2704,7 +2704,7 @@ jobs:
 
       - name: Configure gst-plugins-ugly
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}
@@ -2729,7 +2729,7 @@ jobs:
 
       - name: Build gst-plugins-ugly
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2751,7 +2751,7 @@ jobs:
       - name: Configure gst-libav
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
@@ -2761,7 +2761,7 @@ jobs:
       - name: Build gst-libav
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-libav-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2786,7 +2786,7 @@ jobs:
         if: false && matrix.arch == 'x86_64'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
@@ -2805,7 +2805,7 @@ jobs:
         if: false && matrix.arch == 'x86_64'
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/gst-plugins-rs/build
         run: ninja
 
@@ -2840,7 +2840,7 @@ jobs:
       - name: Configure qtbase
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qtbase-everywhere-src-${{env.qt_version}}
@@ -2897,7 +2897,7 @@ jobs:
       - name: Build qtbase
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
@@ -2920,7 +2920,7 @@ jobs:
       - name: Configure qttools
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qttools-everywhere-src-${{env.qt_version}}
@@ -2932,7 +2932,7 @@ jobs:
       - name: Build qttools
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
@@ -2955,7 +2955,7 @@ jobs:
       - name: Configure qtsparkle
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qtsparkle-git
@@ -2964,7 +2964,7 @@ jobs:
       - name: Build qtsparkle
         shell: cmd
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/qtsparkle-git/build
         run: cmake --build .
 
@@ -3000,7 +3000,7 @@ jobs:
 
       - name: Configure KDSingleApplication
         env:
-          CL: "/MP"
+          CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}
@@ -3008,7 +3008,7 @@ jobs:
 
       - name: Build KDSingleApplication
         env:
-          CL: "/MP"
+          CL: -MP
         working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}/build
         run: cmake --build .
 
