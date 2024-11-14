@@ -2796,7 +2796,6 @@ jobs:
 
       - name: Build gst-plugins-rs
         if: matrix.arch == 'x86_64'
-        continue-on-error: true
         shell: cmd
         working-directory: c:/build/gst-plugins-rs/build
         run: ninja
