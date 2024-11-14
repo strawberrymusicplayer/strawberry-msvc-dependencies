@@ -560,7 +560,7 @@ jobs:
         run: |
           xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
           xcopy /s /y bin\x86\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x86\*.* ${{env.prefix_path_backslash}}\lib\
+          xcopy /s /y lib\x86\gnutls.* ${{env.prefix_path_backslash}}\lib\
 
       - name: Copy GnuTLS (x86_64)
         if: matrix.arch == 'x86_64'
@@ -569,7 +569,7 @@ jobs:
         run: |
           xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
           xcopy /s /y bin\x64\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x64\*.* ${{env.prefix_path_backslash}}\lib\
+          xcopy /s /y lib\x64\gnutls.* ${{env.prefix_path_backslash}}\lib\
 
       - name: Create gnutls.pc
         shell: bash
