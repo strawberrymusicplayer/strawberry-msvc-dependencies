@@ -50,7 +50,7 @@ env:
 
   glib_version: '2.83.0'
 
-  libsoup_version: '3.6.0'
+  libsoup_version: '3.6.1'
 
   glib_networking_version: '2.80.0'
 
