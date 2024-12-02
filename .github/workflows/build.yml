@@ -110,7 +110,7 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
-  gettext_version: '0.22.5a-v1.17-r3'
+  gettext_version: '0.23-v1.17'
 
   asiosdk_version: '2.3.3_2019-06-14'
 
