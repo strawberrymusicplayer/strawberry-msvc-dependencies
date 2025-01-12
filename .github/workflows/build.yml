@@ -2959,20 +2959,6 @@ jobs:
         working-directory: build/qtsparkle-git/build
         run: cmake --install .
 
-      - name: Create qtsparkle pkg-config file
-        shell: bash
-        run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Name: qtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Version: " >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Description: Qt auto-updater lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Libs: -L\${libdir} -lqtsparkle-qt6" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/qtsparkle-qt6.pc
-
 
       - name: Download KDSingleApplication
         shell: bash
