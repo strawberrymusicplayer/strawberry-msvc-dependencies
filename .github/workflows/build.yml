@@ -3101,7 +3101,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           while [ "$(git tag | wc -l)" -ge "${{env.max_releases}}" ]; do
-            oldest_tag=$(git tag | head -1)
+            oldest_tag=$(git tag | sort -V | head -1)
             gh release delete "${oldest_tag}"
             git tag -d "${oldest_tag}"
             git push --delete origin "${oldest_tag}"
