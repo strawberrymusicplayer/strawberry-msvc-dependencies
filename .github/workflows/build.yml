@@ -114,6 +114,8 @@ env:
 
   asiosdk_version: '2.3.3_2019-06-14'
 
+  sparsehash_version: '2.0.4'
+
   max_releases: '6'
 
   curl_options: '-f -O -L --connect-timeout 15 -m 900 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
@@ -396,6 +398,44 @@ jobs:
         shell: cmd
         working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --install .
+
+
+      - name: Download sparsehash
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/sparsehash/sparsehash/archive/refs/tags/sparsehash-${{env.sparsehash_version}}.tar.gz
+
+      - name: Extract sparsehash
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/sparsehash-${{env.sparsehash_version}}.tar.gz
+
+      - name: Patch sparsehash
+        shell: bash
+        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
+        run: patch -p1 < ../../patches/sparsehash-msvc.patch
+
+      - name: Install sparsehash
+        shell: bash
+        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
+        run: |
+          cp -v -r src/{google,sparsehash} ${{env.prefix_path_forwardslash}}/include/
+          cp -v -r src/windows/google/sparsehash/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/google/sparsehash/
+          cp -v -r src/windows/sparsehash/internal/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/sparsehash/internal/
+
+      - name: Create libsparsehash.pc
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Name: sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Description: C++ associative containers" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "URL: https://github.com/sparsehash/sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Version: ${{env.sparsehash_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
 
 
       - name: Download zlib
