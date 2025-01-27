@@ -26,7 +26,7 @@ function error() { echo "[$(timestamp)] ERROR: $*" >&2; }
 
 function latest_github_release() {
 
-  curl ${curl_options} -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/$1/$2/releases/latest" | jq -r '.tag_name' | sed 's/^v//g' | sort -V | head -1
+  curl ${curl_options} -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/$1/$2/releases/latest" | jq -r '.tag_name' | sed 's/^v//g' | sed 's/^sparsehash-//g' | sort -V | head -1
 
 }
 
@@ -304,6 +304,9 @@ function update_package() {
       ;;
     "gettext")
       package_version_latest=$(latest_github_release "mlocati" "gettext-iconv-windows")
+      ;;
+    "sparsehash")
+      package_version_latest=$(latest_github_release "sparsehash" "sparsehash")
       ;;
     *)
       package_version_latest=
