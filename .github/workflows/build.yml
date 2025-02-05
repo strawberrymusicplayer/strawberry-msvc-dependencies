@@ -20,7 +20,7 @@ env:
 
   libjpeg_turbo_version: '3.0.1'
 
-  pcre2_version: '10.44'
+  pcre2_version: '10.45'
 
   bzip2_version: '1.0.8'
 
