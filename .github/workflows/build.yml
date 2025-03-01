@@ -2103,7 +2103,7 @@ jobs:
         working-directory: downloads
         run: curl ${{env.curl_options}} https://github.com/knik0/faac/archive/refs/tags/faac-${{env.faac_version}}.tar.gz
 
-      - name: Extract faad2
+      - name: Extract faac
         shell: bash
         working-directory: build
         run: tar -xvf ../downloads/faac-${{env.faac_version}}.tar.gz
