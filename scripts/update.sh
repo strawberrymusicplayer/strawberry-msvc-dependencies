@@ -233,10 +233,10 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
       ;;
     "opus")
-      package_version_latest=$(curl ${curl_options} 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
       ;;
     "opusfile")
-      package_version_latest=$(curl ${curl_options} 'https://archive.mozilla.org/pub/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/opus/?C=M;O=D' | sed -n 's,.*opusfile-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | sort -V | tail -1)
       ;;
     "speex")
       package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/speex/' | sed -n 's,.*<a href="speex-\([0-9][0-9.]*\)\.tar\.[gx]z">.*,\1,p' | sort -V | tail -1)

@@ -1666,7 +1666,7 @@ jobs:
       - name: Download opus
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://archive.mozilla.org/pub/opus/opus-${{env.opus_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opus-${{env.opus_version}}.tar.gz
 
       - name: Extract opus
         shell: bash
@@ -1703,7 +1703,7 @@ jobs:
       - name: Download opusfile
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://ftp.osuosl.org/pub/xiph/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz
 
       - name: Extract opusfile
         shell: bash
