@@ -85,6 +85,8 @@ env:
   libgme_version: '0.6.3'
 
   faad2_version: '2.11.1'
+  
+  faac_version: '1.31'
 
   fdk_aac_version: '2.0.3'
 
@@ -2098,38 +2100,43 @@ jobs:
 
       - name: Download faac
         shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/knik0/faac/archive/refs/tags/faac-${{env.faac_version}}.tar.gz
+
+      - name: Extract faad2
+        shell: bash
         working-directory: build
-        run: git clone https://github.com/knik0/faac
+        run: tar -xvf ../downloads/faac-${{env.faac_version}}.tar.gz
 
       - name: Patch faac
         shell: bash
-        working-directory: build/faac
+        working-directory: build/faac-faac-${{env.faac_version}}
         run: patch -p1 < ../../patches/faac-msvc.patch
 
       - name: Upgrade faac project
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/faac/project/msvc
+        working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: start /w devenv.exe faac.sln /upgrade
 
       - name: Build faac
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/faac/project/msvc
+        working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: msbuild faac.sln /p:Configuration=${{env.buildtype}} /p:Platform=${{env.msbuild_platform}}
 
       - name: Install faac headers
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/faac
+        working-directory: build/faac-faac-${{env.faac_version}}
         run: copy include\*.h ${{env.prefix_path_backslash}}\include\
 
       - name: Install faac lib
         shell: cmd
-        working-directory: build/faac/project/msvc
+        working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: |
           copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\libfaac.lib
           copy bin\${{env.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
@@ -2145,7 +2152,7 @@ jobs:
           echo "Name: faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "Description: faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "URL: https://github.com/knik0/faac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
-          echo "Version: 1.30" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
+          echo "Version: ${{env.faac_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "Libs: -L\${libdir} -lfaac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
 

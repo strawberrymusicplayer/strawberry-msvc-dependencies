@@ -1,5 +1,28 @@
+diff --git a/configure.ac b/configure.ac
+index 6318ae1..aeb35f0 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,5 +1,5 @@
+ AC_PREREQ([2.71])
+-AC_INIT([faac],[1.31],[https://github.com/knik0/faac])
++AC_INIT(faac, 1.31, [https://github.com/knik0/faac])
+ AC_CONFIG_AUX_DIR(.)
+ AM_INIT_AUTOMAKE([subdir-objects])
+ 
+diff --git a/frontend/mp4write.c b/frontend/mp4write.c
+index 701953c..b2f1e67 100644
+--- a/frontend/mp4write.c
++++ b/frontend/mp4write.c
+@@ -27,7 +27,6 @@
+ //#include <byteswap.h>
+ #endif
+ #include <string.h>
+-#include <sys/time.h>
+ #include <time.h>
+ #include <unistd.h>
+ 
 diff --git a/project/msvc/faac.sln b/project/msvc/faac.sln
-index 0a2d554..1d78695 100644
+index 257de01..10dc670 100644
 --- a/project/msvc/faac.sln
 +++ b/project/msvc/faac.sln
 @@ -10,8 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfaac", "libfaac.vcxproj"
