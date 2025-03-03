@@ -86,7 +86,7 @@ env:
 
   faad2_version: '2.11.1'
   
-  faac_version: '1.31'
+  faac_version: '1.31.1'
 
   fdk_aac_version: '2.0.3'
 
