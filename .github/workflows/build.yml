@@ -380,6 +380,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/yasm-${{env.yasm_version}}.tar.gz
 
+      - name: Patch yasm
+        shell: bash
+        working-directory: build/yasm-${{env.yasm_version}}
+        run: patch -p1 < ../../patches/yasm-cmake.patch
+
       - name: Configure yasm
         shell: cmd
         env:
