@@ -84,7 +84,7 @@ env:
 
   libgme_version: '0.6.3'
 
-  faad2_version: '2.11.1'
+  faad2_version: '2.11.2'
   
   faac_version: '1.31.1'
 
@@ -2072,11 +2072,6 @@ jobs:
         run: |
           mkdir faad2-${{env.faad2_version}}
           tar -xvf ../downloads/faad2-${{env.faad2_version}}.tar.gz --strip-components=1 -C faad2-${{env.faad2_version}}
-
-      - name: Patch faad2
-        shell: bash
-        working-directory: build/faad2-${{env.faad2_version}}
-        run: patch -p1 < ../../patches/faad2-cmake.patch
 
       - name: Configure faad2
         shell: cmd
