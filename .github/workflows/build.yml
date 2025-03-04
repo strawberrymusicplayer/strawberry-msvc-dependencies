@@ -40,7 +40,7 @@ env:
 
   nghttp2_version: '1.65.0'
 
-  dlfcn_version: '1.4.1'
+  dlfcn_version: '1.4.2'
 
   libpsl_version: '0.21.5'
 
