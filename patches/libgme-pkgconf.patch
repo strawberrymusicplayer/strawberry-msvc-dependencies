@@ -1,0 +1,10 @@
+diff --git a/gme/libgme.pc.in b/gme/libgme.pc.in
+index f057ce1..7d1ee44 100644
+--- a/gme/libgme.pc.in
++++ b/gme/libgme.pc.in
+@@ -13,4 +13,4 @@ URL: https://bitbucket.org/mpyne/game-music-emu/wiki/Home
+ Version: @GME_VERSION@
+ Cflags: -I${includedir}
+ Libs: -L${libdir} -lgme
+-Libs.private: -lstdc++ @PKG_CONFIG_ZLIB@
++Libs.private: @PKG_CONFIG_ZLIB@

@@ -2046,6 +2046,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/game-music-emu-${{env.libgme_version}}.tar.xz
 
+      - name: Patch libgme
+        shell: bash
+        working-directory: build/game-music-emu-${{env.libgme_version}}
+        run: patch -p1 < ../../patches/libgme-pkgconf.patch
+
       - name: Configure libgme
         shell: cmd
         env:
