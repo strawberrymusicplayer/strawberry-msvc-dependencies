@@ -2310,6 +2310,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
 
+      - name: Patch libebur128
+        shell: bash
+        working-directory: build/libebur128-${{env.libebur128_version}}
+        run: sed -i "/^Libs.private.*/d" ebur128/libebur128.pc.cmake
+
       - name: Configure libebur128
         shell: cmd
         env:
