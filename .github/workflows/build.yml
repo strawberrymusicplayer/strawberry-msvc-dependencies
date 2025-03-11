@@ -104,7 +104,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.24.12'
+  gstreamer_version: '1.26.0'
 
   gstreamer_plugins_rs_version: '0.13.0'
 
@@ -113,8 +113,6 @@ env:
   kdsingleapplication_version: '1.1.0'
 
   gettext_version: '0.24-v1.17'
-
-  asiosdk_version: '2.3.3_2019-06-14'
 
   sparsehash_version: '2.0.4'
 
@@ -2445,17 +2443,6 @@ jobs:
         run: rm -rf *
 
 
-      - name: Download ASIO SDK
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://download.steinberg.net/sdk_downloads/asiosdk_${{env.asiosdk_version}}.zip
-
-      - name: Install ASIO SDK
-        shell: bash
-        working-directory: ${{env.prefix_path_backslash}}\share
-        run: 7z x "${{github.workspace}}\downloads\asiosdk_${{env.asiosdk_version}}.zip"
-
-
       - name: Set gstreamer checks
         shell: bash
         run: echo "gstreamer_checks=$(test "${{env.buildtype}}" = "debug" && echo "enabled" || echo "disabled")" >> $GITHUB_ENV
@@ -2728,7 +2715,6 @@ jobs:
           -Dwasapi=enabled
           -Dwasapi2=enabled
           -Dhls=enabled
-          -Dasio-sdk-path="${{env.prefix_path_backslash}}\share\asiosdk_${{env.asiosdk_version}}"
           build
 
       - name: Build gst-plugins-bad
