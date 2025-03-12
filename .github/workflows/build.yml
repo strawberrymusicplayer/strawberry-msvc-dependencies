@@ -1012,12 +1012,12 @@ jobs:
       - name: Download Boost
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/boost/boost/${{env.boost_version}}/boost_${{env.boost_version_underscore}}.tar.bz2
+        run: curl ${{env.curl_options}} https://archives.boost.io/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.gz
 
       - name: Extract Boost
         shell: bash
         working-directory: build
-        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.bz2
+        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.gz
 
       - name: Configure Boost
         shell: cmd
