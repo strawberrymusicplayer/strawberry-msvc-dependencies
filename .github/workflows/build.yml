@@ -2829,8 +2829,13 @@ jobs:
       - name: Configure gst-plugins-rs
         if: matrix.arch == 'x86_64'
         shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: c:/build/gst-plugins-rs
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
 
       - name: Build gst-plugins-rs
         if: matrix.arch == 'x86_64'
