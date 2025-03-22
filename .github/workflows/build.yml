@@ -407,44 +407,6 @@ jobs:
         run: cmake --install .
 
 
-      - name: Download sparsehash
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/sparsehash/sparsehash/archive/refs/tags/sparsehash-${{env.sparsehash_version}}.tar.gz
-
-      - name: Extract sparsehash
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/sparsehash-${{env.sparsehash_version}}.tar.gz
-
-      - name: Patch sparsehash
-        shell: bash
-        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
-        run: patch -p1 < ../../patches/sparsehash-msvc.patch
-
-      - name: Install sparsehash
-        shell: bash
-        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
-        run: |
-          cp -v -r src/{google,sparsehash} ${{env.prefix_path_forwardslash}}/include/
-          cp -v -r src/windows/google/sparsehash/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/google/sparsehash/
-          cp -v -r src/windows/sparsehash/internal/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/sparsehash/internal/
-
-      - name: Create libsparsehash.pc
-        shell: bash
-        run: |
-          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "Name: sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "Description: C++ associative containers" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "URL: https://github.com/sparsehash/sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "Version: ${{env.sparsehash_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-
-
       - name: Download zlib
         shell: bash
         working-directory: downloads
@@ -805,12 +767,12 @@ jobs:
       - name: Download brotli
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/google/brotli/archive/refs/tags/v${{env.brotli_version}}/brotli-${{env.brotli_version}}.tar.gz
 
       - name: Extract brotli
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/v${{env.brotli_version}}.tar.gz
+        run: tar -xf ../downloads/brotli-${{env.brotli_version}}.tar.gz
 
       - name: Configure brotli
         shell: cmd
@@ -1171,12 +1133,12 @@ jobs:
       - name: Download dlfcn-win32
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${{env.dlfcn_version}}/dlfcn-win32-${{env.dlfcn_version}}.tar.gz
 
       - name: Extract dlfcn-win32
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/v${{env.dlfcn_version}}.tar.gz
+        run: tar -xf ../downloads/dlfcn-win32-${{env.dlfcn_version}}.tar.gz
 
       - name: Configure dlfcn-win32
         shell: cmd
@@ -2197,12 +2159,12 @@ jobs:
       - name: Download utfcpp
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/nemtrif/utfcpp/archive/refs/tags/v${{env.utfcpp_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/nemtrif/utfcpp/archive/refs/tags/v${{env.utfcpp_version}}/utfcpp-${{env.utfcpp_version}}.tar.gz
 
       - name: Extract utfcpp
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/v${{env.utfcpp_version}}.tar.gz
+        run: tar -xf ../downloads/utfcpp-${{env.utfcpp_version}}.tar.gz
 
       - name: Configure utfcpp
         shell: cmd
@@ -2303,7 +2265,7 @@ jobs:
       - name: Download libebur128
         shell: bash
         working-directory: downloads
-        run: curl -o libebur128-${{env.libebur128_version}}.tar.gz ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}/libebur128-${{env.libebur128_version}}.tar.gz
 
       - name: Extract libebur128
         shell: bash
@@ -3027,6 +2989,44 @@ jobs:
       - name: Install KDSingleApplication
         working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}/build
         run: cmake --install .
+
+
+      - name: Download sparsehash
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/sparsehash/sparsehash/archive/refs/tags/sparsehash-${{env.sparsehash_version}}.tar.gz
+
+      - name: Extract sparsehash
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/sparsehash-${{env.sparsehash_version}}.tar.gz
+
+      - name: Patch sparsehash
+        shell: bash
+        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
+        run: patch -p1 < ../../patches/sparsehash-msvc.patch
+
+      - name: Install sparsehash
+        shell: bash
+        working-directory: build/sparsehash-sparsehash-${{env.sparsehash_version}}
+        run: |
+          cp -v -r src/{google,sparsehash} ${{env.prefix_path_forwardslash}}/include/
+          cp -v -r src/windows/google/sparsehash/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/google/sparsehash/
+          cp -v -r src/windows/sparsehash/internal/sparseconfig.h ${{env.prefix_path_forwardslash}}/include/sparsehash/internal/
+
+      - name: Create libsparsehash.pc
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Name: sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Description: C++ associative containers" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "URL: https://github.com/sparsehash/sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Version: ${{env.sparsehash_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
 
 
       - name: Download rapidjson
