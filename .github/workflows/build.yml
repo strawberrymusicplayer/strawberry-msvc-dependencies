@@ -3047,12 +3047,12 @@ jobs:
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/rapidjson
+        working-directory: build/rapidjson/build
         run: cmake --build .
 
       - name: Install rapidjson
         shell: cmd
-        working-directory: build/rapidjson
+        working-directory: build/rapidjson/build
         run: cmake --install .
 
 
