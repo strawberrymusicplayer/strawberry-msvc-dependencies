@@ -32,7 +32,7 @@ env:
 
   pixman_version: '0.44.2'
 
-  expat_version: '2.7.0'
+  expat_version: '2.7.1'
 
   boost_version: '1.87.0'
 
