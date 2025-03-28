@@ -82,7 +82,7 @@ env:
 
   libopenmpt_version: '0.7.13'
 
-  libgme_version: '0.6.3'
+  libgme_version: '0.6.4'
 
   faad2_version: '2.11.2'
   
