@@ -82,7 +82,7 @@ env:
 
   libopenmpt_version: '0.7.13'
 
-  libgme_version: '0.6.3'
+  libgme_version: '0.6.4'
 
   faad2_version: '2.11.2'
   
@@ -2002,35 +2002,35 @@ jobs:
       - name: Download libgme
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://bitbucket.org/mpyne/game-music-emu/downloads/game-music-emu-${{env.libgme_version}}.tar.xz
+        run: curl ${{env.curl_options}} https://github.com/libgme/game-music-emu/releases/download/${{env.libgme_version}}/libgme-${{env.libgme_version}}-src.tar.gz
 
       - name: Extract libgme
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/game-music-emu-${{env.libgme_version}}.tar.xz
+        run: tar -xf ../downloads/libgme-${{env.libgme_version}}-src.tar.gz
 
       - name: Patch libgme
         shell: bash
-        working-directory: build/game-music-emu-${{env.libgme_version}}
+        working-directory: build/libgme-${{env.libgme_version}}
         run: patch -p1 < ../../patches/libgme-pkgconf.patch
 
       - name: Configure libgme
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/game-music-emu-${{env.libgme_version}}
+        working-directory: build/libgme-${{env.libgme_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build libgme
         shell: cmd
         env:
           CL: -MP
-        working-directory: build/game-music-emu-${{env.libgme_version}}/build
+        working-directory: build/libgme-${{env.libgme_version}}/build
         run: cmake --build .
 
       - name: Install libgme
         shell: cmd
-        working-directory: build/game-music-emu-${{env.libgme_version}}/build
+        working-directory: build/libgme-${{env.libgme_version}}/build
         run: cmake --install .
 
 
