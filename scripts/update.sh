@@ -26,7 +26,7 @@ function error() { echo "[$(timestamp)] ERROR: $*" >&2; }
 
 function latest_github_release() {
 
-  curl ${curl_options} -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/$1/$2/releases/latest" | jq -r '.tag_name' | sed 's/^v//g' | sed 's/^sparsehash-//g' | sed 's/^faac-//g' | sort -V | head -1
+  curl ${curl_options} -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" -H "Authorization: Bearer ${gh_token}" "https://api.github.com/repos/$1/$2/releases/latest" | jq -r '.tag_name' | sed 's/^v//g' | sed 's/^sparsehash-//g' | sed 's/^faac-//g' | sort -V | head -1
 
 }
 
@@ -419,6 +419,12 @@ fi
 gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml)
 if [ "${gh_username}" = "" ]; then
   error "Missing GitHub username."
+  exit 1
+fi
+
+gh_token=$(gh auth token 2>/dev/null)
+if [ "${gh_token}" = "" ]; then
+  error "Missing GitHub token."
   exit 1
 fi
 
