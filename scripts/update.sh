@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #  STRAWBERRY MSVC GITHUB ACTION UPDATE SCRIPT
-#  Copyright (C) 2022 Jonas Kvinge
+#  Copyright (C) 2022-2025 Jonas Kvinge
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://lib.openmpt.org/files/libopenmpt/src/' | sed -n 's,.*libopenmpt-\([0-9][^>]*\)+release\.autotools\.tar.*,\1,p' | sort -V | tail -1)
       ;;
     "libgme")
-      package_version_latest=$(curl ${curl_options} 'https://bitbucket.org/mpyne/game-music-emu/downloads/' | sed -n 's,.*game-music-emu-\([^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(latest_github_release "libgme" "game-music-emu")
       ;;
     "faad2")
       package_version_latest=$(latest_github_release "knik0" "faad2")
