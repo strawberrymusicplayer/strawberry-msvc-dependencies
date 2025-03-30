@@ -2934,12 +2934,7 @@ jobs:
       - name: Download qtsparkle
         shell: bash
         working-directory: build
-        run: git clone https://github.com/davidsansome/qtsparkle qtsparkle-git
-
-      - name: Patch qtsparkle
-        shell: bash
-        working-directory: build/qtsparkle-git
-        run: patch -p1 < ../../patches/qtsparkle-fixes.patch
+        run: git clone https://github.com/strawberrymusicplayer/qtsparkle.git qtsparkle-git
 
       - name: Configure qtsparkle
         shell: cmd
