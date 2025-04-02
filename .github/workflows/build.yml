@@ -2803,8 +2803,8 @@ jobs:
         working-directory: c:/build/gst-plugins-rs/build
         run: ninja
 
-      - name: Install gst-plugins-rs && false
-        if: matrix.arch == 'x86_64'
+      - name: Install gst-plugins-rs
+        if: matrix.arch == 'x86_64' && false
         shell: cmd
         working-directory: c:/build/gst-plugins-rs/build
         run: ninja install
