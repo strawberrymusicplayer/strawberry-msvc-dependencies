@@ -649,7 +649,7 @@ jobs:
         env:
           CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libjpeg-turbo
         shell: cmd
@@ -718,7 +718,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/bzip2-${{env.bzip2_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build bzip2
         shell: cmd
@@ -1507,7 +1507,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libogg-${{env.libogg_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libogg
         shell: cmd
@@ -1539,7 +1539,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libvorbis-${{env.libvorbis_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libvorbis
         shell: cmd
@@ -1690,7 +1690,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/opusfile-${{env.opusfile_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build opusfile
         shell: cmd
@@ -1926,7 +1926,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/musepack_src_r${{env.musepack_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build musepack
         shell: cmd
@@ -2019,7 +2019,7 @@ jobs:
         env:
           CL: -MP
         working-directory: build/libgme-${{env.libgme_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libgme
         shell: cmd
@@ -2285,7 +2285,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libebur128-${{env.libebur128_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libebur128
         shell: cmd
@@ -2387,7 +2387,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/chromaprint-${{env.chromaprint_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=${{env.prefix_path_backslash}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=${{env.prefix_path_backslash}} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build Chromaprint
         shell: cmd
@@ -3037,7 +3037,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/rapidjson
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF -DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF -DCMAKE_INSTALL_DIR="${{env.prefix_path_backslash}}\lib\cmake\RapidJSON"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF -DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF -DCMAKE_INSTALL_DIR="${{env.prefix_path_backslash}}\lib\cmake\RapidJSON" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build rapidjson
         shell: cmd
