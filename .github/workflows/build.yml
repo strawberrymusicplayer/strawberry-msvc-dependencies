@@ -2754,36 +2754,36 @@ jobs:
 
 
       - name: Install cargo-c
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         run: cargo install cargo-c
 
       - name: Create build directory
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         run: mkdir c:\build
 
       - name: Download gst-plugins-rs
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: c:/build
         #run: git clone --depth 1 --recurse-submodules -b "${{env.gstreamer_plugins_rs_version}}" "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
         run: git clone --depth 1 --recurse-submodules "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git"
 
       - name: Configure gst-plugins-rs
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: c:/build/gst-plugins-rs
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
 
       - name: Build gst-plugins-rs
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: c:/build/gst-plugins-rs/build
         run: ninja
 
       - name: Install gst-plugins-rs
-        if: matrix.arch == 'x86_64' && false
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: c:/build/gst-plugins-rs/build
         run: ninja install
