@@ -2408,10 +2408,6 @@ jobs:
         run: rm -rf *
 
 
-      - name: Set gstreamer checks
-        shell: bash
-        run: echo "gstreamer_checks=$(test "${{env.buildtype}}" = "debug" && echo "enabled" || echo "disabled")" >> $GITHUB_ENV
-
       - name: Download GStreamer
         shell: bash
         working-directory: downloads
@@ -2443,10 +2439,10 @@ jobs:
           -Dtools=enabled
           -Dintrospection=disabled
           -Dnls=disabled
-          -Dgobject-cast-checks="${{env.gstreamer_checks}}"
-          -Dglib-asserts="${{env.gstreamer_checks}}"
-          -Dglib-checks="${{env.gstreamer_checks}}"
-          -Dextra-checks="${{env.gstreamer_checks}}"
+          -Dgobject-cast-checks=enabled
+          -Dglib-asserts=enabled
+          -Dglib-checks=enabled
+          -Dextra-checks=enabled
           -Ddoc=disabled
           -Dgst_debug=true
           -Dgst_parse=true
@@ -2498,9 +2494,9 @@ jobs:
           -Dintrospection=disabled
           -Dnls=disabled
           -Dorc=enabled
-          -Dgobject-cast-checks="${{env.gstreamer_checks}}"
-          -Dglib-asserts="${{env.gstreamer_checks}}"
-          -Dglib-checks="${{env.gstreamer_checks}}"
+          -Dgobject-cast-checks=enabled
+          -Dglib-asserts=enabled
+          -Dglib-checks=enabled
           -Ddoc=disabled
           -Dadder=enabled
           -Dapp=enabled
@@ -2565,9 +2561,9 @@ jobs:
           -Dtests=disabled
           -Dnls=disabled
           -Dorc=enabled
-          -Dgobject-cast-checks="${{env.gstreamer_checks}}"
-          -Dglib-asserts="${{env.gstreamer_checks}}"
-          -Dglib-checks="${{env.gstreamer_checks}}"
+          -Dgobject-cast-checks=enabled
+          -Dglib-asserts=enabled
+          -Dglib-checks=enabled
           -Dasm=enabled
           -Ddoc=disabled
           -Dapetag=enabled
@@ -2650,10 +2646,10 @@ jobs:
           -Dintrospection=disabled
           -Dnls=disabled
           -Dorc=enabled
-          -Dgobject-cast-checks="${{env.gstreamer_checks}}"
-          -Dglib-asserts="${{env.gstreamer_checks}}"
-          -Dglib-checks="${{env.gstreamer_checks}}"
-          -Dextra-checks="${{env.gstreamer_checks}}"
+          -Dgobject-cast-checks=enabled
+          -Dglib-asserts=enabled
+          -Dglib-checks=enabled
+          -Dextra-checks=enabled
           -Dgpl=enabled
           -Daiff=enabled
           -Dasfmux=enabled
@@ -2722,9 +2718,9 @@ jobs:
           -Dnls=disabled
           -Dorc=enabled
           -Dtests=disabled
-          -Dgobject-cast-checks="${{env.gstreamer_checks}}"
-          -Dglib-asserts="${{env.gstreamer_checks}}"
-          -Dglib-checks="${{env.gstreamer_checks}}"
+          -Dgobject-cast-checks=enabled
+          -Dglib-asserts=enabled
+          -Dglib-checks=enabled
           -Ddoc=disabled
           -Dgpl=enabled
           -Dasfdemux=enabled
