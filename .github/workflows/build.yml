@@ -279,7 +279,7 @@ jobs:
       - name: Download nasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/${{env.arch_win}}/nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe
+        run: curl ${{env.curl_options}} https://files.jkvinge.net/install/nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe
 
       - name: Create nasm directory
         shell: cmd
@@ -1564,10 +1564,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/flac-${{env.flac_version}}.tar.xz
 
-      - name: Rename nasm.exe
-        shell: bash
-        run: mv /c/nasm/nasm.exe /c/nasm/nasm.exe_
-
       - name: Configure flac
         shell: cmd
         env:
@@ -1588,10 +1584,6 @@ jobs:
         shell: cmd
         working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --install .
-
-      - name: Rename nasm.exe
-        shell: bash
-        run: mv /c/nasm/nasm.exe_ /c/nasm/nasm.exe
 
 
       - name: Download wavpack
