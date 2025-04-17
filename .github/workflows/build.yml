@@ -150,13 +150,41 @@ jobs:
 
     if: (!contains(github.event.head_commit.message, 'skip ci'))
 
-    runs-on: windows-2022
-
     strategy:
 
       matrix:
-       arch: [ x86_64, x86 ]
-       buildtype: [ release, debug ]
+       include:
+         - name: "Windows x86_64 debug"
+           runner: windows-2022
+           arch: x86_64
+           buildtype: debug
+
+         - name: "Windows x86_64 release"
+           runner: windows-2022
+           arch: x86_64
+           buildtype: release
+
+         - name: "Windows x86 debug"
+           runner: windows-2022
+           arch: x86
+           buildtype: debug
+
+         - name: "Windows x86 release"
+           runner: windows-2022
+           arch: x86
+           buildtype: release
+
+         - name: "Windows arm64 debug"
+           runner: windows-11-arm
+           arch: arm64
+           buildtype: debug
+
+         - name: "Windows arm64 release"
+           runner: windows-11-arm
+           arch: arm64
+           buildtype: release
+
+    runs-on: ${{matrix.runner}}
 
     steps:
 
@@ -199,6 +227,11 @@ jobs:
           echo "arch_bits=32" >> $GITHUB_ENV
           echo "libdir=lib" >> $GITHUB_ENV
           echo "bindir=bin" >> $GITHUB_ENV
+          echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
+          echo "boost_architecture=x86" >> $GITHUB_ENV
+          echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
+          echo "gst_twolame=enabled" >> $GITHUB_ENV
+          echo "gst_faac=enabled" >> $GITHUB_ENV
 
       - name: Set arch variables (x86_64)
         if: matrix.arch == 'x86_64'
@@ -211,6 +244,28 @@ jobs:
           echo "arch_bits=64" >> $GITHUB_ENV
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
+          echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
+          echo "boost_architecture=x86" >> $GITHUB_ENV
+          echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
+          echo "gst_twolame=enabled" >> $GITHUB_ENV
+          echo "gst_faac=enabled" >> $GITHUB_ENV
+
+      - name: Set arch variables (arm64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        run: |
+          echo "openssl_platform=VC-WIN64-ARM" >> $GITHUB_ENV
+          echo "msbuild_platform=arm64" >> $GITHUB_ENV
+          echo "arch_short=arm64" >> $GITHUB_ENV
+          echo "arch_win=win64" >> $GITHUB_ENV
+          echo "arch_bits=64" >> $GITHUB_ENV
+          echo "libdir=libARM64" >> $GITHUB_ENV
+          echo "bindir=binARM64" >> $GITHUB_ENV
+          echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
+          echo "boost_architecture=arm" >> $GITHUB_ENV
+          echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
+          echo "gst_twolame=disabled" >> $GITHUB_ENV
+          echo "gst_faac=disabled" >> $GITHUB_ENV
 
       - name: Set extra version variables
         shell: bash
@@ -276,10 +331,15 @@ jobs:
         run: mkdir build
 
 
+      - id: set-nasm-filename
+        name: Set nasm filename
+        shell: bash
+        run: echo "nasm-filename=nasm-${{env.nasm_version}}-installer-$(test "${{matrix.arch}}" = "arm64" && echo "x64" || echo "${{env.arch_short}}").exe" >> $GITHUB_OUTPUT
+
       - name: Download nasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://files.jkvinge.net/install/nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe
+        run: curl ${{env.curl_options}} https://files.jkvinge.net/install/${{steps.set-nasm-filename.outputs.nasm-filename}}
 
       - name: Create nasm directory
         shell: cmd
@@ -288,7 +348,7 @@ jobs:
       - name: Extract nasm
         shell: cmd
         working-directory: c:/nasm
-        run: 7z x "${{github.workspace}}\downloads\nasm-${{env.nasm_version}}-installer-${{env.arch_short}}.exe"
+        run: 7z x "${{github.workspace}}\downloads\${{steps.set-nasm-filename.outputs.nasm-filename}}"
 
       - name: Copy nasm
         shell: bash
@@ -425,7 +485,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/zlib-${{env.zlib_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
 
       - name: Build zlib
         shell: cmd
@@ -439,17 +499,19 @@ jobs:
         working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --install .
 
-      - name: Copy zlib (release)
-        if: env.buildtype == 'release'
-        shell: bash
-        run: cp ${{env.prefix_path_unix}}/lib/zlib.lib ${{env.prefix_path_unix}}/lib/z.lib
-
-      - name: Copy zlib (debug)
-        if: env.buildtype == 'debug'
+      - name: Install zlib pc file
         shell: bash
         run: |
-          cp ${{env.prefix_path_unix}}/lib/zlibd.lib ${{env.prefix_path_unix}}/lib/z.lib
-          cp ${{env.prefix_path_unix}}/lib/zlibd.lib ${{env.prefix_path_unix}}/lib/zd.lib
+          cp ${{env.prefix_path_unix}}/share/pkgconfig/zlib.pc ${{env.prefix_path_unix}}/lib/pkgconfig/
+          sed -i 's/\-lz/\-lzlib${{env.lib_postfix}}/g' ${{env.prefix_path_unix}}/lib/pkgconfig/zlib.pc
+
+      - name: Copy zlib
+        shell: bash
+        run: cp ${{env.prefix_path_unix}}/lib/zlib${{env.lib_postfix}}.lib ${{env.prefix_path_unix}}/lib/z.lib
+
+      - name: Delete static zlib
+        shell: bash
+        run: rm ${{env.prefix_path_unix}}/lib/zlibstatic${{env.lib_postfix}}.lib
 
 
       - name: Download openssl
@@ -462,25 +524,25 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/openssl-${{env.openssl_version}}.tar.gz
 
-      - name: Configure openssl (release)
-        if: env.buildtype == 'release'
+      - name: Configure openssl
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
-        run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --release --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib.lib
+        run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib${{env.lib_postfix}}.lib
 
-      - name: Configure openssl (debug)
-        if: env.buildtype == 'debug'
+      - name: Configure openssl
+        if: matrix.arch == 'arm64'
         shell: cmd
         env:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
-        run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --debug --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlibd.lib
+        run: perl Configure ${{env.openssl_platform}} shared no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib${{env.lib_postfix}}.lib
 
       - name: Build openssl
         shell: cmd
@@ -649,7 +711,7 @@ jobs:
         env:
           CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON -DWITH_SIMD=${{env.libjpeg_turbo_simd}}
 
       - name: Build libjpeg-turbo
         shell: cmd
@@ -839,6 +901,12 @@ jobs:
         working-directory: build
         run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
 
+      - name: Patch icu
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: build/icu/source
+        run: sed -i 's/bin64/binARM64/g' extra/uconv/makedata.mak
+
       - name: Build icu
         shell: cmd
         env:
@@ -909,16 +977,19 @@ jobs:
 
 
       - name: Download pixman
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://www.cairographics.org/releases/pixman-${{env.pixman_version}}.tar.gz
 
       - name: Extract pixman
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/pixman-${{env.pixman_version}}.tar.gz || true
 
       - name: Configure pixman
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -928,6 +999,7 @@ jobs:
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
 
       - name: Build pixman
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -935,6 +1007,7 @@ jobs:
         run: ninja
 
       - name: Install pixman
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja install
@@ -994,7 +1067,7 @@ jobs:
         env:
           CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
-        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" --with-headers toolset=msvc architecture=x86 link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
+        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" --with-headers toolset=msvc architecture=${{env.boost_architecture}} link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
 
 
       - name: Cleanup build directory
@@ -1326,6 +1399,9 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_backslash}}\include
+          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
+          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/libsoup-${{env.libsoup_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
 
@@ -1358,8 +1434,11 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_backslash}}\include
+          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
+          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/glib-networking-${{env.glib_networking_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=enabled -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=${{env.glib_networking_gnutls}} -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
 
       - name: Build glib-networking
         shell: cmd
@@ -1795,6 +1874,12 @@ jobs:
         working-directory: build/lame-${{env.lame_version}}
         run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' Makefile.MSVC
 
+      - name: Patch lame (arm64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: build/lame-${{env.lame_version}}
+        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:ARM64/g' Makefile.MSVC
+
       - name: Build lame (x86)
         if: matrix.arch == 'x86'
         shell: cmd
@@ -1804,7 +1889,7 @@ jobs:
         run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
 
       - name: Build lame (x86_64)
-        if: matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64' || matrix.arch == 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -1836,21 +1921,25 @@ jobs:
 
 
       - name: Download twolame
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Extract twolame
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/twolame-${{env.twolame_version}}.tar.gz
 
       - name: Patch twolame source
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build/twolame-${{env.twolame_version}}
         run: patch -p1 < ../../patches/twolame.patch
 
       - name: Upgrade twolame project
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: start /w devenv.exe libtwolame_dll.sln /upgrade
@@ -1864,6 +1953,7 @@ jobs:
           sed -i 's/MachineX86/MachineX64/g' *.sln *.vcxproj
 
       - name: Build twolame
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -1871,6 +1961,7 @@ jobs:
         run: msbuild libtwolame_dll.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
 
       - name: Install twolame
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -1881,6 +1972,7 @@ jobs:
           copy lib\*.dll ${{env.prefix_path_backslash}}\bin\
 
       - name: Create twolame.pc
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           echo "prefix=${{env.prefix_path_forwardslash}}" >${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
@@ -2059,21 +2151,25 @@ jobs:
 
 
       - name: Download faac
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://github.com/knik0/faac/archive/refs/tags/faac-${{env.faac_version}}.tar.gz
 
       - name: Extract faac
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build
         run: tar -xvf ../downloads/faac-${{env.faac_version}}.tar.gz
 
       - name: Patch faac
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build/faac-faac-${{env.faac_version}}
         run: patch -p1 < ../../patches/faac-msvc.patch
 
       - name: Upgrade faac project
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2081,6 +2177,7 @@ jobs:
         run: start /w devenv.exe faac.sln /upgrade
 
       - name: Build faac
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2088,6 +2185,7 @@ jobs:
         run: msbuild faac.sln /p:Configuration=${{env.buildtype}} /p:Platform=${{env.msbuild_platform}}
 
       - name: Install faac headers
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2095,6 +2193,7 @@ jobs:
         run: copy include\*.h ${{env.prefix_path_backslash}}\include\
 
       - name: Install faac lib
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: |
@@ -2102,6 +2201,7 @@ jobs:
           copy bin\${{env.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
 
       - name: Create faac.pc
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
@@ -2256,21 +2356,25 @@ jobs:
 
 
       - name: Download libebur128
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}/libebur128-${{env.libebur128_version}}.tar.gz
 
       - name: Extract libebur128
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
 
       - name: Patch libebur128
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build/libebur128-${{env.libebur128_version}}
         run: sed -i "/^Libs.private.*/d" ebur128/libebur128.pc.cmake
 
       - name: Configure libebur128
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2280,6 +2384,7 @@ jobs:
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libebur128
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2287,27 +2392,32 @@ jobs:
         run: cmake --build .
 
       - name: Install libebur128
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --install .
 
 
-      - name: Download FFTW
+      - name: Download FFTW (x86)
+        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://files.strawberrymusicplayer.org/fftw-${{env.fftw_version}}-${{env.arch_short}}-${{env.buildtype}}.zip
 
-      - name: Create FFTW directory
+      - name: Create FFTW directory (x86)
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: downloads
         run: mkdir fftw
 
-      - name: Extract FFTW
+      - name: Extract FFTW (x86)
+        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: downloads/fftw
         run: 7z x "../fftw-${{env.fftw_version}}-${{env.arch_short}}-${{env.buildtype}}.zip"
 
-      - name: Install FFTW
+      - name: Install FFTW (x86)
+        if: matrix.arch != 'arm64'
         working-directory: downloads/fftw
         run: |
           lib /machine:${{env.arch_short}} /def:libfftw3-3.def
@@ -2315,7 +2425,8 @@ jobs:
           xcopy /s /y libfftw3-3.lib ${{env.prefix_path_backslash}}\lib\
           xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
 
-      - name: Create fftw3.pc
+      - name: Create fftw3.pc (x86)
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
@@ -2328,6 +2439,49 @@ jobs:
           echo "Version: ${{env.fftw_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
           echo "Libs: -L\${libdir} -lfftw3-3" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+
+
+      - name: Download FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://www.fftw.org/fftw-${{env.fftw_version}}.tar.gz
+
+      - name: Extract FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/fftw-${{env.fftw_version}}.tar.gz
+
+      - name: Extract FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: build/fftw-${{env.fftw_version}}
+        run: patch -p1 < ../../patches/fftw-fixes.patch
+
+      - name: Configure FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/fftw-${{env.fftw_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+      - name: Build FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/fftw-${{env.fftw_version}}/build
+        run: cmake --build .
+
+      - name: Install FFTW (ARM64)
+        if: matrix.arch == 'arm64'
+        shell: cmd
+        working-directory: build/fftw-${{env.fftw_version}}/build
+        run: cmake --install .
 
 
       - name: Download ffmpeg
@@ -2533,6 +2687,7 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2571,7 +2726,7 @@ jobs:
           -Dmpg123=enabled
           -Dspeex=enabled
           -Dtaglib=enabled
-          -Dtwolame=enabled
+          -Dtwolame=${{env.gst_twolame}}
           -Dwaveform=enabled
           -Dwavpack=enabled
           -Dsoup=enabled
@@ -2644,7 +2799,7 @@ jobs:
           -Dchromaprint=enabled
           -Ddash=enabled
           -Ddirectsound=enabled
-          -Dfaac=enabled
+          -Dfaac=${{env.gst_faac}}
           -Dfaad=enabled
           -Dfdkaac=enabled
           -Dgme=enabled
@@ -2684,6 +2839,7 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}
         run: >
           meson setup
