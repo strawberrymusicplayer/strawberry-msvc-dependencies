@@ -161,7 +161,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/p/libpng/code/ref/master/tags/' | sed -n 's,.*<a[^>]*>v\([0-9][^<]*\)<.*,\1,p' | grep -v alpha | grep -v beta | grep -v rc | sort -V | tail -1)
       ;;
     "libjpeg_turbo")
-      package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/libjpeg-turbo/files/' | sed -n 's,.*/projects/.*/\([0-9][^"%]*\)/".*,\1,p' | sort -V | tail -1)
+      package_version_latest=$(latest_github_release "libjpeg-turbo" "libjpeg-turbo")
       ;;
     "pcre2")
       package_version_latest=$(latest_github_release "PhilipHazel" "pcre2" | sed 's/^pcre2\-//g' | grep -iv rc | sort -V | tail -1)
