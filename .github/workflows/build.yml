@@ -16,6 +16,10 @@ env:
 
   openssl_version: '3.5.2'
 
+  gmp_version: '6.2.1-4'
+  
+  nettle_version: '3.10.1_release_20241230'
+
   gnutls_version: '3.8.8'
 
   libpng_version: '1.6.50'
@@ -522,6 +526,24 @@ jobs:
         run: cmake --install .
 
 
+      - name: Download VSYASM
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        working-directory: downloads
+        #run: git clone --recurse-submodules https://github.com/ShiftMediaProject/VSYASM
+        run: |
+          mkdir VSYASM
+          cd VSYASM
+          curl ${{env.curl_options}} https://github.com/ShiftMediaProject/VSYASM/releases/download/1.0/VSYASM.zip
+          7z x VSYASM.zip
+
+      - name: Install VSYASM
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        working-directory: downloads\VSYASM
+        run: install_script.bat
+
+
       - name: Download zlib
         shell: bash
         working-directory: downloads
@@ -566,6 +588,178 @@ jobs:
       - name: Delete static zlib
         shell: bash
         run: rm ${{env.prefix_path_unix}}/lib/zlibstatic${{env.lib_postfix}}.lib
+
+
+      - name: Create ShiftMediaProject build directory
+        shell: bash
+        working-directory: build
+        run: mkdir -p /c/ShiftMediaProject/build
+
+
+      - name: Download GMP
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/build
+          git clone --recurse-submodules -b "${{env.gmp_version}}" https://github.com/ShiftMediaProject/gmp
+
+      - name: Build GMP
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: c:/ShiftMediaProject/build/gmp/SMP
+        run: msbuild libgmp.vcxproj -p:Configuration=${{env.buildtype}}DLL
+
+      - name: Install GMP
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/msvc
+          cp -v include/gmp*.h ${{env.prefix_path_unix}}/include/
+          cp -v lib/${{env.arch_short}}/gmp*.lib ${{env.prefix_path_unix}}/lib/
+          cp -v bin/${{env.arch_short}}/gmp*.dll ${{env.prefix_path_unix}}/bin/
+
+      - name: Create gmp.pc
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "Name: gmp" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "Description: gmp" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "URL: https://gmplib.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "Version: ${{env.gmp_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "Libs: -L\${libdir} -lgmp${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+
+
+      - name: Download nettle
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/build
+          git clone --recurse-submodules -b "nettle_${{env.nettle_version}}" https://github.com/ShiftMediaProject/nettle
+
+      - name: Build nettle
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: c:/ShiftMediaProject/build/nettle/SMP
+        run: |
+          msbuild libnettle.vcxproj -p:Configuration=${{env.buildtype}}DLL
+          msbuild libhogweed.vcxproj -p:Configuration=${{env.buildtype}}DLL
+
+      - name: Install nettle
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/msvc
+          cp -v -r include/nettle ${{env.prefix_path_unix}}/include/
+          cp -v lib/${{env.arch_short}}/*.lib ${{env.prefix_path_unix}}/lib/
+          cp -v bin/${{env.arch_short}}/*.dll ${{env.prefix_path_unix}}/bin/
+
+      - name: Create nettle.pc
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "Name: nettle" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "Description: nettle" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "URL:https://www.lysator.liu.se/~nisse/nettle/" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "Version: ${{env.nettle_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "Libs: -L\${libdir} -lnettle${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
+
+      - name: Create hogweed.pc
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "Name: hogweed" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "Description: hogweed" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "URL: https://www.lysator.liu.se/~nisse/nettle/" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "Version: ${{env.hogweed_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "Libs: -L\${libdir} -lhogweed${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+
+
+      - name: Download GnuTLS
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/build
+          git clone --recurse-submodules -b "${{env.gnutls_version}}" https://github.com/ShiftMediaProject/gnutls
+
+      - name: Create inject_zlib.props 
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/build/gnutls/SMP
+          echo "<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">" >inject_zlib.props
+          echo "  <ItemDefinitionGroup>" >>inject_zlib.props
+          echo "    <ClCompile>" >>inject_zlib.props
+          echo "      <AdditionalIncludeDirectories>${{env.prefix_path_backslash}}\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>" >>inject_zlib.props
+          echo "    </ClCompile>" >>inject_zlib.props
+          echo "    <Link>" >>inject_zlib.props
+          echo "      <AdditionalLibraryDirectories>${{env.prefix_path_backslash}}\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>" >>inject_zlib.props
+          echo "    </Link>" >>inject_zlib.props
+          echo "  </ItemDefinitionGroup>" >>inject_zlib.props
+          echo "</Project>" >>inject_zlib.props
+
+      - name: View inject_zlib.props 
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: cat /c/ShiftMediaProject/build/gnutls/SMP/inject_zlib.props
+
+      - name: Build GnuTLS
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: c:/ShiftMediaProject/build/gnutls/SMP
+        run: msbuild libgnutls.sln -p:Configuration=${{env.buildtype}}DLL -p:ForceImportBeforeCppTargets=c:\ShiftMediaProject\build\gnutls\SMP\inject_zlib.props
+
+      - name: Install GnuTLS
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          cd /c/ShiftMediaProject/msvc
+          cp -v -r include/gnutls ${{env.prefix_path_unix}}/include/
+          cp -v lib/${{env.arch_short}}/*.lib ${{env.prefix_path_unix}}/lib/
+          cp -v bin/${{env.arch_short}}/*.dll ${{env.prefix_path_unix}}/bin/
+
+      - name: Create gnutls.pc
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Name: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Description: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "URL: https://www.gnutls.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Version: ${{env.gnutls_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Libs: -L\${libdir} -lgnutls${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
 
       - name: Download openssl
@@ -662,55 +856,6 @@ jobs:
           echo
           echo "${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc:"
           cat ${{env.prefix_path_unix}}/lib/pkgconfig/libssl.pc
-
-
-      - name: Download GnuTLS
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc17.zip
-
-      - name: Create GnuTLS directory
-        shell: cmd
-        working-directory: downloads
-        run: mkdir gnutls
-
-      - name: Extract GnuTLS
-        shell: cmd
-        working-directory: downloads/gnutls
-        run: 7z x "../libgnutls_${{env.gnutls_version}}_msvc17.zip"
-
-      - name: Copy GnuTLS (x86)
-        if: matrix.arch == 'x86'
-        shell: cmd
-        working-directory: downloads/gnutls
-        run: |
-          xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
-          xcopy /s /y bin\x86\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x86\gnutls.* ${{env.prefix_path_backslash}}\lib\
-
-      - name: Copy GnuTLS (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        working-directory: downloads/gnutls
-        run: |
-          xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
-          xcopy /s /y bin\x64\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x64\gnutls.* ${{env.prefix_path_backslash}}\lib\
-
-      - name: Create gnutls.pc
-        shell: bash
-        run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Name: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Description: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "URL: https://www.gnutls.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Version: ${{env.gnutls_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Libs: -L\${libdir} -lgnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
 
       - name: Download libpng
