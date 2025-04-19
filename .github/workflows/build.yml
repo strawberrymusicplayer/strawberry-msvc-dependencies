@@ -2356,25 +2356,27 @@ jobs:
 
 
       - name: Download libebur128
-        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://github.com/jiixyj/libebur128/archive/refs/tags/v${{env.libebur128_version}}/libebur128-${{env.libebur128_version}}.tar.gz
 
       - name: Extract libebur128
-        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/libebur128-${{env.libebur128_version}}.tar.gz
 
       - name: Patch libebur128
-        if: matrix.arch != 'arm64'
         shell: bash
         working-directory: build/libebur128-${{env.libebur128_version}}
         run: sed -i "/^Libs.private.*/d" ebur128/libebur128.pc.cmake
 
+      - name: Patch libebur128 (arm64)
+        if: matrix.arch == 'arm64'
+        shell: bash
+        working-directory: build/libebur128-${{env.libebur128_version}}
+        run: sed -i "s/^#warning .*//g" ebur128/ebur128.c
+
       - name: Configure libebur128
-        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2384,7 +2386,6 @@ jobs:
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libebur128
-        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           CL: -MP
@@ -2392,7 +2393,6 @@ jobs:
         run: cmake --build .
 
       - name: Install libebur128
-        if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --install .
