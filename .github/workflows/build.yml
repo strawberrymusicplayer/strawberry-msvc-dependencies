@@ -468,6 +468,28 @@ jobs:
         run: cmake --install .
 
 
+      - name: Download VSYASM
+        if: env.arch != 'arm64'
+        shell: cmd
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/ShiftMediaProject/VSYASM/releases/download/1.0/VSYASM.zip
+
+      - name: Extract VSYASM
+        if: env.arch != 'arm64'
+        shell: cmd
+        working-directory: build
+        run: |
+          mkdir VSYASM
+          cd VSYASM
+          7z x "..\..\downloads\VSYASM.zip"
+
+      - name: Install VSYASM
+        if: env.arch != 'arm64'
+        shell: cmd
+        working-directory: build\VSYASM
+        run: install_script.bat
+
+
       - name: Download zlib
         shell: bash
         working-directory: downloads
@@ -611,41 +633,45 @@ jobs:
 
 
       - name: Download GnuTLS
+        if: env.arch != 'arm64'
+        shell: cmd
+        working-directory: build
+        run: |
+          mkdir ShiftMediaProject
+          cd ShiftMediaProject
+          git clone --recurse-submodules -b "${{env.gnutls_version}}" https://github.com/ShiftMediaProject/gnutls
+
+      - name: Get GnuTLS dependencies
+        if: env.arch != 'arm64'
+        continue-on-error: true
+        shell: cmd
+        working-directory: build/ShiftMediaProject/gnutls/SMP
+        run: project_get_dependencies.bat
+
+      - name: Build GnuTLS
+        if: env.arch != 'arm64'
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/ShiftMediaProject/gnutls/SMP
+        run: |
+          msbuild libgnutls_deps.sln /property:Configuration=${{env.buildtype}}DLL
+          msbuild libgnutls.sln /property:Configuration=${{env.buildtype}}DLL
+
+      - name: Install GnuTLS
+        if: env.arch != 'arm64'
         shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/ShiftMediaProject/gnutls/releases/download/${{env.gnutls_version}}/libgnutls_${{env.gnutls_version}}_msvc17.zip
-
-      - name: Create GnuTLS directory
-        shell: cmd
-        working-directory: downloads
-        run: mkdir gnutls
-
-      - name: Extract GnuTLS
-        shell: cmd
-        working-directory: downloads/gnutls
-        run: 7z x "../libgnutls_${{env.gnutls_version}}_msvc17.zip"
-
-      - name: Copy GnuTLS (x86)
-        if: matrix.arch == 'x86'
-        shell: cmd
-        working-directory: downloads/gnutls
+        working-directory: build
         run: |
-          xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
-          xcopy /s /y bin\x86\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x86\gnutls.* ${{env.prefix_path_backslash}}\lib\
-
-      - name: Copy GnuTLS (x86_64)
-        if: matrix.arch == 'x86_64'
-        shell: cmd
-        working-directory: downloads/gnutls
-        run: |
-          xcopy /s /y include\* ${{env.prefix_path_backslash}}\include\
-          xcopy /s /y bin\x64\*.* ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y lib\x64\gnutls.* ${{env.prefix_path_backslash}}\lib\
+          cp -v -r msvc/include/*.h ${{env.prefix_path_unix}}/include/
+          cp -v msvc/lib/${{env.arch_short}}/*.lib ${{env.prefix_path_unix}}/lib/
+          cp -v msvc/bin/${{env.arch_short}}/*.dll ${{env.prefix_path_unix}}/bin/
 
       - name: Create gnutls.pc
+        if: env.arch != 'arm64'
         shell: bash
         run: |
+          mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
           echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
