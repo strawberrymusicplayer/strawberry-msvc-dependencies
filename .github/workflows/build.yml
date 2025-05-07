@@ -120,7 +120,7 @@ env:
 
   max_releases: '6'
 
-  curl_options: '-f -O -L --connect-timeout 15 -m 900 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
+  curl_options: '-f -O -L --connect-timeout 60 -m 900 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
 
   sourceforge_mirror: 'downloads.sourceforge.net'
 
