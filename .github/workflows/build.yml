@@ -112,7 +112,7 @@ env:
 
   kdsingleapplication_version: '1.1.0'
 
-  gettext_version: '0.24.1-v1.17'
+  gettext_version: '0.25-v1.17'
 
   sparsehash_version: '2.0.4'
 
