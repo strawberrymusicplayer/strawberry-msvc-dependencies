@@ -48,7 +48,7 @@ env:
 
   sqlite3_version: '3490200'
 
-  glib_version: '2.84.2'
+  glib_version: '2.85.0'
 
   libsoup_version: '3.6.5'
 
@@ -1368,7 +1368,7 @@ jobs:
           CXXFLAGS: -I${{env.prefix_path_backslash}}\include
           LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/glib-${{env.glib_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig -Dtests=false build
 
       - name: Build GLib
         shell: cmd
