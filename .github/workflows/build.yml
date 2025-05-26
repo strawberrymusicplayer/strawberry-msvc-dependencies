@@ -110,7 +110,7 @@ env:
 
   qt_version: '6.9.0'
 
-  kdsingleapplication_version: '1.1.0'
+  kdsingleapplication_version: '1.2.0'
 
   gettext_version: '0.25-v1.17'
 
