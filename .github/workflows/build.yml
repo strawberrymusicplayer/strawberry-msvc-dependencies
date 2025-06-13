@@ -1313,7 +1313,7 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
-      - name: Build SQlite
+      - name: Build SQLite
         shell: cmd
         env:
           CL: -MP
