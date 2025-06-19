@@ -1,0 +1,26 @@
+From a9ce70a603bce06d228dc6091a9fe31aa8953c08 Mon Sep 17 00:00:00 2001
+From: Jonas Kvinge <jonas@jkvinge.net>
+Date: Mon, 23 Jun 2025 23:05:44 +0200
+Subject: [PATCH] dependency: Add check for zero string
+
+Fixes strange pkgconf results on Windows when there are empty ``Requires:`` lines in the .pc files.
+
+Possible fix for #413
+---
+ libpkgconf/dependency.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libpkgconf/dependency.c b/libpkgconf/dependency.c
+index b205ad2..54e27ad 100644
+--- a/libpkgconf/dependency.c
++++ b/libpkgconf/dependency.c
+@@ -318,6 +318,9 @@ pkgconf_dependency_parse_str(pkgconf_client_t *client, pkgconf_list_t *deplist_h
+ 
+ 	memset(cmpname, '\0', sizeof cmpname);
+ 
++	if (strlen(depends) == 0)
++		return;
++
+ 	buf_sz = strlen(depends) * 2;
+ 	buf = calloc(1, buf_sz);
+ 	if (buf == NULL)
