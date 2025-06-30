@@ -407,11 +407,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/pkgconf-${{env.pkgconf_version}}.tar.gz
 
-      - name: Patch pkgconf
-        shell: bash
-        working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}
-        run: patch -p1 < ../../patches/pkgconf.patch
-
       - name: Configure pkgconf
         shell: cmd
         env:
