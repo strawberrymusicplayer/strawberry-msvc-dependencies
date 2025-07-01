@@ -16,7 +16,7 @@ env:
 
   gnutls_version: '3.8.8'
 
-  libpng_version: '1.6.49'
+  libpng_version: '1.6.50'
 
   libjpeg_turbo_version: '3.1.1'
 
