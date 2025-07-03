@@ -85,7 +85,7 @@ env:
   libgme_version: '0.6.4'
 
   faad2_version: '2.11.2'
-  
+
   faac_version: '1.31.1'
 
   fdk_aac_version: '2.0.3'
@@ -111,8 +111,6 @@ env:
   qt_version: '6.9.1'
 
   kdsingleapplication_version: '1.2.0'
-
-  gettext_version: '0.25-v1.17'
 
   sparsehash_version: '2.0.4'
 
@@ -278,8 +276,6 @@ jobs:
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "expat_version_underscore=$(echo ${{env.expat_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
-          echo "gettext_only_version=$(echo ${{env.gettext_version}} | cut -d '-' -f 1)" >> $GITHUB_ENV
-          echo "gettext_iconv_version=$(echo ${{env.gettext_version}} | cut -d '-' -f 2 | sed 's/^v//g')" >> $GITHUB_ENV
           echo "libxml2_version_short=$(echo ${{env.libxml2_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
 
       - name: Create directories
@@ -376,25 +372,6 @@ jobs:
       - name: Add win_flex_bison to PATH
         shell: pwsh
         run: echo "c:\win_flex_bison" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-
-      - name: Download gettext
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/mlocati/gettext-iconv-windows/releases/download/v${{env.gettext_only_version}}-v${{env.gettext_iconv_version}}/gettext${{env.gettext_only_version}}-iconv${{env.gettext_iconv_version}}-static-${{env.arch_bits}}.zip
-
-      - name: Extract gettext
-        shell: cmd
-        working-directory: build
-        run: |
-          mkdir gettext
-          cd gettext
-          7z x "..\..\downloads\gettext${{env.gettext_only_version}}-iconv${{env.gettext_iconv_version}}-static-${{env.arch_bits}}.zip"
-
-      - name: Install gettext
-        shell: bash
-        working-directory: build/gettext
-        run: cp -v bin/*.exe ${{env.prefix_path_forwardslash}}/bin/
 
 
       - name: Download pkgconf
@@ -3252,7 +3229,6 @@ jobs:
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
-          echo "* gettext ${{env.gettext_version}}" >> "${{env.release_notes_file}}"
 
       - name: Create new release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
