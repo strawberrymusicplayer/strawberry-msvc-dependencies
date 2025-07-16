@@ -206,10 +206,14 @@ jobs:
           echo "prefix_path_forwardslash=c:/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
           echo "prefix_path_unix=/c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
 
+      - name: Set python version
+        shell: bash
+        run: echo "python_version="$(ls -1 /c/hostedtoolcache/windows/Python | sort -V | tail -1)"" >> $GITHUB_ENV
+
       - name: Cleanup PATH
         uses: egor-tensin/cleanup-path@v4
         with:
-          dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\3.9.13\x64;C:\hostedtoolcache\windows\Python\3.9.13\x64\Scripts;C:\Users\runneradmin\.cargo\bin
+          dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\${{env.python_version}}\x64;C:\hostedtoolcache\windows\Python\${{env.python_version}}\x64\Scripts;C:\Users\runneradmin\.cargo\bin
 
       - name: Set lib postfix
         if: env.buildtype == 'debug'
