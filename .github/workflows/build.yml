@@ -206,6 +206,16 @@ jobs:
           echo "prefix_path_forwardslash=c:/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
           echo "prefix_path_unix=/c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
 
+      - name: Set SDK version
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: echo "sdk_version=10.0.22000.0" >> $GITHUB_ENV
+
+      - name: Set SDK version
+        if: matrix.arch == 'arm64'
+        shell: bash
+        run: echo "sdk_version=10.0.26100.0" >> $GITHUB_ENV
+
       - name: Set python version
         shell: bash
         run: echo "python_version="$(ls -1 /c/hostedtoolcache/windows/Python | sort -V | tail -1)"" >> $GITHUB_ENV
@@ -318,7 +328,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{matrix.arch}}
-          sdk: 10.0.20348.0
+          sdk: ${{env.sdk_version}}
           vsversion: 2022
 
 
@@ -904,6 +914,11 @@ jobs:
         shell: bash
         working-directory: build
         run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
+
+      - name: Set windows SDK version for icu
+        shell: bash
+        working-directory: build/icu/source
+        run: sed -i 's/10.0.22621.0/${{env.sdk_version}}/g' allinone/Build.Windows.ProjectConfiguration.props
 
       - name: Patch icu
         if: matrix.arch == 'arm64'
