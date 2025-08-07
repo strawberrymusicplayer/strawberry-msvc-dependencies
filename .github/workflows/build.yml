@@ -104,7 +104,7 @@ env:
 
   chromaprint_version: '1.5.1'
 
-  gstreamer_version: '1.26.4'
+  gstreamer_version: '1.26.5'
 
   gstreamer_plugins_rs_version: '0.13.0'
 
