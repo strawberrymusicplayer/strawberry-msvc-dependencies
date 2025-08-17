@@ -206,10 +206,14 @@ jobs:
           echo "prefix_path_forwardslash=c:/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
           echo "prefix_path_unix=/c/strawberry_msvc_${{matrix.arch}}_${{env.buildtype}}" >> $GITHUB_ENV
 
+      - name: Show SDK versions
+        shell: bash
+        run: ls -la "c:/Program Files (x86)/Windows Kits/10/include"
+
       - name: Set SDK version
         if: matrix.arch != 'arm64'
         shell: bash
-        run: echo "sdk_version=10.0.22000.0" >> $GITHUB_ENV
+        run: echo "sdk_version=10.0.19041.0" >> $GITHUB_ENV
 
       - name: Set SDK version
         if: matrix.arch == 'arm64'
