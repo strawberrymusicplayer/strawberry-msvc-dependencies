@@ -317,6 +317,9 @@ function update_package() {
     "rapidjson")
       package_version_latest=$(latest_github_release "Tencent" "rapidjson")
       ;;
+    "getopt_win")
+      package_version_latest=$(git ls-remote https://github.com/ludvikjerabek/getopt-win.git refs/heads/main | cut -f 1)
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"

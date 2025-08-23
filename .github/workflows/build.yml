@@ -42,6 +42,8 @@ env:
 
   dlfcn_version: '1.4.2'
 
+  getopt_win_version: '3ff5d91263481e77366111be8b183c8c825b3a3c'
+
   libpsl_version: '0.21.5'
 
   orc_version: '0.4.41'
@@ -1198,12 +1200,10 @@ jobs:
       - name: Download getopt-win
         shell: bash
         working-directory: build
-        run: git clone https://github.com/ludvikjerabek/getopt-win
-
-      - name: Patch getopt-win
-        shell: bash
-        working-directory: build/getopt-win
-        run: patch -p1 < ../../patches/getopt-win-cmake.patch
+        run: |
+          git clone https://github.com/ludvikjerabek/getopt-win
+          cd getopt-win
+          git checkout ${{env.getopt_win_version}}
 
       - name: Configure getopt-win
         shell: cmd
@@ -1212,7 +1212,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/getopt-win
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF
 
       - name: Build getopt-win
         shell: cmd
