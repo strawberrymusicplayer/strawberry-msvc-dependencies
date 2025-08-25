@@ -318,7 +318,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "Tencent" "rapidjson")
       ;;
     "getopt_win")
-      package_version_latest=$(git ls-remote https://github.com/ludvikjerabek/getopt-win.git refs/heads/main | cut -f 1)
+      package_version_latest=$(latest_github_release "ludvikjerabek" "getopt-win")
       ;;
     *)
       package_version_latest=
