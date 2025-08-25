@@ -10,6 +10,8 @@ env:
 
   pkgconf_version: '2.5.1'
 
+  getopt_win_version: '2.42.0'
+
   zlib_version: '1.3.1'
 
   openssl_version: '3.5.2'
@@ -41,8 +43,6 @@ env:
   nghttp2_version: '1.66.0'
 
   dlfcn_version: '1.4.2'
-
-  getopt_win_version: '3ff5d91263481e77366111be8b183c8c825b3a3c'
 
   libpsl_version: '0.21.5'
 
@@ -485,6 +485,38 @@ jobs:
       - name: Install yasm
         shell: cmd
         working-directory: build/yasm-${{env.yasm_version}}/build
+        run: cmake --install .
+
+
+      - name: Download getopt-win
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/ludvikjerabek/getopt-win/archive/refs/tags/v${{env.getopt_win_version}}/getopt-win-${{env.getopt_win_version}}.tar.gz
+
+      - name: Extract getopt-win
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/getopt-win-${{env.getopt_win_version}}.tar.gz
+
+      - name: Configure getopt-win
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/getopt-win-${{env.getopt_win_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_SHARED_LIB=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_STATIC_LIB=OFF -DBUILD_TESTING=OFF
+
+      - name: Build getopt-win
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/getopt-win-${{env.getopt_win_version}}/build
+        run: cmake --build .
+
+      - name: Install getopt-win
+        shell: cmd
+        working-directory: build/getopt-win-${{env.getopt_win_version}}/build
         run: cmake --install .
 
 
@@ -1195,36 +1227,6 @@ jobs:
         shell: cmd
         working-directory: build/libffi/build
         run: ninja install
-
-
-      - name: Download getopt-win
-        shell: bash
-        working-directory: build
-        run: |
-          git clone https://github.com/ludvikjerabek/getopt-win
-          cd getopt-win
-          git checkout ${{env.getopt_win_version}}
-
-      - name: Configure getopt-win
-        shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-        working-directory: build/getopt-win
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_SHARED_LIB=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_STATIC_LIB=OFF -DBUILD_TESTING=OFF
-
-      - name: Build getopt-win
-        shell: cmd
-        env:
-          CL: -MP
-        working-directory: build/getopt-win/build
-        run: cmake --build .
-
-      - name: Install getopt-win
-        shell: cmd
-        working-directory: build/getopt-win/build
-        run: cmake --install .
 
 
       - name: Download dlfcn-win32
