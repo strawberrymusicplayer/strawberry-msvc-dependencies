@@ -124,6 +124,8 @@ env:
 
   rapidjson_version: '1.1.0'
 
+  pe_parse_version: '2.1.1'
+
   max_releases: '6'
 
   curl_options: '-f -O -L --connect-timeout 60 -m 900 --retry 15 --retry-delay 10 --retry-max-time 300 --retry-all-errors'
@@ -3383,6 +3385,65 @@ jobs:
       - name: Install rapidjson
         shell: cmd
         working-directory: build/rapidjson/build
+        run: cmake --install .
+
+
+      - name: Download pe-parse
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/trailofbits/pe-parse/archive/refs/tags/v${{env.pe_parse_version}}/pe-parse-${{env.pe_parse_version}}.tar.gz
+
+      - name: Extract pe-parse
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/pe-parse-${{env.pe_parse_version}}.tar.gz
+
+      - name: Configure pe-parse
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/pe-parse-${{env.pe_parse_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_COMMAND_LINE_TOOLS=OFF
+
+      - name: Build pe-parse
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/pe-parse-${{env.pe_parse_version}}/build
+        run: cmake --build .
+
+      - name: Install pe-parse
+        shell: cmd
+        working-directory: build/pe-parse-${{env.pe_parse_version}}/build
+        run: cmake --install .
+
+
+      - name: Download pe-util
+        shell: bash
+        working-directory: build
+        run: git clone --depth 1 --recurse-submodules https://github.com/gsauthof/pe-util
+
+      - name: Configure pe-util
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/pe-util
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+
+      - name: Build pe-util
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/pe-util/build
+        run: cmake --build .
+
+      - name: Install pe-util
+        shell: cmd
+        working-directory: build/pe-util/build
         run: cmake --install .
 
 
