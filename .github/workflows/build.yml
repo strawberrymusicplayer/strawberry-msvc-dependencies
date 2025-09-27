@@ -60,7 +60,7 @@ env:
 
   glib_networking_version: '2.80.1'
 
-  freetype_version: '2.14.1'
+  freetype_version: '7.1.0/docs'
 
   harfbuzz_version: '11.5.1'
 
