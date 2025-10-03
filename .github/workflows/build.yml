@@ -2,7 +2,7 @@ name: Build
 on: [push, pull_request]
 
 env:
-  nasm_version: '2.16.03'
+  nasm_version: '3.00'
 
   yasm_version: '1.3.0'
 
@@ -367,7 +367,7 @@ jobs:
       - name: Download nasm
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://files.jkvinge.net/install/${{steps.set-nasm-filename.outputs.nasm-filename}}
+        run: curl ${{env.curl_options}} https://www.nasm.us/pub/nasm/releasebuilds/${{env.nasm_version}}/${{env.arch_win}}/${{steps.set-nasm-filename.outputs.nasm-filename}}
 
       - name: Create nasm directory
         shell: cmd
