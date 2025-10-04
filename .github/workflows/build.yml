@@ -258,6 +258,7 @@ jobs:
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
           echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
+          echo "gst_lame=disabled" >> $GITHUB_ENV
           echo "gst_twolame=enabled" >> $GITHUB_ENV
           echo "gst_faac=enabled" >> $GITHUB_ENV
 
@@ -275,6 +276,7 @@ jobs:
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
           echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
+          echo "gst_lame=enabled" >> $GITHUB_ENV
           echo "gst_twolame=enabled" >> $GITHUB_ENV
           echo "gst_faac=enabled" >> $GITHUB_ENV
 
@@ -292,6 +294,7 @@ jobs:
           echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
           echo "boost_architecture=arm" >> $GITHUB_ENV
           echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
+          echo "gst_lame=enabled" >> $GITHUB_ENV
           echo "gst_twolame=disabled" >> $GITHUB_ENV
           echo "gst_faac=disabled" >> $GITHUB_ENV
 
@@ -2086,7 +2089,7 @@ jobs:
         run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:ARM64/g' Makefile.MSVC
 
       - name: Build lame (x86)
-        if: matrix.arch == 'x86'
+        if: false
         shell: cmd
         env:
           CL: -MP
@@ -2102,6 +2105,7 @@ jobs:
         run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
 
       - name: Install lame
+        if: matrix.arch == 'x86_64' || matrix.arch == 'arm64'
         shell: cmd
         working-directory: build/lame-${{env.lame_version}}
         run: |
@@ -2110,6 +2114,7 @@ jobs:
           copy output\libmp3lame*.dll ${{env.prefix_path_backslash}}\bin\
 
       - name: Create mp3lame.pc
+        if: matrix.arch == 'x86_64' || matrix.arch == 'arm64'
         shell: bash
         run: |
           echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
@@ -2927,7 +2932,7 @@ jobs:
           -Dadaptivedemux2=enabled
           -Ddirectsound=enabled
           -Dflac=enabled
-          -Dlame=enabled
+          -Dlame=${{env.gst_lame}}
           -Dmpg123=enabled
           -Dspeex=enabled
           -Dtaglib=enabled
