@@ -2964,7 +2964,9 @@ jobs:
       - name: Patch gst-plugins-bad
         shell: bash
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
-        run: patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
+        run: |
+          patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
+          patch -p1 < ../../patches/gst-plugins-bad-wasapi2.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd
