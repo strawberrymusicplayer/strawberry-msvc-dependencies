@@ -32,7 +32,7 @@ env:
 
   xz_version: '5.8.1'
 
-  brotli_version: '1.1.0'
+  brotli_version: '1.2.0'
 
   icu4c_version: '77.1'
 
