@@ -34,7 +34,7 @@ env:
 
   brotli_version: '1.2.0'
 
-  icu4c_version: '77.1'
+  icu4c_version: '78.1'
 
   pixman_version: '0.46.4'
 
@@ -299,8 +299,6 @@ jobs:
         shell: bash
         run: |
           echo "boost_version_underscore=$(echo ${{env.boost_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
-          echo "icu4c_version_underscore=$(echo ${{env.icu4c_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
-          echo "icu4c_version_dash=$(echo ${{env.icu4c_version}} | sed 's/\./\-/g')" >> $GITHUB_ENV
           echo "glib_version_short=$(echo ${{env.glib_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "glib_networking_version_short=$(echo ${{env.glib_networking_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
@@ -1126,12 +1124,12 @@ jobs:
       - name: Download icu
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version_dash}}/icu4c-${{env.icu4c_version_underscore}}-src.zip
+        run: curl ${{env.curl_options}} https://github.com/unicode-org/icu/releases/download/release-${{env.icu4c_version}}/icu4c-${{env.icu4c_version}}-sources.tgz
 
       - name: Extract icu
         shell: bash
         working-directory: build
-        run: 7z x ../downloads/icu4c-${{env.icu4c_version_underscore}}-src.zip
+        run: tar -xvf ../downloads/icu4c-${{env.icu4c_version}}-sources.tgz
 
       - name: Set windows SDK version for icu
         shell: bash
