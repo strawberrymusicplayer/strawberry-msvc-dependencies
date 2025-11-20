@@ -284,7 +284,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
       ;;
     "ffmpeg")
-      package_version_latest=$(git ls-remote --heads git@gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
+      package_version_latest=$(git ls-remote --heads git@ssh.gitlab.freedesktop.org:gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
       ;;
     "chromaprint")
       package_version_latest=$(latest_github_release "acoustid" "chromaprint")
@@ -293,7 +293,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://gstreamer.freedesktop.org/src/gstreamer' | sed -n "s,.*gstreamer-\([0-9]\.[0-9][02468]\.[0-9]*\)\.tar\.xz.*,\\1,p" | sort -V | tail -1)
       ;;
     "gst_plugins_rs")
-      package_version_latest=$(git ls-remote --tags https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git/ | cut -d ' ' -f 2 | grep -v 'gstreamer' | cut -d '/' -f 3 | sed '/.\^/d' | sort -V | tail -1)
+      package_version_latest=$(git ls-remote --tags git@ssh.gitlab.freedesktop.org:gstreamer/gst-plugins-rs.git | cut -d ' ' -f 2 | grep -v 'gstreamer' | cut -d '/' -f 3 | sed '/.\^/d' | sort -V | tail -1)
       ;;
     "qt")
       qt_major_version=$(curl ${curl_options} "https://download.qt.io/official_releases/qt/" | sed -n 's,.*<a href=\"\([0-9]*\.[0-9]*\).*,\1,p' | sort -V | tail -1)
