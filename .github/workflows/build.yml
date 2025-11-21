@@ -106,7 +106,7 @@ env:
 
   fftw_version: '3.3.10'
 
-  ffmpeg_version: '7.1.2'
+  ffmpeg_version: '8.0'
 
   chromaprint_version: '1.6.0'
 
@@ -2690,12 +2690,14 @@ jobs:
       - name: Download ffmpeg
         shell: bash
         working-directory: build
-        run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
+        run: git clone --recurse-submodules -b "meson-${{env.ffmpeg_version}}" https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
 
+        # ffmpeg 8.0 doesn't build on x86, use version 7.1.2 instead
       - name: Checkout ffmpeg
+        if: matrix.arch == 'x86'
         shell: bash
         working-directory: build/ffmpeg
-        run: git checkout meson-${{env.ffmpeg_version}}
+        run: git checkout meson-7.1.2
 
       - name: Configure ffmpeg
         shell: cmd
