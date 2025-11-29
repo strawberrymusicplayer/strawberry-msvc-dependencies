@@ -991,7 +991,7 @@ jobs:
       - name: Download bzip2
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz || curl ${{env.curl_options}} https://ftp.funet.fi/pub/mirrors/sourceware.org/pub/bzip2/bzip2-${{env.bzip2_version}}.tar.gz
 
       - name: Extract bzip2
         shell: bash
