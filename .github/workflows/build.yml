@@ -40,7 +40,7 @@ env:
 
   expat_version: '2.7.3'
 
-  boost_version: '1.89.0'
+  boost_version: '1.90.0'
 
   libxml2_version: '2.15.1'
 
@@ -1283,7 +1283,7 @@ jobs:
       - name: Download Boost
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://files.jkvinge.net/packages/strawberry-dependencies/boost_${{env.boost_version_underscore}}.tar.gz
+        run: curl ${{env.curl_options}} https://archives.boost.io/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.gz
 
       - name: Extract Boost
         shell: bash
