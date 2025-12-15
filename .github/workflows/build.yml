@@ -72,7 +72,7 @@ env:
 
   wavpack_version: '5.8.1'
 
-  opus_version: '1.5.2'
+  opus_version: '1.6'
 
   opusfile_version: '0.12'
 
@@ -1918,7 +1918,7 @@ jobs:
       - name: Patch opus
         shell: bash
         working-directory: build/opus-${{env.opus_version}}
-        run: sed -i '/include(opus_buildtype.cmake)/d' CMakeLists.txt
+        run: patch -p1 < ../../patches/opus-arm.patch
 
       - name: Configure opus
         shell: cmd

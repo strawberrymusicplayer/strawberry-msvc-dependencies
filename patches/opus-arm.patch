@@ -1,0 +1,72 @@
+From d8bdf8f33109bdfcb2125a3f3c36701392828df7 Mon Sep 17 00:00:00 2001
+From: Piotr Pawlowski <p@perkele.cc>
+Date: Sat, 3 Jan 2026 15:22:39 +0100
+Subject: [PATCH] MSVC ARM64/ARM64EC support - removed xmmintrin.h, updated
+ platform detection in CMake script
+
+---
+ celt/float_cast.h      |  2 +-
+ cmake/OpusConfig.cmake | 21 ++++++++++++++++-----
+ 2 files changed, 17 insertions(+), 6 deletions(-)
+
+diff --git a/celt/float_cast.h b/celt/float_cast.h
+index 120a53695..04ec059f7 100644
+--- a/celt/float_cast.h
++++ b/celt/float_cast.h
+@@ -69,7 +69,7 @@ static OPUS_INLINE opus_int32 float2int(float x) {return _mm_cvt_ss2si(_mm_set_s
+ 
+ #elif (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
+ 
+-        #include <xmmintrin.h>
++        #include <intrin.h>
+         static OPUS_INLINE opus_int32 float2int(float value)
+         {
+                 /* _mm_load_ss will generate same code as _mm_set_ss
+diff --git a/cmake/OpusConfig.cmake b/cmake/OpusConfig.cmake
+index e9319fbad..9dc5a8124 100644
+--- a/cmake/OpusConfig.cmake
++++ b/cmake/OpusConfig.cmake
+@@ -51,14 +51,21 @@ check_symbol_exists(lrint "math.h" HAVE_LRINT)
+ check_symbol_exists(elf_aux_info "sys/auxv.h" HAVE_ELF_AUX_INFO)
+ cmake_pop_check_state()
+ 
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "(i[0-9]86|x86|X86|amd64|AMD64|x86_64)")
++message(STATUS "Check CPU arch: CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM} CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}")
++
++if(CMAKE_GENERATOR_PLATFORM MATCHES "(arm64|ARM64|arm64ec|ARM64EC)")
++# Microsoft ARM mode, override other checks
++# CMake still doesn't recognize it, CMAKE_SYSTEM_PROCESSOR is AMD64
++  set(OPUS_CPU_ARM_MS)
++  set(OPUS_CPU_ARM 1)
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(arm|aarch64|ARM)")
++  set(OPUS_CPU_ARM 1)
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(i[0-9]86|x86|X86|amd64|AMD64|x86_64)")
+   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+     set(OPUS_CPU_X64 1)
+   else()
+     set(OPUS_CPU_X86 1)
+   endif()
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(arm|aarch64|ARM)")
+-  set(OPUS_CPU_ARM 1)
+ endif()
+ 
+ if(NOT OPUS_DISABLE_INTRINSICS)
+@@ -68,12 +75,16 @@ endif()
+ if(OPUS_CPU_X86 OR OPUS_CPU_X64 AND NOT OPUS_DISABLE_INTRINSICS)
+   opus_detect_sse(COMPILER_SUPPORT_SIMD)
+ elseif(OPUS_CPU_ARM AND NOT OPUS_DISABLE_INTRINSICS)
+-  opus_detect_neon(COMPILER_SUPPORT_NEON)
++  if (OPUS_CPU_ARM_MS)
++    set(COMPILER_SUPPORT_NEON 1)
++  else()
++    opus_detect_neon(COMPILER_SUPPORT_NEON)
++  endif()
+   if(COMPILER_SUPPORT_NEON)
+     option(OPUS_USE_NEON "Option to enable NEON" ON)
+     option(OPUS_MAY_HAVE_NEON "Does runtime check for neon support" ON)
+     option(OPUS_PRESUME_NEON "Assume target CPU has NEON support" OFF)
+-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
++    if(OPUS_CPU_ARM_MS OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+       set(OPUS_PRESUME_NEON ON)
+     elseif(CMAKE_SYSTEM_NAME MATCHES "iOS")
+       set(OPUS_PRESUME_NEON ON)
