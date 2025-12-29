@@ -1295,14 +1295,19 @@ jobs:
         env:
           CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
-        run: bootstrap.bat
+        run: bootstrap.bat --with-libraries=headers
 
-      - name: Build and install Boost
+      - name: Build Boost
         shell: cmd
         env:
           CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
-        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" --with-headers toolset=msvc architecture=${{env.boost_architecture}} link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
+        run: b2.exe --with-headers
+
+      - name: Install Boost
+        shell: cmd
+        working-directory: build/boost_${{env.boost_version_underscore}}
+        run: b2.exe install --prefix="${{env.prefix_path_forwardslash}}"
 
 
       - name: Cleanup build directory
