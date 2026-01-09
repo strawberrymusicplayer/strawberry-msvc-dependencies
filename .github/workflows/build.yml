@@ -34,7 +34,7 @@ env:
 
   brotli_version: '1.2.0'
 
-  icu4c_version: '78.1'
+  icu4c_version: '78.2'
 
   pixman_version: '0.46.4'
 
