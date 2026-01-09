@@ -52,7 +52,7 @@ env:
 
   orc_version: '0.4.42'
 
-  sqlite3_version: '3510100'
+  sqlite3_version: '3510200'
 
   glib_version: '2.87.1'
 
@@ -1509,7 +1509,7 @@ jobs:
       - name: Download SQLite
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://sqlite.org/2025/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://sqlite.org/2026/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Extract SQLite
         shell: bash
