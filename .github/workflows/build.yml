@@ -72,7 +72,7 @@ env:
 
   wavpack_version: '5.8.1'
 
-  opus_version: '1.5.2'
+  opus_version: '1.6.1'
 
   opusfile_version: '0.12'
 
