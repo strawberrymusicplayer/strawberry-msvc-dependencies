@@ -70,7 +70,7 @@ env:
 
   flac_version: '1.5.0'
 
-  wavpack_version: '5.8.1'
+  wavpack_version: '5.9.0'
 
   opus_version: '1.5.2'
 
