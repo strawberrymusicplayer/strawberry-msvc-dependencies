@@ -441,7 +441,7 @@ jobs:
         env:
           CL: -MP
         working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dtests=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled build
 
       - name: Build pkgconf
         shell: cmd
@@ -1192,7 +1192,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pixman-${{env.pixman_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
 
       - name: Build pixman
         if: matrix.arch != 'arm64'
@@ -1353,7 +1353,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libffi
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build libffi
         shell: cmd
@@ -1416,11 +1416,8 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/libpsl-${{env.libpsl_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build libpsl
         shell: cmd
@@ -1452,7 +1449,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/orc-${{env.orc_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build orc
         shell: cmd
@@ -1528,11 +1525,8 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/glib-${{env.glib_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig -Dtests=false build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=false build
 
       - name: Build GLib
         shell: cmd
@@ -1563,11 +1557,8 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/libsoup-${{env.libsoup_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
 
       - name: Build libsoup
         shell: cmd
@@ -1598,11 +1589,8 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
         working-directory: build/glib-networking-${{env.glib_networking_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dgnutls=${{env.glib_networking_gnutls}} -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgnutls=${{env.glib_networking_gnutls}} -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
 
       - name: Build glib-networking
         shell: cmd
@@ -1670,12 +1658,8 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_backslash}}\include
-          CXXFLAGS: -I${{env.prefix_path_backslash}}\include
-          LDFLAGS: -L${{env.prefix_path_backslash}}\lib
-
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dcpp_std=c++17 -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dcpp_std=c++17 -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
 
       - name: Build harfbuzz
         shell: cmd
@@ -2667,7 +2651,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/ffmpeg
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Dgpl=enabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Dgpl=enabled -Diconv=disabled build
 
       - name: Build ffmpeg
         shell: cmd
@@ -2736,7 +2720,6 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gstreamer-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2745,6 +2728,7 @@ jobs:
           --prefix=${{env.prefix_path_backslash}}
           --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig
           --wrap-mode=nodownload
+          -Dc_args=-I${{env.prefix_path_backslash}}\include
           -Dexamples=disabled
           -Dtests=disabled
           -Dbenchmarks=disabled
@@ -2786,7 +2770,6 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
         working-directory: build/gst-plugins-base-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2796,6 +2779,8 @@ jobs:
           --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig
           --wrap-mode=nodownload
           --auto-features=disabled
+          -Dc_args=-I${{env.prefix_path_backslash}}\include
+          -Dcpp_args=-I${{env.prefix_path_backslash}}\include
           -Dexamples=disabled
           -Dtests=disabled
           -Dtools=enabled
@@ -2853,7 +2838,6 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2863,6 +2847,8 @@ jobs:
           --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig
           --wrap-mode=nodownload
           --auto-features=disabled
+          -Dc_args=-I${{env.prefix_path_backslash}}\include
+          -Dcpp_args=-I${{env.prefix_path_backslash}}\include
           -Dexamples=disabled
           -Dtests=disabled
           -Dnls=disabled
@@ -2935,7 +2921,6 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include -I${{env.prefix_path_forwardslash}}/include/opus
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2945,6 +2930,8 @@ jobs:
           --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig
           --wrap-mode=nodownload
           --auto-features=disabled
+          -Dc_args=-I${{env.prefix_path_backslash}}\include
+          -Dcpp_args=-I${{env.prefix_path_backslash}}\include
           -Dexamples=disabled
           -Dtools=enabled
           -Dtests=disabled
@@ -3007,7 +2994,6 @@ jobs:
           CL: -MP
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -3017,6 +3003,8 @@ jobs:
           --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig
           --wrap-mode=nodownload
           --auto-features=disabled
+          -Dc_args=-I${{env.prefix_path_backslash}}\include
+          -Dcpp_args=-I${{env.prefix_path_backslash}}\include
           -Dnls=disabled
           -Dorc=enabled
           -Dtests=disabled
@@ -3054,7 +3042,7 @@ jobs:
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
           CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-libav-${{env.gstreamer_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dtests=disabled -Ddoc=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddoc=disabled build
 
       - name: Build gst-libav
         shell: cmd
