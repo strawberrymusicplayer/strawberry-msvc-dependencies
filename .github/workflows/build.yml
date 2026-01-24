@@ -64,6 +64,12 @@ env:
 
   harfbuzz_version: '12.3.2'
 
+  jasper_version: '4.2.8'
+
+  tiff_version: '4.7.1'
+
+  libwebp_version: '1.6.0'
+
   libogg_version: '1.3.6'
 
   libvorbis_version: '1.3.7'
@@ -1711,6 +1717,103 @@ jobs:
         run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
 
 
+      - name: Download jasper
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/jasper-software/jasper/releases/download/version-${{env.jasper_version}}/jasper-${{env.jasper_version}}.tar.gz
+
+      - name: Extract jasper
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/jasper-${{env.jasper_version}}.tar.gz
+
+      - name: Configure jasper
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build
+        run: |
+          cmake --log-level="${{env.cmake_loglevel}}" -S jasper-${{env.jasper_version}} -B jasper-${{env.jasper_version}}-build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DJAS_ENABLE_JP2_CODEC=ON -DJAS_ENABLE_JPC_CODEC=ON -DJAS_ENABLE_JPG_CODEC=ON -DJAS_ENABLE_LIBJPEG=ON -DJAS_ENABLE_OPENGL=ON -DJAS_INCLUDE_BMP_CODEC=ON -DJAS_INCLUDE_JP2_CODEC=ON -DJAS_INCLUDE_JPC_CODEC=ON -DJAS_INCLUDE_JPG_CODEC=ON
+
+      - name: Build jasper
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/jasper-${{env.jasper_version}}-build
+        run: cmake --build .
+
+      - name: Install jasper
+        shell: cmd
+        working-directory: build/jasper-${{env.jasper_version}}-build
+        run: cmake --install .
+
+
+      - name: Download tiff
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://download.osgeo.org/libtiff/tiff-${{env.tiff_version}}.tar.gz
+
+      - name: Extract tiff
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/tiff-${{env.tiff_version}}.tar.gz
+
+      - name: Configure tiff
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/tiff-${{env.tiff_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -Djpeg=ON -Dtiff-static=OFF -Dtiff-docs=OFF -Dtiff-tests=OFF
+
+      - name: Build tiff
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/tiff-${{env.tiff_version}}/build
+        run: cmake --build .
+
+      - name: Install tiff
+        shell: cmd
+        working-directory: build/tiff-${{env.tiff_version}}/build
+        run: cmake --install .
+
+
+      - name: Download libwebp
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${{env.libwebp_version}}.tar.gz
+
+      - name: Extract libwebp
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/libwebp-${{env.libwebp_version}}.tar.gz
+
+      - name: Configure libwebp
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/libwebp-${{env.libwebp_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DWEBP_LINK_STATIC=OFF -DWEBP_UNICODE=ON -DWEBP_USE_THREAD=ON
+
+      - name: Build libwebp
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/libwebp-${{env.libwebp_version}}/build
+        run: cmake --build .
+
+      - name: Install libwebp
+        shell: cmd
+        working-directory: build/libwebp-${{env.libwebp_version}}/build
+        run: cmake --install .
+
+
       - name: Cleanup build directory
         shell: bash
         working-directory: build
@@ -3215,6 +3318,49 @@ jobs:
       - name: Install qttools
         shell: cmd
         working-directory: build/qttools-everywhere-src-${{env.qt_version}}/build
+        run: cmake --install .
+
+
+      - name: Download qtimageformats
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://${{env.qt_mirror}}/official_releases/qt/${{env.qt_version_short}}/${{env.qt_version}}/submodules/qtimageformats-everywhere-src-${{env.qt_version}}.tar.xz
+
+      - name: Extract qtimageformats
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/qtimageformats-everywhere-src-${{env.qt_version}}.tar.xz
+
+      - name: Configure qtimageformats
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/qtimageformats-everywhere-src-${{env.qt_version}}
+        run: >
+          cmake -S . -B build
+          -G Ninja
+          -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
+          -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
+          -DBUILD_SHARED_LIBS=ON
+          -DBUILD_STATIC_LIBS=OFF
+          -DFEATURE_jasper=ON
+          -DFEATURE_tiff=ON
+          -DFEATURE_webp=ON
+          -DFEATURE_system_tiff=ON
+          -DFEATURE_system_webp=ON
+
+      - name: Build qtimageformats
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/qtimageformats-everywhere-src-${{env.qt_version}}/build
+        run: cmake --build .
+
+      - name: Install qtimageformats
+        shell: cmd
+        working-directory: build/qtimageformats-everywhere-src-${{env.qt_version}}/build
         run: cmake --install .
 
 
