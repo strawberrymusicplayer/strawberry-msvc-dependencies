@@ -144,6 +144,10 @@ env:
 
   cmake_generator: 'Ninja'
 
+  PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: '1'
+
+  CL: '-MP'
+
 
 jobs:
 
@@ -303,6 +307,12 @@ jobs:
           echo "expat_version_underscore=$(echo ${{env.expat_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
           echo "libxml2_version_short=$(echo ${{env.libxml2_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
 
+      - name: Set pkg-config variables
+        shell: bash
+        run: |
+          echo "PKG_CONFIG_EXECUTABLE=${{env.prefix_path_backslash}}\bin\pkgconf.exe" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{env.prefix_path_backslash}}\lib\pkgconfig" >> $GITHUB_ENV
+
       - name: Create directories
         shell: bash
         run: mkdir -p ${{env.prefix_path_unix}}/{bin,lib,include}
@@ -423,15 +433,11 @@ jobs:
 
       - name: Configure pkgconf
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled build
 
       - name: Build pkgconf
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pkgconf-pkgconf-${{env.pkgconf_version}}/build
         run: ninja
 
@@ -462,17 +468,11 @@ jobs:
 
       - name: Configure yasm
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/yasm-${{env.yasm_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build yasm
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --build .
 
@@ -494,17 +494,11 @@ jobs:
 
       - name: Configure getopt-win
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/getopt-win-${{env.getopt_win_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_SHARED_LIB=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_STATIC_LIB=OFF -DBUILD_TESTING=OFF
 
       - name: Build getopt-win
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/getopt-win-${{env.getopt_win_version}}/build
         run: cmake --build .
 
@@ -544,17 +538,11 @@ jobs:
 
       - name: Configure zlib
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/zlib-${{env.zlib_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
 
       - name: Build zlib
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --build .
 
@@ -594,8 +582,6 @@ jobs:
       - name: Build GMP
         if: matrix.arch != 'arm64' && false
         shell: cmd
-        env:
-          CL: -MP
         working-directory: c:/ShiftMediaProject/build/gmp/SMP
         run: msbuild libgmp.vcxproj -p:Configuration=${{env.buildtype}}DLL
 
@@ -636,8 +622,6 @@ jobs:
       - name: Build nettle
         if: matrix.arch != 'arm64' && false
         shell: cmd
-        env:
-          CL: -MP
         working-directory: c:/ShiftMediaProject/build/nettle/SMP
         run: |
           msbuild libnettle.vcxproj -p:Configuration=${{env.buildtype}}DLL
@@ -718,8 +702,6 @@ jobs:
       - name: Build GnuTLS
         if: matrix.arch != 'arm64' && false
         shell: cmd
-        env:
-          CL: -MP
         working-directory: c:/ShiftMediaProject/build/gnutls/SMP
         run: msbuild libgnutls.sln -p:Configuration=${{env.buildtype}}DLL -p:ForceImportBeforeCppTargets=c:\ShiftMediaProject\build\gnutls\SMP\inject_zlib.props
 
@@ -743,8 +725,6 @@ jobs:
       - name: Build gnutls dll with static deps
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: c:/ShiftMediaProject/build/gnutls/SMP
         run: |
           msbuild ..\..\gmp\SMP\libgmp.vcxproj -p:Configuration=Release
@@ -794,27 +774,17 @@ jobs:
       - name: Configure openssl
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
         run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib${{env.lib_postfix}}.lib
 
       - name: Configure openssl
         if: matrix.arch == 'arm64'
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/openssl-${{env.openssl_version}}
         run: perl Configure ${{env.openssl_platform}} shared no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib${{env.lib_postfix}}.lib
 
       - name: Build openssl
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/openssl-${{env.openssl_version}}
         run: nmake
 
@@ -852,17 +822,11 @@ jobs:
 
       - name: Configure libpng
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libpng-${{env.libpng_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build libpng
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --build .
 
@@ -884,15 +848,11 @@ jobs:
 
       - name: Configure libjpeg-turbo
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DENABLE_SHARED=ON -DWITH_SIMD=${{env.libjpeg_turbo_simd}}
 
       - name: Build libjpeg-turbo
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
         run: cmake --build .
 
@@ -914,17 +874,11 @@ jobs:
 
       - name: Configure pcre2
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pcre2-${{env.pcre2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_PCRE2_8=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_UNICODE=ON -DPCRE2_BUILD_TESTS=OFF
 
       - name: Build pcre2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --build .
 
@@ -951,17 +905,11 @@ jobs:
 
       - name: Configure bzip2
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/bzip2-${{env.bzip2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build bzip2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/bzip2-${{env.bzip2_version}}/build
         run: cmake --build .
 
@@ -983,17 +931,11 @@ jobs:
 
       - name: Configure xz
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/xz-${{env.xz_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF
 
       - name: Build xz
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/xz-${{env.xz_version}}/build
         run: cmake --build .
 
@@ -1015,17 +957,11 @@ jobs:
 
       - name: Configure brotli
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/brotli-${{env.brotli_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build_dir -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF
 
       - name: Build brotli
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/brotli-${{env.brotli_version}}/build_dir
         run: cmake --build .
 
@@ -1064,8 +1000,6 @@ jobs:
 
       - name: Build icu
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/icu/source/allinone
         run: msbuild allinone.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}} /p:SkipUWP=true
 
@@ -1123,8 +1057,6 @@ jobs:
 
       - name: Verify icu
         shell: cmd
-        env:
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         run: |
           pkg-config icu-uc --libs
           pkg-config icu-i18n --libs
@@ -1146,18 +1078,12 @@ jobs:
       - name: Configure pixman
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pixman-${{env.pixman_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgtk=disabled -Dlibpng=enabled -Dtests=disabled build
 
       - name: Build pixman
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja
 
@@ -1180,17 +1106,11 @@ jobs:
 
       - name: Configure expat
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/expat-${{env.expat_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_PKGCONFIG=ON
 
       - name: Build expat
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/expat-${{env.expat_version}}/build
         run: cmake --build .
 
@@ -1212,15 +1132,11 @@ jobs:
 
       - name: Configure Boost
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
         run: bootstrap.bat
 
       - name: Build and install Boost
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/boost_${{env.boost_version_underscore}}
         run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" --with-headers toolset=msvc architecture=${{env.boost_architecture}} link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
 
@@ -1243,17 +1159,11 @@ jobs:
 
       - name: Configure libxml2
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libxml2-${{env.libxml2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DLIBXML2_WITH_PYTHON=OFF -DLIBXML2_WITH_ZLIB=ON -DLIBXML2_WITH_LZMA=ON -DLIBXML2_WITH_ICONV=OFF -DLIBXML2_WITH_ICU=ON -DICU_ROOT="${{env.prefix_path_backslash}}"
 
       - name: Build libxml2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libxml2-${{env.libxml2_version}}/build
         run: cmake --build .
 
@@ -1280,17 +1190,11 @@ jobs:
 
       - name: Configure nghttp2
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/nghttp2-${{env.nghttp2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
 
       - name: Build nghttp2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/nghttp2-${{env.nghttp2_version}}/build
         run: cmake --build .
 
@@ -1307,17 +1211,11 @@ jobs:
 
       - name: Configure libffi
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libffi
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build libffi
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libffi/build
         run: ninja
 
@@ -1339,17 +1237,11 @@ jobs:
 
       - name: Configure dlfcn-win32
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/dlfcn-win32-${{env.dlfcn_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build dlfcn-win32
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/dlfcn-win32-${{env.dlfcn_version}}/build
         run: cmake --build .
 
@@ -1371,17 +1263,11 @@ jobs:
 
       - name: Configure libpsl
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libpsl-${{env.libpsl_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build libpsl
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libpsl-${{env.libpsl_version}}/build
         run: ninja
 
@@ -1403,17 +1289,11 @@ jobs:
 
       - name: Configure orc
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/orc-${{env.orc_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build orc
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/orc-${{env.orc_version}}/build
         run: ninja
 
@@ -1435,8 +1315,6 @@ jobs:
 
       - name: Build SQLite
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/sqlite-autoconf-${{env.sqlite3_version}}
         run: |
           cl -DSQLITE_API="__declspec(dllexport)" -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA sqlite3.c -link -dll -out:sqlite3.dll
@@ -1480,17 +1358,11 @@ jobs:
 
       - name: Configure proxy-libintl
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
 
       - name: Build proxy-libintl
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
         run: ninja
 
@@ -1512,17 +1384,11 @@ jobs:
 
       - name: Configure GLib
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/glib-${{env.glib_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dc_link_args=-L${{env.prefix_path_backslash}}\lib -Dcpp_link_args=-L${{env.prefix_path_backslash}}\lib -Dtests=false build
 
       - name: Build GLib
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/glib-${{env.glib_version}}/build
         run: ninja
 
@@ -1544,17 +1410,11 @@ jobs:
 
       - name: Configure libsoup
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libsoup-${{env.libsoup_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=false -Dvapi=disabled -Dgssapi=disabled -Dintrospection=disabled -Dsysprof=disabled -Dtls_check=false build
 
       - name: Build libsoup
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libsoup-${{env.libsoup_version}}/build
         run: ninja
 
@@ -1576,17 +1436,11 @@ jobs:
 
       - name: Configure glib-networking
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/glib-networking-${{env.glib_networking_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgnutls=${{env.glib_networking_gnutls}} -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
 
       - name: Build glib-networking
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/glib-networking-${{env.glib_networking_version}}/build
         run: ninja
 
@@ -1608,17 +1462,11 @@ jobs:
 
       - name: Configure freetype (boostrap)
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/freetype-${{env.freetype_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build freetype (boostrap)
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --build .
 
@@ -1645,17 +1493,11 @@ jobs:
 
       - name: Configure harfbuzz
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dcpp_std=c++17 -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
 
       - name: Build harfbuzz
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}/build
         run: ninja
 
@@ -1677,17 +1519,11 @@ jobs:
 
       - name: Configure freetype
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/freetype-${{env.freetype_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build freetype
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --build .
 
@@ -1719,18 +1555,12 @@ jobs:
 
       - name: Configure jasper
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build
         run: |
           cmake --log-level="${{env.cmake_loglevel}}" -S jasper-${{env.jasper_version}} -B jasper-${{env.jasper_version}}-build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DJAS_ENABLE_JP2_CODEC=ON -DJAS_ENABLE_JPC_CODEC=ON -DJAS_ENABLE_JPG_CODEC=ON -DJAS_ENABLE_LIBJPEG=ON -DJAS_ENABLE_OPENGL=ON -DJAS_INCLUDE_BMP_CODEC=ON -DJAS_INCLUDE_JP2_CODEC=ON -DJAS_INCLUDE_JPC_CODEC=ON -DJAS_INCLUDE_JPG_CODEC=ON
 
       - name: Build jasper
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/jasper-${{env.jasper_version}}-build
         run: cmake --build .
 
@@ -1752,17 +1582,11 @@ jobs:
 
       - name: Configure tiff
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/tiff-${{env.tiff_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -Djpeg=ON -Dtiff-static=OFF -Dtiff-docs=OFF -Dtiff-tests=OFF
 
       - name: Build tiff
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/tiff-${{env.tiff_version}}/build
         run: cmake --build .
 
@@ -1784,17 +1608,11 @@ jobs:
 
       - name: Configure libwebp
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libwebp-${{env.libwebp_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DWEBP_LINK_STATIC=OFF -DWEBP_UNICODE=ON -DWEBP_USE_THREAD=ON
 
       - name: Build libwebp
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libwebp-${{env.libwebp_version}}/build
         run: cmake --build .
 
@@ -1822,17 +1640,11 @@ jobs:
 
       - name: Configure libogg
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libogg-${{env.libogg_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DINSTALL_DOCS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libogg
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libogg-${{env.libogg_version}}/build
         run: cmake --build .
 
@@ -1854,17 +1666,11 @@ jobs:
 
       - name: Configure libvorbis
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libvorbis-${{env.libvorbis_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libvorbis
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libvorbis-${{env.libvorbis_version}}/build
         run: cmake --build .
 
@@ -1886,17 +1692,11 @@ jobs:
 
       - name: Configure flac
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/flac-${{env.flac_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_DOCS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_MANPAGES=OFF -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF
 
       - name: Build flac
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --build .
 
@@ -1918,17 +1718,11 @@ jobs:
 
       - name: Configure wavpack
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/wavpack-${{env.wavpack_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DWAVPACK_BUILD_DOCS=OFF -DWAVPACK_BUILD_PROGRAMS=OFF -DWAVPACK_ENABLE_ASM=OFF -DWAVPACK_ENABLE_LEGACY=OFF -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF
 
       - name: Build wavpack
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/wavpack-${{env.wavpack_version}}/build
         run: cmake --build .
 
@@ -1960,17 +1754,11 @@ jobs:
 
       - name: Configure opus
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/opus-${{env.opus_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build opus
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/opus-${{env.opus_version}}/build
         run: cmake --build .
 
@@ -1997,17 +1785,11 @@ jobs:
 
       - name: Configure opusfile
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/opusfile-${{env.opusfile_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build opusfile
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/opusfile-${{env.opusfile_version}}/build
         run: cmake --build .
 
@@ -2034,17 +1816,11 @@ jobs:
 
       - name: Configure speex
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/speex-Speex-${{env.speex_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build speex
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/speex-Speex-${{env.speex_version}}/build
         run: cmake --build .
 
@@ -2073,17 +1849,11 @@ jobs:
 
       - name: Configure mpg123
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/mpg123-${{env.mpg123_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S ports/cmake -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_LIBOUT123=OFF
 
       - name: Build mpg123
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/mpg123-${{env.mpg123_version}}/build
         run: cmake --build .
 
@@ -2124,16 +1894,12 @@ jobs:
       - name: Build lame (x86)
         if: matrix.arch == 'x86'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
 
       - name: Build lame (x86_64)
         if: matrix.arch == 'x86_64' || matrix.arch == 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/lame-${{env.lame_version}}
         run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
 
@@ -2196,16 +1962,12 @@ jobs:
       - name: Build twolame
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: msbuild libtwolame_dll.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
 
       - name: Install twolame
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
@@ -2246,17 +2008,11 @@ jobs:
 
       - name: Configure musepack
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/musepack_src_r${{env.musepack_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DSHARED=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build musepack
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/musepack_src_r${{env.musepack_version}}/build
         run: cmake --build .
 
@@ -2306,15 +2062,11 @@ jobs:
 
       - name: Configure libopenmpt
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libopenmpt
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
       - name: Build libopenmpt
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libopenmpt/build
         run: cmake --build .
 
@@ -2341,15 +2093,11 @@ jobs:
 
       - name: Configure libgme
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libgme-${{env.libgme_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libgme
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libgme-${{env.libgme_version}}/build
         run: cmake --build .
 
@@ -2373,15 +2121,11 @@ jobs:
 
       - name: Configure faad2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/faad2-${{env.faad2_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
       - name: Build faad2
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/faad2-${{env.faad2_version}}/build
         run: cmake --build .
 
@@ -2412,24 +2156,18 @@ jobs:
       - name: Upgrade faac project
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: start /w devenv.exe faac.sln /upgrade
 
       - name: Build faac
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: msbuild faac.sln /p:Configuration=${{env.buildtype}} /p:Platform=${{env.msbuild_platform}}
 
       - name: Install faac headers
         if: matrix.arch != 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/faac-faac-${{env.faac_version}}
         run: copy include\*.h ${{env.prefix_path_backslash}}\include\
 
@@ -2470,17 +2208,11 @@ jobs:
 
       - name: Configure fdk-aac
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/fdk-aac-${{env.fdk_aac_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF
 
       - name: Build fdk-aac
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/fdk-aac-${{env.fdk_aac_version}}/build
         run: cmake --build .
 
@@ -2502,17 +2234,11 @@ jobs:
 
       - name: Configure utfcpp
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/utfcpp-${{env.utfcpp_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build utfcpp
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/utfcpp-${{env.utfcpp_version}}/build
         run: cmake --build .
 
@@ -2534,17 +2260,11 @@ jobs:
 
       - name: Configure TagLib
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/taglib-${{env.taglib_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build TagLib
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/taglib-${{env.taglib_version}}/build
         run: cmake --build .
 
@@ -2576,17 +2296,11 @@ jobs:
 
       - name: Configure libbs2b
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libbs2b-${{env.libbs2b_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON
 
       - name: Build libbs2b
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libbs2b-${{env.libbs2b_version}}/build
         run: cmake --build .
 
@@ -2619,17 +2333,11 @@ jobs:
 
       - name: Configure libebur128
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/libebur128-${{env.libebur128_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build libebur128
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --build .
 
@@ -2703,18 +2411,12 @@ jobs:
       - name: Configure FFTW (ARM64)
         if: matrix.arch == 'arm64'
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/fftw-${{env.fftw_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build FFTW (ARM64)
         if: matrix.arch == 'arm64'
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/fftw-${{env.fftw_version}}/build
         run: cmake --build .
 
@@ -2739,17 +2441,11 @@ jobs:
 
       - name: Configure ffmpeg
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/ffmpeg
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Dgpl=enabled -Diconv=disabled build
 
       - name: Build ffmpeg
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/ffmpeg/build
         run: ninja
 
@@ -2771,17 +2467,11 @@ jobs:
 
       - name: Configure Chromaprint
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/chromaprint-${{env.chromaprint_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DFFTW3_DIR=${{env.prefix_path_backslash}} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build Chromaprint
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/chromaprint-${{env.chromaprint_version}}/build
         run: cmake --build .
 
@@ -2809,10 +2499,6 @@ jobs:
 
       - name: Configure GStreamer
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gstreamer-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2836,8 +2522,6 @@ jobs:
 
       - name: Build GStreamer
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/gstreamer-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2859,10 +2543,6 @@ jobs:
 
       - name: Configure gst-plugins-base
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-base-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2904,8 +2584,6 @@ jobs:
 
       - name: Build gst-plugins-base
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/gst-plugins-base-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -2927,10 +2605,6 @@ jobs:
 
       - name: Configure gst-plugins-good
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -2980,8 +2654,6 @@ jobs:
 
       - name: Build gst-plugins-good
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/gst-plugins-good-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -3010,10 +2682,6 @@ jobs:
 
       - name: Configure gst-plugins-bad
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -3061,8 +2729,6 @@ jobs:
 
       - name: Build gst-plugins-bad
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -3083,10 +2749,6 @@ jobs:
         run: tar -xf ../downloads/gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz
 
       - name: Configure gst-plugins-ugly
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}
         run: >
           meson setup
@@ -3107,8 +2769,6 @@ jobs:
           build
 
       - name: Build gst-plugins-ugly
-        env:
-          CL: -MP
         working-directory: build/gst-plugins-ugly-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -3129,18 +2789,11 @@ jobs:
 
       - name: Configure gst-libav
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
-          CFLAGS: -I${{env.prefix_path_forwardslash}}/include
         working-directory: build/gst-libav-${{env.gstreamer_version}}
         run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddoc=disabled build
 
       - name: Build gst-libav
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/gst-libav-${{env.gstreamer_version}}/build
         run: ninja
 
@@ -3170,7 +2823,7 @@ jobs:
         if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: c:/build/gst-plugins-rs
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path="" --wrap-mode=nodownload --auto-features=disabled -Dspotify=enabled build
 
       - name: Build gst-plugins-rs
         if: matrix.arch == 'x86_64'
@@ -3208,10 +2861,6 @@ jobs:
 
       - name: Configure qtbase
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qtbase-everywhere-src-${{env.qt_version}}
         run: >
           cmake -S . -B build
@@ -3265,8 +2914,6 @@ jobs:
 
       - name: Build qtbase
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/qtbase-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
@@ -3288,10 +2935,6 @@ jobs:
 
       - name: Configure qttools
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qttools-everywhere-src-${{env.qt_version}}
         run: |
           mkdir build
@@ -3300,8 +2943,6 @@ jobs:
 
       - name: Build qttools
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/qttools-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
@@ -3323,10 +2964,6 @@ jobs:
 
       - name: Configure qtimageformats
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qtimageformats-everywhere-src-${{env.qt_version}}
         run: >
           cmake -S . -B build
@@ -3343,8 +2980,6 @@ jobs:
 
       - name: Build qtimageformats
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/qtimageformats-everywhere-src-${{env.qt_version}}/build
         run: cmake --build .
 
@@ -3361,17 +2996,11 @@ jobs:
 
       - name: Configure qtsparkle
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/qtsparkle-git
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH="${{env.prefix_path_backslash}}\lib\cmake" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_forwardslash}}"
 
       - name: Build qtsparkle
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/qtsparkle-git/build
         run: cmake --build .
 
@@ -3392,16 +3021,10 @@ jobs:
         run: tar -xf ../downloads/kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz
 
       - name: Configure KDSingleApplication
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DKDSingleApplication_QT6=ON
 
       - name: Build KDSingleApplication
-        env:
-          CL: -MP
         working-directory: build/kdsingleapplication-${{env.kdsingleapplication_version}}/build
         run: cmake --build .
 
@@ -3455,17 +3078,11 @@ jobs:
 
       - name: Configure rapidjson
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/rapidjson
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF -DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF -DCMAKE_INSTALL_DIR="${{env.prefix_path_backslash}}\lib\cmake\RapidJSON" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build rapidjson
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/rapidjson/build
         run: cmake --build .
 
@@ -3487,17 +3104,11 @@ jobs:
 
       - name: Configure pe-parse
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pe-parse-${{env.pe_parse_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_COMMAND_LINE_TOOLS=OFF
 
       - name: Build pe-parse
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pe-parse-${{env.pe_parse_version}}/build
         run: cmake --build .
 
@@ -3514,17 +3125,11 @@ jobs:
 
       - name: Configure pe-util
         shell: cmd
-        env:
-          CL: -MP
-          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
-          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/pe-util
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build pe-util
         shell: cmd
-        env:
-          CL: -MP
         working-directory: build/pe-util/build
         run: cmake --build .
 
