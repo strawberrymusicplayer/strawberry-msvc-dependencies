@@ -10,6 +10,8 @@ env:
 
   pkgconf_version: '2.5.1'
 
+  proxy_libintl_version: '0.5'
+
   getopt_win_version: '2.42.0'
 
   zlib_version: '1.3.1'
@@ -55,8 +57,6 @@ env:
   sqlite3_version: '3510200'
 
   glib_version: '2.87.2'
-
-  proxy_libintl_version: '0.5'
 
   libsoup_version: '3.6.5'
 
@@ -480,6 +480,32 @@ jobs:
         shell: cmd
         working-directory: build/yasm-${{env.yasm_version}}/build
         run: cmake --install .
+
+
+      - name: Download proxy-libintl
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/frida/proxy-libintl/archive/refs/tags/${{env.proxy_libintl_version}}/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
+
+      - name: Extract proxy-libintl
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
+
+      - name: Configure proxy-libintl
+        shell: cmd
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
+
+      - name: Build proxy-libintl
+        shell: cmd
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
+        run: ninja
+
+      - name: Install proxy-libintl
+        shell: cmd
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
+        run: ninja install
 
 
       - name: Download getopt-win
@@ -1344,32 +1370,6 @@ jobs:
           echo "Libs: -L\${libdir} -lsqlite3" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "Libs.private: -lz -ldl" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
-
-
-      - name: Download proxy-libintl
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/frida/proxy-libintl/archive/refs/tags/${{env.proxy_libintl_version}}/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
-
-      - name: Extract proxy-libintl
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
-
-      - name: Configure proxy-libintl
-        shell: cmd
-        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
-
-      - name: Build proxy-libintl
-        shell: cmd
-        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
-        run: ninja
-
-      - name: Install proxy-libintl
-        shell: cmd
-        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
-        run: ninja install
 
 
       - name: Download GLib
