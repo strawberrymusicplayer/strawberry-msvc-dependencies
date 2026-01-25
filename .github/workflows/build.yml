@@ -1712,6 +1712,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/jasper-${{env.jasper_version}}.tar.gz
 
+      - name: Patch jasper
+        shell: bash
+        working-directory: build/jasper-${{env.jasper_version}}
+        run: sed -i '/include(InstallRequiredSystemLibraries)/d' CMakeLists.txt
+
       - name: Configure jasper
         shell: cmd
         env:
