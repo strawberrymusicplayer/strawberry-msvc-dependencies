@@ -56,6 +56,8 @@ env:
 
   glib_version: '2.87.2'
 
+  proxy_libintl_version: '0.5'
+
   libsoup_version: '3.6.5'
 
   glib_networking_version: '2.80.1'
@@ -1466,6 +1468,38 @@ jobs:
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
 
 
+      - name: Download proxy-libintl
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/frida/proxy-libintl/archive/refs/tags/${{env.proxy_libintl_version}}/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
+
+      - name: Extract proxy-libintl
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/proxy-libintl-${{env.proxy_libintl_version}}.tar.gz
+
+      - name: Configure proxy-libintl
+        shell: cmd
+        env:
+          CL: -MP
+          PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
+          PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
+
+      - name: Build proxy-libintl
+        shell: cmd
+        env:
+          CL: -MP
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
+        run: ninja
+
+      - name: Install proxy-libintl
+        shell: cmd
+        working-directory: build/proxy-libintl-${{env.proxy_libintl_version}}/build
+        run: ninja install
+
+
       - name: Download GLib
         shell: bash
         working-directory: downloads
@@ -1483,7 +1517,7 @@ jobs:
           PKG_CONFIG_EXECUTABLE: ${{env.prefix_path_backslash}}\bin\pkgconf.exe
           PKG_CONFIG_PATH: ${{env.prefix_path_backslash}}\lib\pkgconfig
         working-directory: build/glib-${{env.glib_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=false build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dc_link_args=-L${{env.prefix_path_backslash}}\lib -Dcpp_link_args=-L${{env.prefix_path_backslash}}\lib -Dtests=false build
 
       - name: Build GLib
         shell: cmd
