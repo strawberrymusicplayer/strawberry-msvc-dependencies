@@ -118,7 +118,7 @@ env:
 
   chromaprint_version: '1.6.0'
 
-  gstreamer_version: '1.26.10'
+  gstreamer_version: '1.28.0'
 
   gstreamer_plugins_rs_version: '0.14.4'
 
@@ -2676,9 +2676,7 @@ jobs:
       - name: Patch gst-plugins-bad
         shell: bash
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
-        run: |
-          patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
-          patch -p1 < ../../patches/gst-plugins-bad-wasapi2.patch
+        run: patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd
