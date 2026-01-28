@@ -122,7 +122,7 @@ env:
 
   gstreamer_plugins_rs_version: '0.14.4'
 
-  qt_version: '6.10.1'
+  qt_version: '6.10.2'
 
   kdsingleapplication_version: '1.2.0'
 
