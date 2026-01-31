@@ -593,6 +593,11 @@ jobs:
         shell: bash
         run: rm ${{env.prefix_path_unix}}/lib/zlibstatic${{env.lib_postfix}}.lib
 
+      - name: Check zlib
+        shell: bash
+        run: pkg-config zlib --libs --cflags
+
+
 
       - name: Create ShiftMediaProject build directory
         shell: bash
@@ -638,6 +643,11 @@ jobs:
           echo "Version: ${{env.gmp_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
           echo "Libs: -L\${libdir} -lgmp${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
+
+      - name: Check gmp
+        if: matrix.arch != 'arm64' && false
+        shell: cmd
+        run: pkg-config gmp --libs --cflags
 
 
       - name: Download nettle
@@ -697,6 +707,13 @@ jobs:
           echo "Version: ${{env.hogweed_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
           echo "Libs: -L\${libdir} -lhogweed${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
+
+      - name: Check nettle
+        if: matrix.arch != 'arm64' && false
+        shell: cmd
+        run: |
+          pkg-config nettle --libs --cflags
+          pkg-config hogweed --libs --cflags
 
 
       - name: Download GnuTLS
@@ -788,6 +805,11 @@ jobs:
           echo "Libs: -L\${libdir} -lgnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
+      - name: Check gnutls
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        run: pkg-config gnutls --libs --cflags
+
 
       - name: Download openssl
         shell: bash
@@ -832,6 +854,13 @@ jobs:
         working-directory: build/openssl-${{env.openssl_version}}
         run: copy exporters\*.pc ${{env.prefix_path_backslash}}\lib\pkgconfig\
 
+      - name: Check openssl
+        shell: cmd
+        run: |
+          pkg-config libcrypto --libs --cflags
+          pkg-config libssl --libs --cflags
+          pkg-config openssl --libs --cflags
+
 
       - name: Download libpng
         shell: bash
@@ -863,6 +892,10 @@ jobs:
         working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --install .
 
+      - name: Check libpng
+        shell: cmd
+        run: pkg-config libpng --libs --cflags
+
 
       - name: Download libjpeg-turbo
         shell: bash
@@ -889,6 +922,10 @@ jobs:
         working-directory: build/libjpeg-turbo-${{env.libjpeg_turbo_version}}/build
         run: cmake --install .
 
+      - name: Check libjpeg
+        shell: cmd
+        run: pkg-config libjpeg --libs --cflags
+
 
       - name: Download pcre2
         shell: bash
@@ -914,6 +951,14 @@ jobs:
         shell: cmd
         working-directory: build/pcre2-${{env.pcre2_version}}/build
         run: cmake --install .
+
+      - name: Check pcre2
+        shell: cmd
+        run: |
+          pkg-config libpcre2-posix --libs --cflags
+          pkg-config libpcre2-8 --libs --cflags
+          pkg-config libpcre2-16 --libs --cflags
+          pkg-config libpcre2-32 --libs --cflags
 
 
       - name: Download bzip2
@@ -946,6 +991,10 @@ jobs:
         working-directory: build/bzip2-${{env.bzip2_version}}/build
         run: cmake --install .
 
+      - name: Check bzip2
+        shell: cmd
+        run: pkg-config bzip2 --libs --cflags
+
 
       - name: Download xz
         shell: bash
@@ -972,6 +1021,10 @@ jobs:
         working-directory: build/xz-${{env.xz_version}}/build
         run: cmake --install .
 
+      - name: Check xz
+        shell: cmd
+        run: pkg-config liblzma --libs --cflags
+
 
       - name: Download brotli
         shell: bash
@@ -997,6 +1050,12 @@ jobs:
         shell: cmd
         working-directory: build/brotli-${{env.brotli_version}}/build_dir
         run: cmake --install .
+
+      - name: Check brotli
+        shell: cmd
+        run: |
+          pkg-config libbrotlidec --libs --cflags
+          pkg-config libbrotlienc --libs --cflags
 
 
       - name: Cleanup build directory
@@ -1083,12 +1142,12 @@ jobs:
           echo "${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc:"
           cat ${{env.prefix_path_unix}}/lib/pkgconfig/icu-io.pc
 
-      - name: Verify icu
+      - name: Check icu
         shell: cmd
         run: |
-          pkg-config icu-uc --libs
-          pkg-config icu-i18n --libs
-          pkg-config icu-io --libs
+          pkg-config icu-uc --libs --cflags
+          pkg-config icu-i18n --libs --cflags
+          pkg-config icu-io --libs --cflags
 
 
       - name: Download pixman
@@ -1121,6 +1180,11 @@ jobs:
         working-directory: build/pixman-${{env.pixman_version}}/build
         run: ninja install
 
+      - name: Check pixman
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        run: pkg-config pixman-1 --libs --cflags
+
 
       - name: Download expat
         shell: bash
@@ -1146,6 +1210,10 @@ jobs:
         shell: cmd
         working-directory: build/expat-${{env.expat_version}}/build
         run: cmake --install .
+
+      - name: Check expat
+        shell: cmd
+        run: pkg-config expat --libs --cflags
 
 
       - name: Download Boost
@@ -1205,6 +1273,10 @@ jobs:
         shell: bash
         run: cp ${{env.prefix_path_unix}}/lib/libxml2d.lib ${{env.prefix_path_unix}}/lib/libxml2.lib
 
+      - name: Check libxml2
+        shell: cmd
+        run: pkg-config libxml-2.0 --libs --cflags
+
 
       - name: Download nghttp2
         shell: bash
@@ -1231,6 +1303,10 @@ jobs:
         working-directory: build/nghttp2-${{env.nghttp2_version}}/build
         run: cmake --install .
 
+      - name: Check nghttp2
+        shell: cmd
+        run: pkg-config libnghttp2 --libs --cflags
+
 
       - name: Download libffi
         shell: bash
@@ -1251,6 +1327,10 @@ jobs:
         shell: cmd
         working-directory: build/libffi/build
         run: ninja install
+
+      - name: Check libffi
+        shell: cmd
+        run: pkg-config libffi --libs --cflags
 
 
       - name: Download dlfcn-win32
@@ -1303,6 +1383,10 @@ jobs:
         shell: cmd
         working-directory: build/libpsl-${{env.libpsl_version}}/build
         run: ninja install
+
+      - name: Check libpsl
+        shell: cmd
+        run: pkg-config libpsl --libs --cflags
 
 
       - name: Download orc
@@ -1373,6 +1457,10 @@ jobs:
           echo "Libs.private: -lz -ldl" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/sqlite3.pc
 
+      - name: Check SQLite
+        shell: cmd
+        run: pkg-config sqlite3 --libs --cflags
+
 
       - name: Download GLib
         shell: bash
@@ -1399,6 +1487,13 @@ jobs:
         working-directory: build/glib-${{env.glib_version}}/build
         run: ninja install
 
+      - name: Check GLib
+        shell: cmd
+        run: |
+          pkg-config glib-2.0 --libs --cflags
+          pkg-config gobject-2.0 --libs --cflags
+          pkg-config gio-2.0 --libs --cflags
+
 
       - name: Download libsoup
         shell: bash
@@ -1424,6 +1519,10 @@ jobs:
         shell: cmd
         working-directory: build/libsoup-${{env.libsoup_version}}/build
         run: ninja install
+
+      - name: Check libsoup
+        shell: cmd
+        run: pkg-config libsoup-3.0 --libs --cflags
 
 
       - name: Download glib-networking
@@ -1482,6 +1581,10 @@ jobs:
         shell: bash
         run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
 
+      - name: Check freetype
+        shell: cmd
+        run: pkg-config freetype2 --libs --cflags
+
 
       - name: Download harfbuzz
         shell: bash
@@ -1507,6 +1610,12 @@ jobs:
         shell: cmd
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}/build
         run: ninja install
+
+      - name: Check harfbuzz
+        shell: cmd
+        run: |
+          pkg-config harfbuzz --libs --cflags
+          pkg-config harfbuzz-icu --libs --cflags
 
 
       - name: Delete freetype bootstrap
@@ -1538,6 +1647,10 @@ jobs:
         if: env.buildtype == 'debug'
         shell: bash
         run: cp ${{env.prefix_path_unix}}/lib/freetyped.lib ${{env.prefix_path_unix}}/lib/freetype.lib
+
+      - name: Check freetype
+        shell: cmd
+        run: pkg-config freetype2 --libs --cflags
 
 
       - name: Download jasper
@@ -1571,6 +1684,10 @@ jobs:
         working-directory: build/jasper-${{env.jasper_version}}-build
         run: cmake --install .
 
+      - name: Check jasper
+        shell: cmd
+        run: pkg-config jasper --libs --cflags
+
 
       - name: Download tiff
         shell: bash
@@ -1597,6 +1714,10 @@ jobs:
         working-directory: build/tiff-${{env.tiff_version}}/build
         run: cmake --install .
 
+      - name: Check tiff
+        shell: cmd
+        run: pkg-config libtiff-4 --libs --cflags
+
 
       - name: Download libwebp
         shell: bash
@@ -1622,6 +1743,10 @@ jobs:
         shell: cmd
         working-directory: build/libwebp-${{env.libwebp_version}}/build
         run: cmake --install .
+
+      - name: Check libwebp
+        shell: cmd
+        run: pkg-config libwebp --libs --cflags
 
 
       - name: Cleanup build directory
@@ -1655,6 +1780,10 @@ jobs:
         working-directory: build/libogg-${{env.libogg_version}}/build
         run: cmake --install .
 
+      - name: Check libogg
+        shell: cmd
+        run: pkg-config ogg --libs --cflags
+
 
       - name: Download libvorbis
         shell: bash
@@ -1681,6 +1810,10 @@ jobs:
         working-directory: build/libvorbis-${{env.libvorbis_version}}/build
         run: cmake --install .
 
+      - name: Check libvorbis
+        shell: cmd
+        run: pkg-config vorbis --libs --cflags
+
 
       - name: Download flac
         shell: bash
@@ -1706,6 +1839,10 @@ jobs:
         shell: cmd
         working-directory: build/flac-${{env.flac_version}}/build
         run: cmake --install .
+
+      - name: Check flac
+        shell: cmd
+        run: pkg-config flac --libs --cflags
 
 
       - name: Download wavpack
@@ -1738,6 +1875,10 @@ jobs:
           copy ${{env.prefix_path_backslash}}\lib\wavpackdll.lib ${{env.prefix_path_backslash}}\lib\wavpack.lib
           copy ${{env.prefix_path_backslash}}\bin\wavpackdll.dll ${{env.prefix_path_backslash}}\bin\wavpack.dll
 
+      - name: Check wavpack
+        shell: cmd
+        run: pkg-config wavpack --libs --cflags
+
 
       - name: Download opus
         shell: bash
@@ -1768,6 +1909,10 @@ jobs:
         shell: cmd
         working-directory: build/opus-${{env.opus_version}}/build
         run: cmake --install .
+
+      - name: Check opus
+        shell: cmd
+        run: pkg-config opus --libs --cflags
 
 
       - name: Download opusfile
@@ -1838,6 +1983,10 @@ jobs:
           copy ${{env.prefix_path_backslash}}\lib\libspeexd.lib ${{env.prefix_path_backslash}}\lib\libspeex.lib
           copy ${{env.prefix_path_backslash}}\bin\libspeexd.dll ${{env.prefix_path_backslash}}\bin\libspeex.dll
 
+      - name: Check speex
+        shell: cmd
+        run: pkg-config speex --libs --cflags
+
 
       - name: Download mpg123
         shell: bash
@@ -1863,6 +2012,10 @@ jobs:
         shell: cmd
         working-directory: build/mpg123-${{env.mpg123_version}}/build
         run: cmake --install .
+
+      - name: Check mpg123
+        shell: cmd
+        run: pkg-config libmpg123 --libs --cflags
 
 
       - name: Download lame
@@ -1909,24 +2062,32 @@ jobs:
         shell: cmd
         working-directory: build/lame-${{env.lame_version}}
         run: |
-          copy include\*.h ${{env.prefix_path_backslash}}\include\
-          copy output\libmp3lame*.lib ${{env.prefix_path_backslash}}\lib\
-          copy output\libmp3lame*.dll ${{env.prefix_path_backslash}}\bin\
+          mkdir ${{env.prefix_path_backslash}}\include\lame
+          copy include\lame.h ${{env.prefix_path_backslash}}\include\lame\
+          copy output\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\
+          copy output\libmp3lame.dll ${{env.prefix_path_backslash}}\bin\
 
-      - name: Create mp3lame.pc
+      - name: Create lame.pc
         shell: bash
         run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Name: lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Description: encoder that converts audio to the MP3 file format." >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "URL: https://lame.sourceforge.io/" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Version: ${{env.lame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Libs: -L\${libdir} -lmp3lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/mp3lame.pc
+          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "Name: lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "Description: encoder that converts audio to the MP3 file format." >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "URL: https://lame.sourceforge.io/" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "Version: ${{env.lame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "Libs: -L\${libdir} -lmp3lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc
+          cp ${{env.prefix_path_unix}}/lib/pkgconfig/lame.pc ${{env.prefix_path_unix}}/lib/pkgconfig/libmp3lame.pc
+
+      - name: Check lame
+        shell: cmd
+        run: |
+          pkg-config lame --libs --cflags
+          pkg-config libmp3lame --libs --cflags
 
 
       - name: Download twolame
@@ -1991,6 +2152,11 @@ jobs:
           echo "Version: ${{env.twolame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Libs: -L\${libdir} -ltwolame_dll" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+
+      - name: Check twolame
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        run: pkg-config twolame --libs --cflags
 
 
       - name: Download musepack
@@ -2077,6 +2243,10 @@ jobs:
         working-directory: build/libopenmpt/build
         run: cmake --install .
 
+      - name: Check libopenmpt
+        shell: cmd
+        run: pkg-config libopenmpt --libs --cflags
+
 
       - name: Download libgme
         shell: bash
@@ -2108,6 +2278,10 @@ jobs:
         working-directory: build/libgme-${{env.libgme_version}}/build
         run: cmake --install .
 
+      - name: Check libgme
+        shell: cmd
+        run: pkg-config libgme --libs --cflags
+
 
       - name: Download faad2
         shell: bash
@@ -2135,6 +2309,10 @@ jobs:
         shell: cmd
         working-directory: build/faad2-${{env.faad2_version}}/build
         run: cmake --install . --config ${{env.cmake_buildtype}}
+
+      - name: Check faad2
+        shell: cmd
+        run: pkg-config faad2 --libs --cflags
 
 
       - name: Download faac
@@ -2197,6 +2375,11 @@ jobs:
           echo "Libs: -L\${libdir} -lfaac" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/faac.pc
 
+      - name: Check faac
+        if: matrix.arch != 'arm64'
+        shell: cmd
+        run: pkg-config faac --libs --cflags
+
 
       - name: Download fdk-aac
         shell: bash
@@ -2222,6 +2405,10 @@ jobs:
         shell: cmd
         working-directory: build/fdk-aac-${{env.fdk_aac_version}}/build
         run: cmake --install .
+
+      - name: Check fdk-aac
+        shell: cmd
+        run: pkg-config fdk-aac --libs --cflags
 
 
       - name: Download utfcpp
@@ -2275,6 +2462,10 @@ jobs:
         working-directory: build/taglib-${{env.taglib_version}}/build
         run: cmake --install .
 
+      - name: Check TagLib
+        shell: cmd
+        run: pkg-config taglib --libs --cflags
+
 
       - name: Download libbs2b
         shell: bash
@@ -2310,6 +2501,10 @@ jobs:
         shell: cmd
         working-directory: build/libbs2b-${{env.libbs2b_version}}/build
         run: cmake --install .
+
+      - name: Check libbs2b
+        shell: cmd
+        run: pkg-config libbs2b --libs --cflags
 
 
       - name: Download libebur128
@@ -2347,6 +2542,10 @@ jobs:
         shell: cmd
         working-directory: build/libebur128-${{env.libebur128_version}}/build
         run: cmake --install .
+
+      - name: Check libebur128
+        shell: cmd
+        run: pkg-config libebur128 --libs --cflags
 
 
       - name: Download FFTW (x86)
@@ -2428,6 +2627,10 @@ jobs:
         working-directory: build/fftw-${{env.fftw_version}}/build
         run: cmake --install .
 
+      - name: Check fftw
+        shell: cmd
+        run: pkg-config fftw3 --libs --cflags
+
 
       - name: Download ffmpeg
         shell: bash
@@ -2482,6 +2685,10 @@ jobs:
         working-directory: build/chromaprint-${{env.chromaprint_version}}/build
         run: cmake --install .
 
+      - name: Check Chromaprint
+        shell: cmd
+        run: pkg-config libchromaprint --libs --cflags
+
 
       - name: Cleanup build directory
         shell: bash
@@ -2531,6 +2738,12 @@ jobs:
         shell: cmd
         working-directory: build/gstreamer-${{env.gstreamer_version}}/build
         run: ninja install
+
+      - name: Check GStreamer
+        shell: cmd
+        run: |
+          pkg-config gstreamer-1.0 --libs --cflags
+          pkg-config gstreamer-base-1.0 --libs --cflags
 
 
       - name: Download gst-plugins-base
