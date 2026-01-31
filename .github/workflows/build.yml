@@ -2888,11 +2888,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
 
-      - name: Patch gst-plugins-bad
-        shell: bash
-        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
-        run: patch -p1 < ../../patches/gst-plugins-bad-meson-dependency.patch
-
       - name: Configure gst-plugins-bad
         shell: cmd
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
