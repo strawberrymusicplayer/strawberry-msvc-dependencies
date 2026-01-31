@@ -2064,8 +2064,8 @@ jobs:
         run: |
           mkdir ${{env.prefix_path_backslash}}\include\lame
           copy include\lame.h ${{env.prefix_path_backslash}}\include\lame\
-          copy output\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\
-          copy output\libmp3lame.dll ${{env.prefix_path_backslash}}\bin\
+          copy output\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\mp3lame.lib
+          copy output\libmp3lame.dll ${{env.prefix_path_backslash}}\bin\mp3lame.dll
 
       - name: Create lame.pc
         shell: bash
@@ -2356,8 +2356,8 @@ jobs:
         shell: cmd
         working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: |
-          copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\libfaac.lib
-          copy bin\${{env.buildtype}}\*.dll ${{env.prefix_path_backslash}}\bin\
+          copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\faac.lib
+          copy bin\${{env.buildtype}}\libfaac_dll.dll ${{env.prefix_path_backslash}}\bin\faac.dll
 
       - name: Create faac.pc
         if: matrix.arch != 'arm64'
