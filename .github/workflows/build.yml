@@ -2134,7 +2134,7 @@ jobs:
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
-          copy lib\*.lib ${{env.prefix_path_backslash}}\lib\
+          copy lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\twolame${{env.lib_postfix}}.lib
           copy lib\*.dll ${{env.prefix_path_backslash}}\bin\
 
       - name: Create twolame.pc
@@ -2150,7 +2150,7 @@ jobs:
           echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "URL: https://www.twolame.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Version: ${{env.twolame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Libs: -L\${libdir} -ltwolame_dll" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
+          echo "Libs: -L\${libdir} -ltwolame${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
 
       - name: Check twolame
