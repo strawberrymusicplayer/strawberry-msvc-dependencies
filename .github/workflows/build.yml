@@ -1873,7 +1873,6 @@ jobs:
           mkdir ${{env.prefix_path_backslash}}\include\wavpack
           copy ${{env.prefix_path_backslash}}\include\wavpack.h ${{env.prefix_path_backslash}}\include\wavpack\
           copy ${{env.prefix_path_backslash}}\lib\wavpackdll.lib ${{env.prefix_path_backslash}}\lib\wavpack.lib
-          copy ${{env.prefix_path_backslash}}\bin\wavpackdll.dll ${{env.prefix_path_backslash}}\bin\wavpack.dll
 
       - name: Check wavpack
         shell: cmd
@@ -2064,8 +2063,9 @@ jobs:
         run: |
           mkdir ${{env.prefix_path_backslash}}\include\lame
           copy include\lame.h ${{env.prefix_path_backslash}}\include\lame\
-          copy output\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\mp3lame.lib
+          copy output\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\
           copy output\libmp3lame.dll ${{env.prefix_path_backslash}}\bin\
+          copy ${{env.prefix_path_backslash}}\lib\libmp3lame.lib ${{env.prefix_path_backslash}}\lib\mp3lame.lib
 
       - name: Create lame.pc
         shell: bash
@@ -2134,8 +2134,9 @@ jobs:
         working-directory: build/twolame-${{env.twolame_version}}/win32
         run: |
           copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
-          copy lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\twolame${{env.lib_postfix}}.lib
+          copy lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\
           copy lib\*.dll ${{env.prefix_path_backslash}}\bin\
+          copy ${{env.prefix_path_backslash}}\lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\twolame${{env.lib_postfix}}.lib
 
       - name: Create twolame.pc
         if: matrix.arch != 'arm64'
@@ -2356,8 +2357,9 @@ jobs:
         shell: cmd
         working-directory: build/faac-faac-${{env.faac_version}}/project/msvc
         run: |
-          copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\faac.lib
+          copy bin\${{env.buildtype}}\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\
           copy bin\${{env.buildtype}}\ ${{env.prefix_path_backslash}}\bin\
+          copy ${{env.prefix_path_backslash}}\lib\libfaac_dll.lib ${{env.prefix_path_backslash}}\lib\faac.lib
 
       - name: Create faac.pc
         if: matrix.arch != 'arm64'
