@@ -314,14 +314,8 @@ function update_package() {
     "protobuf")
       package_version_latest=$(latest_github_release "protocolbuffers" "protobuf")
       ;;
-    "gettext")
-      package_version_latest=$(latest_github_release "mlocati" "gettext-iconv-windows")
-      ;;
     "sparsehash")
       package_version_latest=$(latest_github_release "sparsehash" "sparsehash")
-      ;;
-    "rapidjson")
-      package_version_latest=$(latest_github_release "Tencent" "rapidjson")
       ;;
     "getopt_win")
       package_version_latest=$(latest_github_release "ludvikjerabek" "getopt-win")
