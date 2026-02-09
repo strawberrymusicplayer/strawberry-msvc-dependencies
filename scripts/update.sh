@@ -332,6 +332,9 @@ function update_package() {
     "libwebp")
       package_version_latest=$(curl ${curl_options} 'https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html' | sed -n 's,.*libwebp-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.tar.gz.*,\1,p' | tail -1)
       ;;
+    "pe_parse")
+      package_version_latest=$(latest_github_release "trailofbits" "pe-parse")
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
