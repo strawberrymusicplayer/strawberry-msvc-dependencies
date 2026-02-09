@@ -128,8 +128,6 @@ env:
 
   sparsehash_version: '2.0.4'
 
-  rapidjson_version: '1.1.0'
-
   pe_parse_version: '2.1.1'
 
   max_releases: '6'
@@ -3290,27 +3288,6 @@ jobs:
           echo "URL: https://github.com/sparsehash/sparsehash" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
           echo "Version: ${{env.sparsehash_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/libsparsehash.pc
-
-
-      - name: Download rapidjson
-        shell: bash
-        working-directory: build
-        run: git clone --depth 1 --recurse-submodules https://github.com/Tencent/rapidjson
-
-      - name: Configure rapidjson
-        shell: cmd
-        working-directory: build/rapidjson
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_TESTING=OFF -DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF -DCMAKE_INSTALL_DIR="${{env.prefix_path_backslash}}\lib\cmake\RapidJSON" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-
-      - name: Build rapidjson
-        shell: cmd
-        working-directory: build/rapidjson/build
-        run: cmake --build .
-
-      - name: Install rapidjson
-        shell: cmd
-        working-directory: build/rapidjson/build
-        run: cmake --install .
 
 
       - name: Download pe-parse
