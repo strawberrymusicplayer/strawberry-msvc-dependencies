@@ -175,22 +175,22 @@ jobs:
       matrix:
        include:
          - name: "Windows x86_64 debug"
-           runner: windows-2022
+           runner: windows-2025-vs2026
            arch: x86_64
            buildtype: debug
 
          - name: "Windows x86_64 release"
-           runner: windows-2022
+           runner: windows-2025-vs2026
            arch: x86_64
            buildtype: release
 
          - name: "Windows x86 debug"
-           runner: windows-2022
+           runner: windows-2025-vs2026
            arch: x86
            buildtype: debug
 
          - name: "Windows x86 release"
-           runner: windows-2022
+           runner: windows-2025-vs2026
            arch: x86
            buildtype: release
 
@@ -358,7 +358,7 @@ jobs:
         with:
           arch: ${{matrix.arch}}
           sdk: ${{env.sdk_version}}
-          vsversion: 2022
+          vsversion: 2026
 
 
       - name: Checkout
