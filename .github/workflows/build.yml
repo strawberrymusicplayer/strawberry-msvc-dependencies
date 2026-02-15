@@ -325,13 +325,13 @@ jobs:
         shell: bash
         run: cp /c/strawberry/c/bin/{patch.exe,strip.exe,strings.exe,objdump.exe} ${{env.prefix_path_unix}}/bin
 
-      - name: Delete conflicting libraries
-        shell: bash
-        run: rm -rf /c/{msys64,mingw32,mingw64,clangarm64} /c/strawberry/c "/c/program files/OpenSSL"
+      #- name: Delete conflicting libraries
+        #shell: bash
+        #run: rm -rf /c/{msys64,mingw32,mingw64,clangarm64} /c/strawberry/c "/c/program files/OpenSSL"
 
-      - name: Delete conflicting icu
-        shell: bash
-        run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
+      #- name: Delete conflicting icu
+        #shell: bash
+        #run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
 
 
       - name: Show python path
