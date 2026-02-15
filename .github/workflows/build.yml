@@ -208,6 +208,12 @@ jobs:
 
     steps:
 
+      - name: Show VS installation
+        shell: cmd
+        run: |
+          dir "C:\Program Files\Microsoft Visual Studio"
+          dir "C:\Program Files (x86)\Microsoft Visual Studio"
+
       - name: Set buildtype
         shell: bash
         run: echo "buildtype=$(echo ${{matrix.buildtype}} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
@@ -356,7 +362,6 @@ jobs:
         uses: egor-tensin/cleanup-path@v4
         with:
           dirs: ${{env.prefix_path_backslash}}\bin;C:\Windows;C:\Windows\system32;C:\Program Files\Git\bin;C:\Program Files\CMake\bin;C:\Program Files\GitHub CLI;C:\ProgramData\Chocolatey\bin;C:\Strawberry\perl\bin;C:\hostedtoolcache\windows\Python\${{env.python_version}}\x64;C:\hostedtoolcache\windows\Python\${{env.python_version}}\x64\Scripts;C:\Users\runneradmin\.cargo\bin
-
 
       - name: Setup Python
         uses: actions/setup-python@v6
