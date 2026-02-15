@@ -453,32 +453,27 @@ jobs:
 
       - name: Download yasm
         shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} http://www.tortall.net/projects/yasm/releases/yasm-${{env.yasm_version}}.tar.gz
-
-      - name: Extract yasm
-        shell: bash
         working-directory: build
-        run: tar -xf ../downloads/yasm-${{env.yasm_version}}.tar.gz
+        run: git clone https://github.com/yasm/yasm.git
 
       - name: Patch yasm
         shell: bash
-        working-directory: build/yasm-${{env.yasm_version}}
+        working-directory: build/yasm
         run: patch -p1 < ../../patches/yasm-cmake.patch
 
       - name: Configure yasm
         shell: cmd
-        working-directory: build/yasm-${{env.yasm_version}}
+        working-directory: build/yasm
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}"
 
       - name: Build yasm
         shell: cmd
-        working-directory: build/yasm-${{env.yasm_version}}/build
+        working-directory: build/yasm/build
         run: cmake --build .
 
       - name: Install yasm
         shell: cmd
-        working-directory: build/yasm-${{env.yasm_version}}/build
+        working-directory: build/yasm/build
         run: cmake --install .
 
 
@@ -538,18 +533,17 @@ jobs:
         if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: downloads
-        #run: git clone --recurse-submodules https://github.com/ShiftMediaProject/VSYASM
-        run: |
-          mkdir VSYASM
-          cd VSYASM
-          curl ${{env.curl_options}} https://github.com/ShiftMediaProject/VSYASM/releases/download/1.0/VSYASM.zip
-          7z x VSYASM.zip
+        run: git clone --recurse-submodules https://github.com/ShiftMediaProject/VSYASM
 
       - name: Install VSYASM
         if: matrix.arch != 'arm64'
-        shell: cmd
+        shell: pwsh
         working-directory: downloads\VSYASM
-        run: install_script.bat
+        run: |
+          $vs_where_path = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs_install_path = & "${vs_where_path}" -latest -property installationPath 2>$null
+          $vs_targets_path = "$vs_install_path\MSBuild\Microsoft\VC\v170\BuildCustomizations\"
+          Copy-Item yasm.props,yasm.targets,yasm.xml "$vs_targets_path" -Force
 
 
       - name: Download zlib
@@ -613,6 +607,8 @@ jobs:
       - name: Build GMP
         if: matrix.arch != 'arm64' && false
         shell: cmd
+        env:
+          YASMPATH: ${{env.prefix_path_backslash}}\bin
         working-directory: c:/ShiftMediaProject/build/gmp/SMP
         run: msbuild libgmp.vcxproj -p:Configuration=${{env.buildtype}}DLL
 
@@ -658,6 +654,8 @@ jobs:
       - name: Build nettle
         if: matrix.arch != 'arm64' && false
         shell: cmd
+        env:
+          YASMPATH: ${{env.prefix_path_backslash}}\bin
         working-directory: c:/ShiftMediaProject/build/nettle/SMP
         run: |
           msbuild libnettle.vcxproj -p:Configuration=${{env.buildtype}}DLL
@@ -745,6 +743,8 @@ jobs:
       - name: Build GnuTLS
         if: matrix.arch != 'arm64' && false
         shell: cmd
+        env:
+          YASMPATH: ${{env.prefix_path_backslash}}\bin
         working-directory: c:/ShiftMediaProject/build/gnutls/SMP
         run: msbuild libgnutls.sln -p:Configuration=${{env.buildtype}}DLL -p:ForceImportBeforeCppTargets=c:\ShiftMediaProject\build\gnutls\SMP\inject_zlib.props
 
@@ -768,6 +768,8 @@ jobs:
       - name: Build gnutls dll with static deps
         if: matrix.arch != 'arm64'
         shell: cmd
+        env:
+          YASMPATH: ${{env.prefix_path_backslash}}\bin
         working-directory: c:/ShiftMediaProject/build/gnutls/SMP
         run: |
           msbuild ..\..\gmp\SMP\libgmp.vcxproj -p:Configuration=Release
