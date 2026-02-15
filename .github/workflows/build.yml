@@ -598,14 +598,14 @@ jobs:
 
 
       - name: Download GMP
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/build
           git clone --recurse-submodules -b "${{env.gmp_version}}" https://github.com/ShiftMediaProject/gmp
 
       - name: Build GMP
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           YASMPATH: ${{env.prefix_path_backslash}}\bin
@@ -613,7 +613,7 @@ jobs:
         run: msbuild libgmp.vcxproj -p:Configuration=${{env.buildtype}}DLL
 
       - name: Install GMP
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/msvc
@@ -622,7 +622,7 @@ jobs:
           cp -v bin/${{env.arch_short}}/gmp*.dll ${{env.prefix_path_unix}}/bin/
 
       - name: Create gmp.pc
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
@@ -639,20 +639,20 @@ jobs:
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gmp.pc
 
       - name: Check gmp
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: cmd
         run: pkg-config gmp --libs --cflags
 
 
       - name: Download nettle
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/build
           git clone --recurse-submodules -b "nettle_${{env.nettle_version}}" https://github.com/ShiftMediaProject/nettle
 
       - name: Build nettle
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           YASMPATH: ${{env.prefix_path_backslash}}\bin
@@ -662,7 +662,7 @@ jobs:
           msbuild libhogweed.vcxproj -p:Configuration=${{env.buildtype}}DLL
 
       - name: Install nettle
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/msvc
@@ -671,7 +671,7 @@ jobs:
           cp -v bin/${{env.arch_short}}/*.dll ${{env.prefix_path_unix}}/bin/
 
       - name: Create nettle.pc
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
@@ -688,7 +688,7 @@ jobs:
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/nettle.pc
 
       - name: Create hogweed.pc
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           mkdir -p ${{env.prefix_path_unix}}/lib/pkgconfig
@@ -705,7 +705,7 @@ jobs:
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/hogweed.pc
 
       - name: Check nettle
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: cmd
         run: |
           pkg-config nettle --libs --cflags
@@ -720,7 +720,7 @@ jobs:
           git clone --recurse-submodules -b "${{env.gnutls_version}}" https://github.com/ShiftMediaProject/gnutls
 
       - name: Create inject_zlib.props 
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/build/gnutls/SMP
@@ -736,12 +736,12 @@ jobs:
           echo "</Project>" >>inject_zlib.props
 
       - name: View inject_zlib.props 
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: cat /c/ShiftMediaProject/build/gnutls/SMP/inject_zlib.props
 
       - name: Build GnuTLS
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: cmd
         env:
           YASMPATH: ${{env.prefix_path_backslash}}\bin
@@ -749,7 +749,7 @@ jobs:
         run: msbuild libgnutls.sln -p:Configuration=${{env.buildtype}}DLL -p:ForceImportBeforeCppTargets=c:\ShiftMediaProject\build\gnutls\SMP\inject_zlib.props
 
       - name: Install GnuTLS
-        if: matrix.arch != 'arm64' && false
+        if: matrix.arch != 'arm64'
         shell: bash
         run: |
           cd /c/ShiftMediaProject/msvc
@@ -759,14 +759,14 @@ jobs:
 
 
       - name: Get GnuTLS dependencies
-        if: matrix.arch != 'arm64'
+        if: matrix.arch != 'arm64' && false
         continue-on-error: true
         shell: cmd
         working-directory: c:/ShiftMediaProject/build/gnutls/SMP
         run: project_get_dependencies.bat
 
       - name: Build gnutls dll with static deps
-        if: matrix.arch != 'arm64'
+        if: matrix.arch != 'arm64' && false
         shell: cmd
         env:
           YASMPATH: ${{env.prefix_path_backslash}}\bin
@@ -779,7 +779,7 @@ jobs:
           msbuild libgnutls.vcxproj -p:Configuration=ReleaseDLLStaticDeps
 
       - name: Install gnutls dll with static deps
-        if: matrix.arch != 'arm64'
+        if: matrix.arch != 'arm64' && false
         shell: bash
         run: |
           cd /c/ShiftMediaProject/msvc
@@ -801,8 +801,7 @@ jobs:
           echo "Description: gnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "URL: https://www.gnutls.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Version: ${{env.gnutls_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          #echo "Libs: -L\${libdir} -lgnutls${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
-          echo "Libs: -L\${libdir} -lgnutls" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
+          echo "Libs: -L\${libdir} -lgnutls${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
           echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/gnutls.pc
 
       - name: Check gnutls
