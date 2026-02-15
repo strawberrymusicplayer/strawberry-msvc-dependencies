@@ -334,6 +334,12 @@ jobs:
         run: find "/c/program files (x86)/windows kits/" -type f \( -iname 'icu*.lib' -o -iname 'icu*.h' \) -print -delete
 
 
+      - name: Show python path
+        shell: bash
+        run: |
+          which python
+          ls -la /c/hostedtoolcache/windows/Python
+
       - name: Set python version
         shell: bash
         run: echo "python_version="$(which python | cut -d '/' -f 6)"" >> $GITHUB_ENV
