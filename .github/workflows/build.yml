@@ -376,7 +376,7 @@ jobs:
         with:
           arch: ${{matrix.arch}}
           sdk: ${{env.sdk_version}}
-          vsversion: 2026
+          vsversion: 18
 
 
       - name: Checkout
