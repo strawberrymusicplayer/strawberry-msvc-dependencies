@@ -348,7 +348,8 @@ jobs:
         shell: bash
         run: |
           which python
-          find /c/hostedtoolcache/windows/Python/${{env.python_version}}
+          which pip
+          #find /c/hostedtoolcache/windows/Python/${{env.python_version}}
 
 
       - name: Cleanup PATH
