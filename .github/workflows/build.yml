@@ -14,7 +14,7 @@ env:
 
   getopt_win_version: '2.42.0'
 
-  zlib_version: '1.3.1'
+  zlib_version: '1.3.2'
 
   openssl_version: '3.6.1'
 
@@ -571,19 +571,12 @@ jobs:
         working-directory: build/zlib-${{env.zlib_version}}/build
         run: cmake --install .
 
-      - name: Install zlib pc file
+      - name: Fix zlib for debug
+        if: env.buildtype == 'debug'
         shell: bash
         run: |
-          cp ${{env.prefix_path_unix}}/share/pkgconfig/zlib.pc ${{env.prefix_path_unix}}/lib/pkgconfig/
-          sed -i 's/\-lz/\-lzlib${{env.lib_postfix}}/g' ${{env.prefix_path_unix}}/lib/pkgconfig/zlib.pc
-
-      - name: Copy zlib
-        shell: bash
-        run: cp ${{env.prefix_path_unix}}/lib/zlib${{env.lib_postfix}}.lib ${{env.prefix_path_unix}}/lib/z.lib
-
-      - name: Delete static zlib
-        shell: bash
-        run: rm ${{env.prefix_path_unix}}/lib/zlibstatic${{env.lib_postfix}}.lib
+          sed -i 's/-lz$/-lzd/g' ${{env.prefix_path_unix}}/lib/pkgconfig/zlib.pc
+          cp -v ${{env.prefix_path_unix}}/lib/zd.lib ${{env.prefix_path_unix}}/lib/z.lib
 
       - name: Check zlib
         shell: bash
@@ -825,7 +818,7 @@ jobs:
         if: matrix.arch != 'arm64'
         shell: cmd
         working-directory: build/openssl-${{env.openssl_version}}
-        run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\zlib${{env.lib_postfix}}.lib
+        run: perl Configure ${{env.openssl_platform}} shared zlib no-capieng no-tests --prefix=${{env.prefix_path_backslash}} --libdir=lib --openssldir=${{env.prefix_path_backslash}}\ssl --${{env.buildtype}} --with-zlib-include=${{env.prefix_path_backslash}}\include --with-zlib-lib=${{env.prefix_path_backslash}}\lib\z${{env.lib_postfix}}.lib
 
       - name: Configure openssl
         if: matrix.arch == 'arm64'
