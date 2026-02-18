@@ -106,7 +106,7 @@ env:
 
   utfcpp_version: '4.0.9'
 
-  taglib_version: '2.1.1'
+  taglib_version: '2.2'
 
   libbs2b_version: '3.1.0'
 
