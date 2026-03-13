@@ -885,6 +885,11 @@ jobs:
         working-directory: build/libpng-${{env.libpng_version}}/build
         run: cmake --install .
 
+      - name: Fix libpng pc for debug
+        if: env.buildtype == 'debug'
+        shell: bash
+        run: sed -i 's/\-lpng16$/\-lpng16d/' ${{env.prefix_path_unix}}/lib/pkgconfig/libpng.pc
+
       - name: Check libpng
         shell: cmd
         run: pkg-config libpng --libs --cflags
