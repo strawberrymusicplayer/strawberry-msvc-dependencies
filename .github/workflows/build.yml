@@ -64,7 +64,7 @@ env:
 
   freetype_version: '2.14.2'
 
-  harfbuzz_version: '13.0.1'
+  harfbuzz_version: '13.1.1'
 
   jasper_version: '4.2.9'
 
@@ -1592,7 +1592,7 @@ jobs:
       - name: Configure harfbuzz
         shell: cmd
         working-directory: build/harfbuzz-${{env.harfbuzz_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dcpp_std=c++17 -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix="${{env.prefix_path_backslash}}" --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dcpp_std=c++17 -Dc_args=-I${{env.prefix_path_backslash}}\include -Dcpp_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled -Dicu=enabled -Dcairo=disabled -Dutilities=disabled build
 
       - name: Build harfbuzz
         shell: cmd
