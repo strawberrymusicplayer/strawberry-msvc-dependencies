@@ -260,7 +260,6 @@ jobs:
           echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
           echo "gst_twolame=enabled" >> $GITHUB_ENV
-          echo "gst_faac=enabled" >> $GITHUB_ENV
 
       - name: Set arch variables (x86_64)
         if: matrix.arch == 'x86_64'
@@ -277,7 +276,6 @@ jobs:
           echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
           echo "gst_twolame=enabled" >> $GITHUB_ENV
-          echo "gst_faac=enabled" >> $GITHUB_ENV
 
       - name: Set arch variables (arm64)
         if: matrix.arch == 'arm64'
@@ -294,7 +292,6 @@ jobs:
           echo "boost_architecture=arm" >> $GITHUB_ENV
           echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
           echo "gst_twolame=disabled" >> $GITHUB_ENV
-          echo "gst_faac=disabled" >> $GITHUB_ENV
 
       - name: Set extra version variables
         shell: bash
@@ -2901,7 +2898,7 @@ jobs:
           -Dchromaprint=enabled
           -Ddash=enabled
           -Ddirectsound=enabled
-          -Dfaac=${{env.gst_faac}}
+          -Dfaac=enabled
           -Dfaad=enabled
           -Dfdkaac=enabled
           -Dgme=enabled
