@@ -184,16 +184,6 @@ jobs:
            arch: x86_64
            buildtype: release
 
-         - name: "Windows x86 debug"
-           runner: windows-2022
-           arch: x86
-           buildtype: debug
-
-         - name: "Windows x86 release"
-           runner: windows-2022
-           arch: x86
-           buildtype: release
-
          - name: "Windows arm64 debug"
            runner: windows-11-arm
            arch: arm64
@@ -244,22 +234,6 @@ jobs:
         if: env.buildtype == 'debug'
         shell: bash
         run: echo "lib_postfix=d" >> $GITHUB_ENV
-
-      - name: Set arch variables (x86)
-        if: matrix.arch == 'x86'
-        shell: bash
-        run: |
-          echo "openssl_platform=VC-WIN32" >> $GITHUB_ENV
-          echo "msbuild_platform=win32" >> $GITHUB_ENV
-          echo "arch_short=x86" >> $GITHUB_ENV
-          echo "arch_win=win32" >> $GITHUB_ENV
-          echo "arch_bits=32" >> $GITHUB_ENV
-          echo "libdir=lib" >> $GITHUB_ENV
-          echo "bindir=bin" >> $GITHUB_ENV
-          echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
-          echo "boost_architecture=x86" >> $GITHUB_ENV
-          echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
-          echo "gst_twolame=enabled" >> $GITHUB_ENV
 
       - name: Set arch variables (x86_64)
         if: matrix.arch == 'x86_64'
@@ -2027,12 +2001,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/lame-${{env.lame_version}}.tar.gz
 
-      - name: Patch lame (x86)
-        if: matrix.arch == 'x86'
-        shell: bash
-        working-directory: build/lame-${{env.lame_version}}
-        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X86/g' Makefile.MSVC
-
       - name: Patch lame (x86_64)
         if: matrix.arch == 'x86_64'
         shell: bash
@@ -2601,13 +2569,6 @@ jobs:
         shell: bash
         working-directory: build
         run: git clone --recurse-submodules -b "meson-${{env.ffmpeg_version}}" https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg
-
-        # ffmpeg 8.0 doesn't build on x86, use version 7.1.2 instead
-      - name: Checkout ffmpeg
-        if: matrix.arch == 'x86'
-        shell: bash
-        working-directory: build/ffmpeg
-        run: git checkout meson-7.1.2
 
       - name: Configure ffmpeg
         shell: cmd
