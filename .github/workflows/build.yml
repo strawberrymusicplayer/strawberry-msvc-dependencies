@@ -2632,6 +2632,11 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/gstreamer-${{env.gstreamer_version}}.tar.xz
 
+      - name: Patch GStreamer
+        shell: bash
+        working-directory: build/gstreamer-${{env.gstreamer_version}}
+        run: patch -p1 < ../../patches/gstreamer-macros-restrict.patch
+
       - name: Configure GStreamer
         shell: cmd
         working-directory: build/gstreamer-${{env.gstreamer_version}}
