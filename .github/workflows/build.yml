@@ -64,7 +64,7 @@ env:
 
   freetype_version: '2.14.3'
 
-  harfbuzz_version: '14.1.0'
+  harfbuzz_version: '14.2.0'
 
   jasper_version: '4.2.9'
 
