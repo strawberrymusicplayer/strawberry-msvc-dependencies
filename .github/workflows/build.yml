@@ -2235,11 +2235,6 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/libgme-${{env.libgme_version}}-src.tar.gz
 
-      - name: Patch libgme
-        shell: bash
-        working-directory: build/libgme-${{env.libgme_version}}
-        run: patch -p1 < ../../patches/libgme-pkgconf.patch
-
       - name: Configure libgme
         shell: cmd
         working-directory: build/libgme-${{env.libgme_version}}
