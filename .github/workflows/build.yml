@@ -112,7 +112,7 @@ env:
 
   libebur128_version: '1.2.6'
 
-  fftw_source_version: '3.3.10'
+  fftw_source_version: '3.3.11'
 
   fftw_mingw_version: '3.3.11.20'
 
