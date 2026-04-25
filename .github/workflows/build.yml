@@ -112,7 +112,9 @@ env:
 
   libebur128_version: '1.2.6'
 
-  fftw_version: '3.3.10'
+  fftw_source_version: '3.3.10'
+
+  fftw_mingw_version: '3.3.11.20'
 
   ffmpeg_version: '8.0.1'
 
@@ -2484,83 +2486,82 @@ jobs:
         run: pkg-config libebur128 --libs --cflags
 
 
-      - name: Download FFTW (x86)
-        if: matrix.arch != 'arm64'
+      - name: Download FFTW (x86_64)
+        if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://files.strawberrymusicplayer.org/fftw-${{env.fftw_version}}-${{env.arch_short}}-${{env.buildtype}}.zip
+        run: curl ${{env.curl_options}} https://github.com/strawberrymusicplayer/fftw3-mingw-cross/releases/download/${{env.fftw_mingw_version}}/fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}.tar.xz
 
-      - name: Create FFTW directory (x86)
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        working-directory: downloads
-        run: mkdir fftw
-
-      - name: Extract FFTW (x86)
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        working-directory: downloads/fftw
-        run: 7z x "../fftw-${{env.fftw_version}}-${{env.arch_short}}-${{env.buildtype}}.zip"
-
-      - name: Install FFTW (x86)
-        if: matrix.arch != 'arm64'
-        working-directory: downloads/fftw
-        run: |
-          lib /machine:${{env.arch_short}} /def:libfftw3-3.def
-          xcopy /s /y *.dll ${{env.prefix_path_backslash}}\bin\
-          xcopy /s /y libfftw3-3.lib ${{env.prefix_path_backslash}}\lib\
-          xcopy /s /y fftw3.h ${{env.prefix_path_backslash}}\include\
-
-      - name: Create fftw3.pc (x86)
-        if: matrix.arch != 'arm64'
+      - name: Extract FFTW (x86_64)
+        if: matrix.arch == 'x86_64'
         shell: bash
+        working-directory: build
+        run: tar -xvf ../downloads/fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}.tar.xz
+
+      - name: Update fftw3.pc (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build/fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}/lib/pkgconfig
         run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Name: FFTW" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Description: fast Fourier transform library" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Version: ${{env.fftw_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Libs: -L\${libdir} -lfftw3-3" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/fftw3.pc
+          sed -i "s,^prefix=.*,prefix=${{env.prefix_path_forwardslash}},g" fftw3.pc
+          sed -i "s,^exec_prefix=.*,exec_prefix=${{env.prefix_path_forwardslash}},g" fftw3.pc
+          sed -i "s,^libdir=.*,libdir=${{env.prefix_path_forwardslash}}/lib,g" fftw3.pc
+          sed -i "s,^includedir=.*,includedir=${{env.prefix_path_forwardslash}}/include,g" fftw3.pc
+
+      - name: Generate lib (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build/fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}/lib
+        run: lib /machine:${{env.arch_short}} /def:libfftw3-3.def
+
+      - name: Install FFTW (x86_64)
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        working-directory: build/fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}
+        run: |
+          cp -v include/*.h ${{env.prefix_path_unix}}/include/
+          cp -v bin/*.dll ${{env.prefix_path_unix}}/bin/
+          cp -v lib/*.lib ${{env.prefix_path_unix}}/lib/
+          cp -v lib/pkgconfig/*.pc ${{env.prefix_path_unix}}/lib/pkgconfig/
 
 
-      - name: Download FFTW (ARM64)
+      - name: Download FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.fftw.org/fftw-${{env.fftw_version}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror1}}/project/fftw/fftw/${{env.fftw_version}}/fftw-${{env.fftw_version}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror2}}/project/fftw/fftw/${{env.fftw_version}}/fftw-${{env.fftw_version}}.tar.gz
+        run: |
+          curl ${{env.curl_options}} https://www.fftw.org/fftw-${{env.fftw_source_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://${{env.sourceforge_mirror1}}/project/fftw/fftw/${{env.fftw_source_version}}/fftw-${{env.fftw_source_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://${{env.sourceforge_mirror2}}/project/fftw/fftw/${{env.fftw_source_version}}/fftw-${{env.fftw_source_version}}.tar.gz
 
-      - name: Extract FFTW (ARM64)
+      - name: Extract FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/fftw-${{env.fftw_version}}.tar.gz
+        run: tar -xf ../downloads/fftw-${{env.fftw_source_version}}.tar.gz
 
-      - name: Extract FFTW (ARM64)
+      - name: Extract FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: bash
-        working-directory: build/fftw-${{env.fftw_version}}
+        working-directory: build/fftw-${{env.fftw_source_version}}
         run: patch -p1 < ../../patches/fftw-fixes.patch
 
-      - name: Configure FFTW (ARM64)
+      - name: Configure FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: cmd
-        working-directory: build/fftw-${{env.fftw_version}}
+        working-directory: build/fftw-${{env.fftw_source_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DENABLE_AVX=ON -DENABLE_AVX2=OFF -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_THREADS=ON -DWITH_COMBINED_THREADS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
-      - name: Build FFTW (ARM64)
+      - name: Build FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: cmd
-        working-directory: build/fftw-${{env.fftw_version}}/build
+        working-directory: build/fftw-${{env.fftw_source_version}}/build
         run: cmake --build .
 
-      - name: Install FFTW (ARM64)
+      - name: Install FFTW (arm64)
         if: matrix.arch == 'arm64'
         shell: cmd
-        working-directory: build/fftw-${{env.fftw_version}}/build
+        working-directory: build/fftw-${{env.fftw_source_version}}/build
         run: cmake --install .
 
       - name: Check fftw
@@ -3343,7 +3344,7 @@ jobs:
           echo "* TagLib ${{env.taglib_version}}" >> "${{env.release_notes_file}}"
           echo "* libbs2b ${{env.libbs2b_version}}" >> "${{env.release_notes_file}}"
           echo "* libebur128 ${{env.libebur128_version}}" >> "${{env.release_notes_file}}"
-          echo "* FFTW ${{env.fftw_version}}" >> "${{env.release_notes_file}}"
+          echo "* FFTW ${{env.fftw_source_version}}" >> "${{env.release_notes_file}}"
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
