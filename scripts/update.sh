@@ -286,8 +286,11 @@ function update_package() {
     "libebur128")
       package_version_latest=$(latest_github_release "jiixyj" "libebur128")
       ;;
-    "fftw")
-      package_version_latest=$(curl ${curl_options} 'http://www.fftw.org/install/windows.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\-.*\.zip.*,\1,p' | head -1)
+    "fftw_source")
+      package_version_latest=$(curl ${curl_options} 'https://www.fftw.org/download.html' | sed -n 's,.*fftw-\([0-9][^>]*\)\.tar.*,\1,p' | head -1)
+      ;;
+    "fftw_mingw")
+      package_version_latest=$(latest_github_release "strawberrymusicplayer" "fftw3-mingw-cross")
       ;;
     "ffmpeg")
       package_version_latest=$(git ls-remote --heads https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git | cut -d '/' -f 3 | grep '^meson-' | sed 's/^meson-//g' | sort -V | tail -1)
