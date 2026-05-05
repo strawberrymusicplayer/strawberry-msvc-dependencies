@@ -1744,7 +1744,10 @@ jobs:
       - name: Download libogg
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz || curl ${{env.curl_options}} https://github.com/xiph/ogg/releases/download/v${{env.libogg_version}}/libogg-${{env.libogg_version}}.tar.xz
+        run: |
+          curl ${{env.curl_options}} https://downloads.xiph.org/releases/ogg/libogg-${{env.libogg_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://github.com/xiph/ogg/releases/download/v${{env.libogg_version}}/libogg-${{env.libogg_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/libogg-${{env.libogg_version}}.tar.xz
 
       - name: Extract libogg
         shell: bash
@@ -1774,7 +1777,10 @@ jobs:
       - name: Download libvorbis
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz || curl ${{env.curl_options}} https://github.com/xiph/vorbis/releases/download/v${{env.libvorbis_version}}/libvorbis-${{env.libvorbis_version}}.tar.xz
+        run: |
+          curl ${{env.curl_options}} https://downloads.xiph.org/releases/vorbis/libvorbis-${{env.libvorbis_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://github.com/xiph/vorbis/releases/download/v${{env.libvorbis_version}}/libvorbis-${{env.libvorbis_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/libvorbis-${{env.libvorbis_version}}.tar.xz
 
       - name: Extract libvorbis
         shell: bash
@@ -1804,7 +1810,10 @@ jobs:
       - name: Download flac
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz || curl ${{env.curl_options}} https://downloads.xiph.org/releases/flac/flac-${{env.flac_version}}.tar.xz
+        run: |
+          curl ${{env.curl_options}} https://github.com/xiph/flac/releases/download/${{env.flac_version}}/flac-${{env.flac_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://downloads.xiph.org/releases/flac/flac-${{env.flac_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/flac-${{env.flac_version}}.tar.xz
 
       - name: Extract flac
         shell: bash
@@ -1868,7 +1877,10 @@ jobs:
       - name: Download opus
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opus-${{env.opus_version}}.tar.gz || curl ${{env.curl_options}} https://github.com/xiph/opus/releases/download/v${{env.opus_version}}/opus-${{env.opus_version}}.tar.gz
+        run: |
+          curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opus-${{env.opus_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://github.com/xiph/opus/releases/download/v${{env.opus_version}}/opus-${{env.opus_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/opus-${{env.opus_version}}.tar.gz
 
       - name: Extract opus
         shell: bash
@@ -1898,7 +1910,10 @@ jobs:
       - name: Download opusfile
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz || curl ${{env.curl_options}} https://github.com/xiph/opusfile/releases/download/v${{env.opusfile_version}}/opusfile-${{env.opusfile_version}}.tar.gz
+        run: |
+          curl ${{env.curl_options}} https://downloads.xiph.org/releases/opus/opusfile-${{env.opusfile_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://github.com/xiph/opusfile/releases/download/v${{env.opusfile_version}}/opusfile-${{env.opusfile_version}}.tar.gz || \
+          curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/opusfile-${{env.opusfile_version}}.tar.gz
 
       - name: Extract opusfile
         shell: bash
