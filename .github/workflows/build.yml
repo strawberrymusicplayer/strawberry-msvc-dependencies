@@ -164,7 +164,7 @@ jobs:
       - name: Set release tag
         id: set_release_tag
         shell: bash
-        run: echo "release_tag=release-$GITHUB_RUN_ID" >> $GITHUB_OUTPUT
+        run: echo "release_tag=${{github.run_number}}" >> $GITHUB_OUTPUT
 
   build:
     name: Build Windows MSVC
@@ -3311,7 +3311,7 @@ jobs:
 
       - name: Create release notes
         run: |
-          echo "Strawberry MSVC Dependencies Release $GITHUB_RUN_ID" > "${{env.release_notes_file}}"
+          echo "Strawberry MSVC Dependencies Release ${{needs.setup.outputs.release_tag}}" > "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
           echo "Libraries:" >> "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
@@ -3367,7 +3367,7 @@ jobs:
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release create -d -F "${{env.release_notes_file}}" -t "Strawberry MSVC Dependencies Release $GITHUB_RUN_ID" "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
+        run: gh release create -d -F "${{env.release_notes_file}}" -t "Strawberry MSVC Dependencies Release ${{needs.setup.outputs.release_tag}}" "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
 
       - name: Update existing release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release == '1'
