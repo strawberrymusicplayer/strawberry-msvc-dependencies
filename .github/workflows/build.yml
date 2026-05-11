@@ -122,7 +122,7 @@ env:
 
   gstreamer_version: '1.28.2'
 
-  gstreamer_plugins_rs_version: '0.15.1'
+  gstreamer_plugins_rs_version: '0.15.2'
 
   qt_version: '6.11.0'
 
