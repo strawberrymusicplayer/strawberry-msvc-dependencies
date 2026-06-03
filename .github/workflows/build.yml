@@ -1507,34 +1507,60 @@ jobs:
         run: pkg-config libsoup-3.0 --libs --cflags
 
 
-      - name: Download glib-networking
+      - name: Download glib-networking (GnuTLS)
+        if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: downloads
         run: curl ${{env.curl_options}} https://download.gnome.org/sources/glib-networking/${{env.glib_networking_version_short}}/glib-networking-${{env.glib_networking_version}}.tar.xz || curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/glib-networking-${{env.glib_networking_version}}.tar.xz
 
-      - name: Extract glib-networking
+      - name: Extract glib-networking (GnuTLS)
+        if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/glib-networking-${{env.glib_networking_version}}.tar.xz
 
-      - name: Patch glib-networking
-        shell: bash
-        working-directory: build/glib-networking-${{env.glib_networking_version}}
-        run: patch -p1 < ../../patches/glib-networking.patch
-
-      - name: Configure glib-networking
+      - name: Configure glib-networking (GnuTLS)
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: build/glib-networking-${{env.glib_networking_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgnutls=${{env.glib_networking_gnutls}} -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgnutls=enabled -Dopenssl=disabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
 
-      - name: Build glib-networking
+      - name: Build glib-networking (GnuTLS)
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: build/glib-networking-${{env.glib_networking_version}}/build
         run: ninja
 
-      - name: Install glib-networking
+      - name: Install glib-networking (GnuTLS)
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: build/glib-networking-${{env.glib_networking_version}}/build
+        run: ninja install
+
+
+      - name: Download glib-networking (OpenSSL)
+        shell: bash
+        working-directory: build
+        run: git clone https://gitlab.gnome.org/GNOME/glib-networking.git
+
+      - name: Patch glib-networking (OpenSSL)
+        shell: bash
+        working-directory: build/glib-networking
+        run: patch -p1 < ../../patches/glib-networking.patch
+
+      - name: Configure glib-networking (OpenSSL)
+        shell: cmd
+        working-directory: build/glib-networking
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dgnutls=disabled -Dopenssl=enabled -Dgnome_proxy=disabled -Dlibproxy=disabled build
+
+      - name: Build glib-networking (OpenSSL)
+        shell: cmd
+        working-directory: build/glib-networking/build
+        run: ninja
+
+      - name: Install glib-networking (OpenSSL)
+        shell: cmd
+        working-directory: build/glib-networking/build
         run: ninja install
 
 

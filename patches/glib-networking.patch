@@ -1,166 +1,267 @@
-diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
-index e98fb0b..93df89e 100644
---- a/tls/openssl/gtlsclientconnection-openssl.c
-+++ b/tls/openssl/gtlsclientconnection-openssl.c
-@@ -322,6 +322,7 @@ g_tls_client_connection_openssl_client_connection_interface_init (GTlsClientConn
- }
- 
- static int data_index = -1;
-+static gsize data_index_initialized = 0;
- 
- static int
- handshake_thread_retrieve_certificate (SSL       *ssl,
-@@ -455,7 +456,10 @@ set_curve_list (GTlsClientConnectionOpenssl *client)
- static int g_tls_client_connection_openssl_new_session (SSL *s, SSL_SESSION *sess)
- {
-   GTlsConnectionBase *tls;
--  GTlsClientConnectionOpenssl *client = G_TLS_CLIENT_CONNECTION_OPENSSL (g_tls_connection_openssl_get_connection_from_ssl (s));
-+  GTlsClientConnectionOpenssl *client = SSL_get_ex_data (s, data_index);
-+
-+  if (!client)
-+    return 0;
- 
-   tls = G_TLS_CONNECTION_BASE (client);
- 
-@@ -564,9 +568,11 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
- 
-   SSL_set_session (client->ssl, client->session);
- 
--  if (data_index == -1) {
-+  if (g_once_init_enter (&data_index_initialized))
-+    {
-       data_index = SSL_get_ex_new_index (0, (void *)"gtlsclientconnection", NULL, NULL, NULL);
--  }
-+      g_once_init_leave (&data_index_initialized, 1);
-+    }
-   SSL_set_ex_data (client->ssl, data_index, client);
- 
- #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+From b9994b7ed8247872c83e1a9324ca7e951f173c68 Mon Sep 17 00:00:00 2001
+From: Jonas Kvinge <jonas@jkvinge.net>
+Date: Sat, 4 Apr 2026 02:03:51 +0200
+Subject: [PATCH 1/5] openssl: Fix threading race conditions
+
+Add mutex guards for SSL objects
+---
+ tls/openssl/gtlsconnection-openssl.c       | 82 +++++++++++++++++-----
+ tls/openssl/gtlsconnection-openssl.h       |  5 +-
+ tls/openssl/gtlsserverconnection-openssl.c |  6 +-
+ 3 files changed, 73 insertions(+), 20 deletions(-)
+
 diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
-index 5191d6a..b2a4b4a 100644
+index ee4cb424..1d263b0d 100644
 --- a/tls/openssl/gtlsconnection-openssl.c
 +++ b/tls/openssl/gtlsconnection-openssl.c
-@@ -664,24 +664,28 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
+@@ -90,6 +90,7 @@ g_tls_connection_openssl_finalize (GObject *object)
+ static GTlsConnectionBaseStatus
+ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+                 GIOCondition            direction,
++                SSL                    *ssl,
+                 int                     ret,
+                 int                     err_code,
+                 gboolean                blocking,
+@@ -272,7 +273,7 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+ 
+   tls = G_TLS_CONNECTION_BASE (openssl);
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+-  ssl = g_tls_connection_openssl_get_ssl (openssl);
++  ssl = g_tls_connection_openssl_lock_ssl (openssl);
+ 
+   if (timeout >= 0)
+     deadline = g_get_monotonic_time () + timeout;
+@@ -313,7 +314,7 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+             break;
+         }
+ 
+-      status = end_openssl_io (openssl, direction, ret, err_code, TRUE, error, err_prefix);
++      status = end_openssl_io (openssl, direction, ssl, ret, err_code, TRUE, error, err_prefix);
+ 
+       if (status != G_TLS_CONNECTION_BASE_TRY_AGAIN)
+         break;
+@@ -360,6 +361,8 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+   if (out_ret)
+     *out_ret = ret;
+ 
++  g_tls_connection_openssl_unlock (openssl);
++
+   return status;
+ }
+ 
+@@ -443,7 +446,7 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   if (!advertised_protocols)
+     return;
+ 
+-  ssl = g_tls_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
+ 
+   if (G_IS_TLS_SERVER_CONNECTION (tls))
+     {
+@@ -452,6 +455,7 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+       g_tls_log_debug (tls, "Setting ALPN Callback on %p", ctx);
+       SSL_CTX_set_alpn_select_cb (ctx, _openssl_alpn_select_cb, tls);
+ 
++      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+       return;
+     }
+ 
+@@ -478,6 +482,8 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+         }
+       g_byte_array_unref (protocols);
+     }
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+ }
+ 
+ static GTlsCertificateFlags
+@@ -555,7 +561,7 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+   if (!handshake_succeeded)
+     return;
+ 
+-  ssl = g_tls_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
+   session = SSL_get_session (ssl);
+ 
+   SSL_get0_alpn_selected (ssl, &data, &len);
+@@ -571,6 +577,8 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+   *protocol_version = session ? glib_protocol_version_from_openssl (SSL_SESSION_get_protocol_version (session))
+                               : G_TLS_PROTOCOL_VERSION_UNKNOWN;
+   *ciphersuite_name = g_strdup (SSL_get_cipher_name (ssl));
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+ }
+ 
+ static GTlsCertificate *
+@@ -581,21 +589,28 @@ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+   GTlsCertificateOpenssl *chain;
+   SSL *ssl;
+ 
+-  ssl = g_tls_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
+ 
+   peer = SSL_get_peer_certificate (ssl);
+   if (!peer)
+-    return NULL;
++    {
++      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++      return NULL;
++    }
+ 
+   certs = SSL_get_peer_cert_chain (ssl);
+   if (!certs)
+     {
+       X509_free (peer);
++      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+       return NULL;
+     }
+ 
+   chain = g_tls_certificate_openssl_build_chain (peer, certs);
+   X509_free (peer);
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++
+   if (!chain)
+     return NULL;
+ 
+@@ -607,22 +622,26 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
                                  GByteArray             *data,
                                  GError                **error)
  {
-+  GTlsConnectionOpensslPrivate *priv = g_tls_connection_openssl_get_instance_private (tls);
-   SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
+-  SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
++  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
    gboolean is_client = G_IS_TLS_CLIENT_CONNECTION (tls);
 -  gboolean resumed = SSL_session_reused (ssl);
 +  gboolean resumed;
    size_t len = 64;
  
-+  if (!data)
-+    return TRUE;
-+
-+  g_mutex_lock (&priv->ssl_mutex);
-+
- #if OPENSSL_VERSION_NUMBER >= 0x10101000L
    if (SSL_version (ssl) >= TLS1_3_VERSION)
      {
-+      g_mutex_unlock (&priv->ssl_mutex);
++      g_tls_connection_openssl_unlock (tls);
        g_set_error_literal (error, G_TLS_CHANNEL_BINDING_ERROR, G_TLS_CHANNEL_BINDING_ERROR_GENERAL_ERROR,
                             _("The request is invalid."));
        return FALSE;
      }
- #endif
  
--  /* This is a drill */
+   /* This is a drill */
 -  if (!data)
--    return TRUE;
--
++  if (!data) {
++    g_tls_connection_openssl_unlock (tls);
+     return TRUE;
++  }
+ 
 +  resumed = SSL_session_reused (ssl);
    do {
      g_byte_array_set_size (data, len);
      if ((resumed && is_client) || (!resumed && !is_client))
-@@ -689,6 +693,7 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
+@@ -630,6 +649,7 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
      else
        len = SSL_get_finished (ssl, data->data, data->len);
    } while (len > data->len);
-+  g_mutex_unlock (&priv->ssl_mutex);
++  g_tls_connection_openssl_unlock (tls);
  
    if (len > 0)
      {
-@@ -705,16 +710,19 @@ openssl_get_binding_tls_server_end_point (GTlsConnectionOpenssl  *tls,
+@@ -646,7 +666,7 @@ openssl_get_binding_tls_server_end_point (GTlsConnectionOpenssl  *tls,
                                            GByteArray             *data,
                                            GError                **error)
  {
-+  GTlsConnectionOpensslPrivate *priv = g_tls_connection_openssl_get_instance_private (tls);
-   SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
+-  SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
++  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
    gboolean is_client = G_IS_TLS_CLIENT_CONNECTION (tls);
    int algo_nid;
    const EVP_MD *algo = NULL;
-   X509 *crt;
- 
-+  g_mutex_lock (&priv->ssl_mutex);
-   if (is_client)
+@@ -656,6 +676,7 @@ openssl_get_binding_tls_server_end_point (GTlsConnectionOpenssl  *tls,
      crt = SSL_get_peer_certificate (ssl);
    else
      crt = SSL_get_certificate (ssl);
-+  g_mutex_unlock (&priv->ssl_mutex);
++  g_tls_connection_openssl_unlock (tls);
  
    if (!crt)
      {
-@@ -732,7 +740,6 @@ openssl_get_binding_tls_server_end_point (GTlsConnectionOpenssl  *tls,
-       return FALSE;
-     }
- 
--  /* This is a drill */
-   if (!data)
-     {
-       if (is_client)
-@@ -777,6 +784,7 @@ openssl_get_binding_tls_exporter (GTlsConnectionOpenssl  *tls,
+@@ -718,13 +739,16 @@ openssl_get_binding_tls_exporter (GTlsConnectionOpenssl  *tls,
                                    GByteArray             *data,
                                    GError                **error)
  {
-+  GTlsConnectionOpensslPrivate *priv = g_tls_connection_openssl_get_instance_private (tls);
-   SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
+-  SSL *ssl = g_tls_connection_openssl_get_ssl (tls);
++  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
    size_t  ctx_len = 0;
    guint8 *context = (guint8 *)"";
-@@ -786,11 +794,13 @@ openssl_get_binding_tls_exporter (GTlsConnectionOpenssl  *tls,
-     return TRUE;
+   int ret;
+ 
+   if (!data)
+-    return TRUE;
++    {
++      g_tls_connection_openssl_unlock (tls);
++      return TRUE;
++    }
  
    g_byte_array_set_size (data, 32);
-+  g_mutex_lock (&priv->ssl_mutex);
    ret = SSL_export_keying_material (ssl,
-                                     data->data, data->len,
+@@ -732,6 +756,7 @@ openssl_get_binding_tls_exporter (GTlsConnectionOpenssl  *tls,
                                      RFC5705_LABEL_DATA, RFC5705_LABEL_LEN,
                                      context, ctx_len,
                                      1 /* use context */);
-+  g_mutex_unlock (&priv->ssl_mutex);
++  g_tls_connection_openssl_unlock (tls);
  
    if (ret > 0)
      return TRUE;
-@@ -1107,6 +1117,7 @@ g_tls_connection_openssl_class_init (GTlsConnectionOpensslClass *klass)
+@@ -828,8 +853,6 @@ g_tls_connection_openssl_push_io (GTlsConnectionBase *tls,
+       g_clear_error (error);
+       g_tls_bio_set_write_error (priv->bio, error);
+     }
+-
+-  g_mutex_lock (&priv->ssl_mutex);
  }
  
- static int data_index = -1;
-+static gsize data_index_initialized = 0;
+ static GTlsConnectionBaseStatus
+@@ -843,8 +866,6 @@ g_tls_connection_openssl_pop_io (GTlsConnectionBase  *tls,
  
- static gboolean
- g_tls_connection_openssl_initable_init (GInitable     *initable,
-@@ -1133,9 +1144,11 @@ g_tls_connection_openssl_initable_init (GInitable     *initable,
-   ssl = g_tls_connection_openssl_get_ssl (openssl);
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+ 
+-  g_mutex_unlock (&priv->ssl_mutex);
+-
+   if (direction & G_IO_IN)
+     g_tls_bio_set_read_cancellable (priv->bio, NULL);
+ 
+@@ -1071,7 +1092,7 @@ g_tls_connection_openssl_initable_init (GInitable     *initable,
+ 
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+ 
+-  ssl = g_tls_connection_openssl_get_ssl (openssl);
++  ssl = g_tls_connection_openssl_lock_ssl (openssl);
    g_assert (ssl);
  
--  if (data_index == -1) {
-+  if (g_once_init_enter (&data_index_initialized))
-+    {
-       data_index = SSL_get_ex_new_index (0, (void *)"gtlsconnection", NULL, NULL, NULL);
--  }
-+      g_once_init_leave (&data_index_initialized, 1);
-+    }
    SSL_set_ex_data (ssl, data_index, openssl);
+@@ -1086,6 +1107,8 @@ g_tls_connection_openssl_initable_init (GInitable     *initable,
+   g_clear_object (&base_io_stream);
+   g_clear_object (&base_socket);
  
-   if (base_io_stream)
-@@ -1182,3 +1195,25 @@ g_tls_connection_openssl_get_connection_from_ssl (SSL *ssl)
++  g_tls_connection_openssl_unlock (openssl);
++
+   return TRUE;
+ }
+ 
+@@ -1106,10 +1129,11 @@ g_tls_connection_openssl_init (GTlsConnectionOpenssl *openssl)
+ }
+ 
+ SSL *
+-g_tls_connection_openssl_get_ssl (GTlsConnectionOpenssl *openssl)
++g_tls_connection_openssl_lock_ssl (GTlsConnectionOpenssl *openssl)
+ {
+   g_return_val_if_fail (G_IS_TLS_CONNECTION_OPENSSL (openssl), NULL);
+ 
++  g_tls_connection_openssl_lock (openssl);
+   return G_TLS_CONNECTION_OPENSSL_GET_CLASS (openssl)->get_ssl (openssl);
+ }
+ 
+@@ -1120,3 +1144,25 @@ g_tls_connection_openssl_get_connection_from_ssl (SSL *ssl)
  
    return SSL_get_ex_data (ssl, data_index);
  }
 +
 +void
-+g_tls_connection_openssl_lock_ssl (GTlsConnectionOpenssl *openssl)
++g_tls_connection_openssl_lock (GTlsConnectionOpenssl *openssl)
 +{
 +  GTlsConnectionOpensslPrivate *priv;
 +
@@ -171,7 +272,7 @@ index 5191d6a..b2a4b4a 100644
 +}
 +
 +void
-+g_tls_connection_openssl_unlock_ssl (GTlsConnectionOpenssl *openssl)
++g_tls_connection_openssl_unlock (GTlsConnectionOpenssl *openssl)
 +{
 +  GTlsConnectionOpensslPrivate *priv;
 +
@@ -181,31 +282,854 @@ index 5191d6a..b2a4b4a 100644
 +  g_mutex_unlock (&priv->ssl_mutex);
 +}
 diff --git a/tls/openssl/gtlsconnection-openssl.h b/tls/openssl/gtlsconnection-openssl.h
-index 1682eed..4f6a803 100644
+index 1682eed8..031758dd 100644
 --- a/tls/openssl/gtlsconnection-openssl.h
 +++ b/tls/openssl/gtlsconnection-openssl.h
-@@ -49,4 +49,7 @@ GTlsConnectionOpenssl *g_tls_connection_openssl_get_connection_from_ssl (SSL *ss
+@@ -43,10 +43,13 @@ struct _GTlsConnectionOpensslClass
+   SSL *(*get_ssl) (GTlsConnectionOpenssl *connection);
+ };
+ 
+-SSL *g_tls_connection_openssl_get_ssl (GTlsConnectionOpenssl *connection);
++SSL *g_tls_connection_openssl_lock_ssl (GTlsConnectionOpenssl *connection);
+ 
+ GTlsConnectionOpenssl *g_tls_connection_openssl_get_connection_from_ssl (SSL *ssl);
  
  GTlsProtocolVersion glib_protocol_version_from_openssl (int protocol_version);
  
-+void g_tls_connection_openssl_lock_ssl   (GTlsConnectionOpenssl *openssl);
-+void g_tls_connection_openssl_unlock_ssl (GTlsConnectionOpenssl *openssl);
++void g_tls_connection_openssl_lock   (GTlsConnectionOpenssl *openssl);
++void g_tls_connection_openssl_unlock (GTlsConnectionOpenssl *openssl);
 +
  G_END_DECLS
 diff --git a/tls/openssl/gtlsserverconnection-openssl.c b/tls/openssl/gtlsserverconnection-openssl.c
-index 2940897..da110a0 100644
+index 09b57f9e..c8e4c7b8 100644
 --- a/tls/openssl/gtlsserverconnection-openssl.c
 +++ b/tls/openssl/gtlsserverconnection-openssl.c
-@@ -237,7 +237,11 @@ on_certificate_changed (GObject    *object,
+@@ -243,7 +243,11 @@ on_certificate_changed (GObject    *object,
    cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (object));
  
    if (ssl && cert)
 -    ssl_set_certificate (ssl, cert, NULL);
 +    {
-+      g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (object));
++      g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
 +      ssl_set_certificate (ssl, cert, NULL);
-+      g_tls_connection_openssl_unlock_ssl (G_TLS_CONNECTION_OPENSSL (object));
++      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
 +    }
  }
  
  static void
+-- 
+GitLab
+
+
+From f984d9f16e9182694714592c189fa1b2ccc4803f Mon Sep 17 00:00:00 2001
+From: Sanchayan Maity <sanchayan@centricular.com>
+Date: Wed, 20 May 2026 20:06:18 +0530
+Subject: [PATCH 2/5] openssl: Do not hold mutex across blocking I/O wait
+
+This also fixes the test_simultaneous_sync timing out when running the
+connection-openssl tests.
+---
+ tls/openssl/gtlsconnection-openssl.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index 1d263b0d..adc4bab0 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -337,7 +337,9 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+       if (io_timeout == 0)
+         break;
+ 
++      g_tls_connection_openssl_unlock (openssl);
+       g_tls_bio_wait_available (priv->bio, io_needed, io_timeout, cancellable);
++      ssl = g_tls_connection_openssl_lock_ssl (openssl);
+     }
+ 
+   if (status == G_TLS_CONNECTION_BASE_TRY_AGAIN)
+-- 
+GitLab
+
+
+From 49eeef51e0f7937783ddf685fb98a349aaacfdae Mon Sep 17 00:00:00 2001
+From: Sanchayan Maity <sanchayan@centricular.com>
+Date: Thu, 21 May 2026 15:11:47 +0530
+Subject: [PATCH 3/5] openssl: Drop lock_ssl function
+
+Use the existing g_tls_connection_openssl_lock function instead of
+introducing a specialised function for protecting SSL member field.
+Same lock can be used for protecting other member fields as needed.
+---
+ tls/openssl/gtlsconnection-openssl.c | 57 +++++++++++++++++++---------
+ tls/openssl/gtlsconnection-openssl.h |  2 +-
+ 2 files changed, 41 insertions(+), 18 deletions(-)
+
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index adc4bab0..27f1309a 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -273,7 +273,9 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+ 
+   tls = G_TLS_CONNECTION_BASE (openssl);
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+-  ssl = g_tls_connection_openssl_lock_ssl (openssl);
++
++  g_tls_connection_openssl_lock (openssl);
++  ssl = g_tls_connection_openssl_get_ssl (openssl);
+ 
+   if (timeout >= 0)
+     deadline = g_get_monotonic_time () + timeout;
+@@ -339,7 +341,7 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+ 
+       g_tls_connection_openssl_unlock (openssl);
+       g_tls_bio_wait_available (priv->bio, io_needed, io_timeout, cancellable);
+-      ssl = g_tls_connection_openssl_lock_ssl (openssl);
++      g_tls_connection_openssl_lock (openssl);
+     }
+ 
+   if (status == G_TLS_CONNECTION_BASE_TRY_AGAIN)
+@@ -444,11 +446,13 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+                                             gchar              **advertised_protocols)
+ {
+   SSL *ssl;
++  GTlsConnectionOpenssl *openssl = G_TLS_CONNECTION_OPENSSL (tls);
+ 
+   if (!advertised_protocols)
+     return;
+ 
+-  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  g_tls_connection_openssl_lock (openssl);
++  ssl = g_tls_connection_openssl_get_ssl (openssl);
+ 
+   if (G_IS_TLS_SERVER_CONNECTION (tls))
+     {
+@@ -457,7 +461,7 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+       g_tls_log_debug (tls, "Setting ALPN Callback on %p", ctx);
+       SSL_CTX_set_alpn_select_cb (ctx, _openssl_alpn_select_cb, tls);
+ 
+-      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++      g_tls_connection_openssl_unlock (openssl);
+       return;
+     }
+ 
+@@ -485,7 +489,7 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+       g_byte_array_unref (protocols);
+     }
+ 
+-  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++  g_tls_connection_openssl_unlock (openssl);
+ }
+ 
+ static GTlsCertificateFlags
+@@ -557,13 +561,17 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+ {
+   SSL *ssl;
+   SSL_SESSION *session;
++  GTlsConnectionOpenssl *openssl;
+   unsigned int len = 0;
+   const unsigned char *data = NULL;
+ 
+   if (!handshake_succeeded)
+     return;
+ 
+-  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  openssl = G_TLS_CONNECTION_OPENSSL (tls);
++
++  g_tls_connection_openssl_lock (openssl);
++  ssl = g_tls_connection_openssl_get_ssl (openssl);
+   session = SSL_get_session (ssl);
+ 
+   SSL_get0_alpn_selected (ssl, &data, &len);
+@@ -580,7 +588,7 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+                               : G_TLS_PROTOCOL_VERSION_UNKNOWN;
+   *ciphersuite_name = g_strdup (SSL_get_cipher_name (ssl));
+ 
+-  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++  g_tls_connection_openssl_unlock (openssl);
+ }
+ 
+ static GTlsCertificate *
+@@ -589,14 +597,18 @@ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+   X509 *peer;
+   STACK_OF (X509) *certs;
+   GTlsCertificateOpenssl *chain;
++  GTlsConnectionOpenssl *openssl;
+   SSL *ssl;
+ 
+-  ssl = g_tls_connection_openssl_lock_ssl (G_TLS_CONNECTION_OPENSSL (tls));
++  openssl = G_TLS_CONNECTION_OPENSSL (tls);
++
++  g_tls_connection_openssl_lock (openssl);
++  ssl = g_tls_connection_openssl_get_ssl (openssl);
+ 
+   peer = SSL_get_peer_certificate (ssl);
+   if (!peer)
+     {
+-      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++      g_tls_connection_openssl_unlock (openssl);
+       return NULL;
+     }
+ 
+@@ -604,14 +616,14 @@ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+   if (!certs)
+     {
+       X509_free (peer);
+-      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++      g_tls_connection_openssl_unlock (openssl);
+       return NULL;
+     }
+ 
+   chain = g_tls_certificate_openssl_build_chain (peer, certs);
+   X509_free (peer);
+ 
+-  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++  g_tls_connection_openssl_unlock (openssl);
+ 
+   if (!chain)
+     return NULL;
+@@ -624,11 +636,14 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
+                                 GByteArray             *data,
+                                 GError                **error)
+ {
+-  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
++  SSL *ssl;
+   gboolean is_client = G_IS_TLS_CLIENT_CONNECTION (tls);
+   gboolean resumed;
+   size_t len = 64;
+ 
++  g_tls_connection_openssl_lock (tls);
++  ssl = g_tls_connection_openssl_get_ssl (tls);
++
+   if (SSL_version (ssl) >= TLS1_3_VERSION)
+     {
+       g_tls_connection_openssl_unlock (tls);
+@@ -668,12 +683,15 @@ openssl_get_binding_tls_server_end_point (GTlsConnectionOpenssl  *tls,
+                                           GByteArray             *data,
+                                           GError                **error)
+ {
+-  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
++  SSL *ssl;
+   gboolean is_client = G_IS_TLS_CLIENT_CONNECTION (tls);
+   int algo_nid;
+   const EVP_MD *algo = NULL;
+   X509 *crt;
+ 
++  g_tls_connection_openssl_lock (tls);
++  ssl = g_tls_connection_openssl_get_ssl (tls);
++
+   if (is_client)
+     crt = SSL_get_peer_certificate (ssl);
+   else
+@@ -741,11 +759,14 @@ openssl_get_binding_tls_exporter (GTlsConnectionOpenssl  *tls,
+                                   GByteArray             *data,
+                                   GError                **error)
+ {
+-  SSL *ssl = g_tls_connection_openssl_lock_ssl (tls);
++  SSL *ssl;
+   size_t  ctx_len = 0;
+   guint8 *context = (guint8 *)"";
+   int ret;
+ 
++  g_tls_connection_openssl_lock (tls);
++  ssl = g_tls_connection_openssl_get_ssl (tls);
++
+   if (!data)
+     {
+       g_tls_connection_openssl_unlock (tls);
+@@ -1036,7 +1057,9 @@ g_tls_connection_openssl_close (GTlsConnectionBase  *tls,
+ 
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+ 
++  g_tls_connection_openssl_lock (openssl);
+   priv->shutting_down = TRUE;
++  g_tls_connection_openssl_unlock (openssl);
+ 
+   return perform_openssl_io (G_TLS_CONNECTION_OPENSSL (tls),
+                              G_IO_IN | G_IO_OUT,
+@@ -1094,7 +1117,8 @@ g_tls_connection_openssl_initable_init (GInitable     *initable,
+ 
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
+ 
+-  ssl = g_tls_connection_openssl_lock_ssl (openssl);
++  g_tls_connection_openssl_lock (openssl);
++  ssl = g_tls_connection_openssl_get_ssl (openssl);
+   g_assert (ssl);
+ 
+   SSL_set_ex_data (ssl, data_index, openssl);
+@@ -1131,11 +1155,10 @@ g_tls_connection_openssl_init (GTlsConnectionOpenssl *openssl)
+ }
+ 
+ SSL *
+-g_tls_connection_openssl_lock_ssl (GTlsConnectionOpenssl *openssl)
++g_tls_connection_openssl_get_ssl (GTlsConnectionOpenssl *openssl)
+ {
+   g_return_val_if_fail (G_IS_TLS_CONNECTION_OPENSSL (openssl), NULL);
+ 
+-  g_tls_connection_openssl_lock (openssl);
+   return G_TLS_CONNECTION_OPENSSL_GET_CLASS (openssl)->get_ssl (openssl);
+ }
+ 
+diff --git a/tls/openssl/gtlsconnection-openssl.h b/tls/openssl/gtlsconnection-openssl.h
+index 031758dd..2313e8e0 100644
+--- a/tls/openssl/gtlsconnection-openssl.h
++++ b/tls/openssl/gtlsconnection-openssl.h
+@@ -43,7 +43,7 @@ struct _GTlsConnectionOpensslClass
+   SSL *(*get_ssl) (GTlsConnectionOpenssl *connection);
+ };
+ 
+-SSL *g_tls_connection_openssl_lock_ssl (GTlsConnectionOpenssl *connection);
++SSL *g_tls_connection_openssl_get_ssl (GTlsConnectionOpenssl *connection);
+ 
+ GTlsConnectionOpenssl *g_tls_connection_openssl_get_connection_from_ssl (SSL *ssl);
+ 
+-- 
+GitLab
+
+
+From 6772c5220a0736fc207450ae64483ef8e7fbb0d6 Mon Sep 17 00:00:00 2001
+From: Sanchayan Maity <sanchayan@centricular.com>
+Date: Thu, 21 May 2026 19:05:51 +0530
+Subject: [PATCH 4/5] openssl: Guard some more member accesses with mutex
+
+---
+ tls/openssl/gtlsclientconnection-openssl.c | 10 ++++++++++
+ tls/openssl/gtlsserverconnection-openssl.c | 19 ++++++++++++++++---
+ 2 files changed, 26 insertions(+), 3 deletions(-)
+
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index 8bdd4692..c321b03b 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -115,6 +115,8 @@ g_tls_client_connection_openssl_get_property (GObject    *object,
+   GList *accepted_cas;
+   gint i;
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
++
+   switch (prop_id)
+     {
+     case PROP_VALIDATION_FLAGS:
+@@ -169,6 +171,8 @@ g_tls_client_connection_openssl_get_property (GObject    *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
+ }
+ 
+ static void
+@@ -180,6 +184,8 @@ g_tls_client_connection_openssl_set_property (GObject      *object,
+   GTlsConnectionBase *tls = G_TLS_CONNECTION_BASE (object);
+   GTlsClientConnectionOpenssl *openssl = G_TLS_CLIENT_CONNECTION_OPENSSL (object);
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
++
+   switch (prop_id)
+     {
+     case PROP_VALIDATION_FLAGS:
+@@ -203,6 +209,8 @@ g_tls_client_connection_openssl_set_property (GObject      *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
+ }
+ 
+ static void
+@@ -292,8 +300,10 @@ handshake_thread_retrieve_certificate (SSL       *ssl,
+   cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (client));
+   if (!cert)
+     {
++      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+       if (g_tls_connection_base_handshake_thread_request_certificate (tls))
+         cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (client));
++      g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (tls));
+     }
+ 
+   if (cert)
+diff --git a/tls/openssl/gtlsserverconnection-openssl.c b/tls/openssl/gtlsserverconnection-openssl.c
+index c8e4c7b8..24816d83 100644
+--- a/tls/openssl/gtlsserverconnection-openssl.c
++++ b/tls/openssl/gtlsserverconnection-openssl.c
+@@ -81,6 +81,8 @@ g_tls_server_connection_openssl_get_property (GObject    *object,
+ {
+   GTlsServerConnectionOpenssl *openssl = G_TLS_SERVER_CONNECTION_OPENSSL (object);
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
++
+   switch (prop_id)
+     {
+     case PROP_AUTHENTICATION_MODE:
+@@ -90,6 +92,8 @@ g_tls_server_connection_openssl_get_property (GObject    *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
+ }
+ 
+ static void
+@@ -100,6 +104,8 @@ g_tls_server_connection_openssl_set_property (GObject      *object,
+ {
+   GTlsServerConnectionOpenssl *openssl = G_TLS_SERVER_CONNECTION_OPENSSL (object);
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
++
+   switch (prop_id)
+     {
+     case PROP_AUTHENTICATION_MODE:
+@@ -109,6 +115,8 @@ g_tls_server_connection_openssl_set_property (GObject      *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
+ }
+ 
+ static int
+@@ -126,6 +134,8 @@ g_tls_server_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   GTlsConnectionBaseClass *base_class = G_TLS_CONNECTION_BASE_CLASS (g_tls_server_connection_openssl_parent_class);
+   int req_mode = 0;
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (tls));
++
+   switch (openssl->authentication_mode)
+     {
+     case G_TLS_AUTHENTICATION_REQUIRED:
+@@ -144,6 +154,8 @@ g_tls_server_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   /* FIXME: is this ok? */
+   SSL_set_verify_depth (openssl->ssl, 0);
+ 
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
++
+   if (base_class->prepare_handshake)
+     base_class->prepare_handshake (tls, advertised_protocols);
+ }
+@@ -239,13 +251,14 @@ on_certificate_changed (GObject    *object,
+   SSL *ssl;
+   GTlsCertificate *cert;
+ 
+-  ssl = g_tls_server_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (object));
+   cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (object));
+ 
+-  if (ssl && cert)
++  if (cert)
+     {
+       g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (object));
+-      ssl_set_certificate (ssl, cert, NULL);
++      ssl = g_tls_server_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (object));
++      if (ssl)
++        ssl_set_certificate (ssl, cert, NULL);
+       g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (object));
+     }
+ }
+-- 
+GitLab
+
+
+From 753c02bccd329259e50d926bab33b7854aace1e5 Mon Sep 17 00:00:00 2001
+From: Sanchayan Maity <sanchayan@centricular.com>
+Date: Fri, 5 Jun 2026 16:43:25 +0530
+Subject: [PATCH 5/5] base/openssl: Move locking to base class
+
+---
+ tls/base/gtlsconnection-base.c             | 36 +++++++++++++++++
+ tls/base/gtlsconnection-base.h             |  2 +
+ tls/openssl/gtlsclientconnection-openssl.c |  4 +-
+ tls/openssl/gtlsconnection-openssl.c       | 45 +++++++---------------
+ tls/openssl/gtlsserverconnection-openssl.c |  4 --
+ 5 files changed, 54 insertions(+), 37 deletions(-)
+
+diff --git a/tls/base/gtlsconnection-base.c b/tls/base/gtlsconnection-base.c
+index 9028b5fa..0c8e2662 100644
+--- a/tls/base/gtlsconnection-base.c
++++ b/tls/base/gtlsconnection-base.c
+@@ -168,6 +168,8 @@ G_GNUC_END_IGNORE_DEPRECATIONS
+ 
+   gchar       *session_id;
+   gboolean     session_resumption_enabled;
++
++  GMutex         sync_mutex;
+ } GTlsConnectionBasePrivate;
+ 
+ static void g_tls_connection_base_dtls_connection_iface_init (GDtlsConnectionInterface *iface);
+@@ -278,6 +280,8 @@ g_tls_connection_base_init (GTlsConnectionBase *tls)
+ 
+   g_mutex_init (&priv->op_mutex);
+ 
++  g_mutex_init (&priv->sync_mutex);
++
+   priv->waiting_for_op = g_cancellable_new ();
+ }
+ 
+@@ -319,6 +323,8 @@ g_tls_connection_base_finalize (GObject *object)
+   g_clear_object (&priv->waiting_for_op);
+   g_mutex_clear (&priv->op_mutex);
+ 
++  g_mutex_clear (&priv->sync_mutex);
++
+   g_clear_pointer (&priv->app_data_buf, g_byte_array_unref);
+ 
+   g_clear_pointer (&priv->advertised_protocols, g_strfreev);
+@@ -341,6 +347,8 @@ g_tls_connection_base_get_property (GObject    *object,
+   GTlsConnectionBasePrivate *priv = g_tls_connection_base_get_instance_private (tls);
+   GTlsBackend *backend;
+ 
++  g_tls_connection_base_lock (tls);
++
+   switch (prop_id)
+     {
+     case PROP_BASE_IO_STREAM:
+@@ -416,6 +424,8 @@ g_tls_connection_base_get_property (GObject    *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_base_unlock (tls);
+ }
+ 
+ static void
+@@ -431,6 +441,8 @@ g_tls_connection_base_set_property (GObject      *object,
+   gboolean system_certdb;
+   GTlsBackend *backend;
+ 
++  g_tls_connection_base_lock (tls);
++
+   switch (prop_id)
+     {
+     case PROP_BASE_IO_STREAM:
+@@ -527,6 +539,8 @@ g_tls_connection_base_set_property (GObject      *object,
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+     }
++
++  g_tls_connection_base_unlock (tls);
+ }
+ 
+ typedef enum {
+@@ -1373,7 +1387,9 @@ accept_or_reject_peer_certificate (gpointer user_data)
+   g_assert (priv->handshake_context);
+   g_assert (g_main_context_is_owner (priv->handshake_context));
+ 
++  g_tls_connection_base_lock (tls);
+   peer_certificate = G_TLS_CONNECTION_BASE_GET_CLASS (tls)->retrieve_peer_certificate (tls);
++  g_tls_connection_base_unlock (tls);
+ 
+   if (peer_certificate)
+     {
+@@ -1705,6 +1721,7 @@ finish_handshake (GTlsConnectionBase  *tls,
+         }
+     }
+ 
++  g_tls_connection_base_lock (tls);
+   tls_class->complete_handshake (tls,
+                                  success,
+                                  &priv->negotiated_protocol,
+@@ -1712,6 +1729,7 @@ finish_handshake (GTlsConnectionBase  *tls,
+                                  &priv->ciphersuite_name,
+                                  /* If we already have an error, ignore further errors. */
+                                  my_error ? NULL : &my_error);
++  g_tls_connection_base_unlock (tls);
+ 
+   if (g_strcmp0 (original_negotiated_protocol, priv->negotiated_protocol) != 0)
+     g_object_notify (G_OBJECT (tls), "negotiated-protocol");
+@@ -1760,8 +1778,10 @@ g_tls_connection_base_handshake (GTlsConnection   *conn,
+ 
+   g_main_context_push_thread_default (priv->handshake_context);
+ 
++  g_tls_connection_base_lock (tls);
+   if (tls_class->prepare_handshake)
+     tls_class->prepare_handshake (tls, priv->advertised_protocols);
++  g_tls_connection_base_unlock (tls);
+ 
+   task = g_task_new (conn, cancellable, sync_handshake_thread_completed, NULL);
+   g_task_set_source_tag (task, g_tls_connection_base_handshake);
+@@ -1998,8 +2018,10 @@ do_implicit_handshake (GTlsConnectionBase  *tls,
+   g_task_set_task_data (priv->implicit_handshake,
+                         thread_timeout, g_free);
+ 
++  g_tls_connection_base_lock (tls);
+   if (tls_class->prepare_handshake)
+     tls_class->prepare_handshake (tls, priv->advertised_protocols);
++  g_tls_connection_base_unlock (tls);
+ 
+   if (timeout != 0)
+     {
+@@ -2966,3 +2988,17 @@ g_tls_connection_base_datagram_based_iface_init (GDatagramBasedInterface *iface)
+   iface->condition_check = g_tls_connection_base_condition_check;
+   iface->condition_wait = g_tls_connection_base_condition_wait;
+ }
++
++void
++g_tls_connection_base_lock (GTlsConnectionBase *tls)
++{
++  GTlsConnectionBasePrivate *priv = g_tls_connection_base_get_instance_private (tls);
++  g_mutex_lock (&priv->sync_mutex);
++}
++
++void
++g_tls_connection_base_unlock (GTlsConnectionBase *tls)
++{
++  GTlsConnectionBasePrivate *priv = g_tls_connection_base_get_instance_private (tls);
++  g_mutex_unlock (&priv->sync_mutex);
++}
+diff --git a/tls/base/gtlsconnection-base.h b/tls/base/gtlsconnection-base.h
+index 7003d3fa..cc6d8305 100644
+--- a/tls/base/gtlsconnection-base.h
++++ b/tls/base/gtlsconnection-base.h
+@@ -209,5 +209,7 @@ gboolean                  g_tls_connection_base_get_session_resumption  (GTlsCon
+ 
+ void                      g_tls_connection_base_set_session_resumption  (GTlsConnectionBase *tls,
+                                                                          gboolean session_resumption_enabled);
++void                      g_tls_connection_base_lock                    (GTlsConnectionBase *tls);
++void                      g_tls_connection_base_unlock                  (GTlsConnectionBase *tls);
+ 
+ G_END_DECLS
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index c321b03b..322a676d 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -295,15 +295,15 @@ handshake_thread_retrieve_certificate (SSL       *ssl,
+   client = G_TLS_CLIENT_CONNECTION_OPENSSL (g_tls_connection_openssl_get_connection_from_ssl (ssl));
+   tls = G_TLS_CONNECTION_BASE (client);
+ 
++  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (tls));
+   client->ca_list = SSL_get_client_CA_list (client->ssl);
++  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+ 
+   cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (client));
+   if (!cert)
+     {
+-      g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+       if (g_tls_connection_base_handshake_thread_request_certificate (tls))
+         cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (client));
+-      g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (tls));
+     }
+ 
+   if (cert)
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index 27f1309a..2c54dbf8 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -46,7 +46,6 @@ typedef struct _GTlsConnectionOpensslPrivate
+   BIO *bio;
+   guint8 *dtls_rx;
+   guint8 *dtls_tx;
+-  GMutex ssl_mutex;
+ 
+   gboolean shutting_down;
+ } GTlsConnectionOpensslPrivate;
+@@ -82,7 +81,6 @@ g_tls_connection_openssl_finalize (GObject *object)
+ 
+   g_free (priv->dtls_rx);
+   g_free (priv->dtls_tx);
+-  g_mutex_clear (&priv->ssl_mutex);
+ 
+   G_OBJECT_CLASS (g_tls_connection_openssl_parent_class)->finalize (object);
+ }
+@@ -94,6 +92,7 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+                 int                     ret,
+                 int                     err_code,
+                 gboolean                blocking,
++                gboolean                require_close_notify,
+                 GError                **error,
+                 const char             *err_prefix)
+ {
+@@ -202,7 +201,7 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+ #if OPENSSL_VERSION_MAJOR >= 3
+   if (reason == SSL_R_UNEXPECTED_EOF_WHILE_READING)
+     {
+-      if (g_tls_connection_get_require_close_notify (G_TLS_CONNECTION (openssl)))
++      if (require_close_notify)
+         {
+           g_set_error_literal (error, G_TLS_ERROR, G_TLS_ERROR_EOF,
+                                _("TLS connection closed unexpectedly"));
+@@ -231,7 +230,7 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+        */
+       if (ret == 0 && err == 0 && err_lib == 0 && (direction == G_IO_IN || direction == G_IO_OUT))
+         {
+-          if (!g_tls_connection_get_require_close_notify (G_TLS_CONNECTION (openssl)))
++          if (!require_close_notify)
+             {
+               status = G_TLS_CONNECTION_BASE_OK;
+               goto out;
+@@ -268,11 +267,14 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+   GTlsConnectionBase *tls;
+   GTlsConnectionOpensslPrivate *priv;
+   SSL *ssl;
++  gboolean require_close_notify;
+   gint64 deadline;
+   int ret, err_code;
+ 
+   tls = G_TLS_CONNECTION_BASE (openssl);
+   priv = g_tls_connection_openssl_get_instance_private (openssl);
++  require_close_notify =
++    g_tls_connection_get_require_close_notify (G_TLS_CONNECTION (openssl));
+ 
+   g_tls_connection_openssl_lock (openssl);
+   ssl = g_tls_connection_openssl_get_ssl (openssl);
+@@ -281,6 +283,7 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+     deadline = g_get_monotonic_time () + timeout;
+   else
+     deadline = -1;
++  g_tls_connection_openssl_unlock (openssl);
+ 
+   while (TRUE)
+     {
+@@ -316,7 +319,9 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+             break;
+         }
+ 
+-      status = end_openssl_io (openssl, direction, ssl, ret, err_code, TRUE, error, err_prefix);
++      g_tls_connection_openssl_lock (openssl);
++      status = end_openssl_io (openssl, direction, ssl, ret, err_code, TRUE, require_close_notify, error, err_prefix);
++      g_tls_connection_openssl_unlock (openssl);
+ 
+       if (status != G_TLS_CONNECTION_BASE_TRY_AGAIN)
+         break;
+@@ -339,11 +344,11 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+       if (io_timeout == 0)
+         break;
+ 
+-      g_tls_connection_openssl_unlock (openssl);
+       g_tls_bio_wait_available (priv->bio, io_needed, io_timeout, cancellable);
+-      g_tls_connection_openssl_lock (openssl);
+     }
+ 
++  g_tls_connection_openssl_lock (openssl);
++
+   if (status == G_TLS_CONNECTION_BASE_TRY_AGAIN)
+     {
+       if (timeout == 0)
+@@ -451,7 +456,6 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   if (!advertised_protocols)
+     return;
+ 
+-  g_tls_connection_openssl_lock (openssl);
+   ssl = g_tls_connection_openssl_get_ssl (openssl);
+ 
+   if (G_IS_TLS_SERVER_CONNECTION (tls))
+@@ -461,7 +465,6 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+       g_tls_log_debug (tls, "Setting ALPN Callback on %p", ctx);
+       SSL_CTX_set_alpn_select_cb (ctx, _openssl_alpn_select_cb, tls);
+ 
+-      g_tls_connection_openssl_unlock (openssl);
+       return;
+     }
+ 
+@@ -488,8 +491,6 @@ g_tls_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+         }
+       g_byte_array_unref (protocols);
+     }
+-
+-  g_tls_connection_openssl_unlock (openssl);
+ }
+ 
+ static GTlsCertificateFlags
+@@ -570,7 +571,6 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+ 
+   openssl = G_TLS_CONNECTION_OPENSSL (tls);
+ 
+-  g_tls_connection_openssl_lock (openssl);
+   ssl = g_tls_connection_openssl_get_ssl (openssl);
+   session = SSL_get_session (ssl);
+ 
+@@ -587,8 +587,6 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+   *protocol_version = session ? glib_protocol_version_from_openssl (SSL_SESSION_get_protocol_version (session))
+                               : G_TLS_PROTOCOL_VERSION_UNKNOWN;
+   *ciphersuite_name = g_strdup (SSL_get_cipher_name (ssl));
+-
+-  g_tls_connection_openssl_unlock (openssl);
+ }
+ 
+ static GTlsCertificate *
+@@ -602,13 +600,11 @@ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+ 
+   openssl = G_TLS_CONNECTION_OPENSSL (tls);
+ 
+-  g_tls_connection_openssl_lock (openssl);
+   ssl = g_tls_connection_openssl_get_ssl (openssl);
+ 
+   peer = SSL_get_peer_certificate (ssl);
+   if (!peer)
+     {
+-      g_tls_connection_openssl_unlock (openssl);
+       return NULL;
+     }
+ 
+@@ -616,15 +612,12 @@ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+   if (!certs)
+     {
+       X509_free (peer);
+-      g_tls_connection_openssl_unlock (openssl);
+       return NULL;
+     }
+ 
+   chain = g_tls_certificate_openssl_build_chain (peer, certs);
+   X509_free (peer);
+ 
+-  g_tls_connection_openssl_unlock (openssl);
+-
+   if (!chain)
+     return NULL;
+ 
+@@ -1147,11 +1140,7 @@ g_tls_connection_openssl_initable_iface_init (GInitableIface *iface)
+ static void
+ g_tls_connection_openssl_init (GTlsConnectionOpenssl *openssl)
+ {
+-  GTlsConnectionOpensslPrivate *priv;
+-
+-  priv = g_tls_connection_openssl_get_instance_private (openssl);
+ 
+-  g_mutex_init (&priv->ssl_mutex);
+ }
+ 
+ SSL *
+@@ -1173,21 +1162,15 @@ g_tls_connection_openssl_get_connection_from_ssl (SSL *ssl)
+ void
+ g_tls_connection_openssl_lock (GTlsConnectionOpenssl *openssl)
+ {
+-  GTlsConnectionOpensslPrivate *priv;
+-
+   g_return_if_fail (G_IS_TLS_CONNECTION_OPENSSL (openssl));
+ 
+-  priv = g_tls_connection_openssl_get_instance_private (openssl);
+-  g_mutex_lock (&priv->ssl_mutex);
++  g_tls_connection_base_lock (G_TLS_CONNECTION_BASE (openssl));
+ }
+ 
+ void
+ g_tls_connection_openssl_unlock (GTlsConnectionOpenssl *openssl)
+ {
+-  GTlsConnectionOpensslPrivate *priv;
+-
+   g_return_if_fail (G_IS_TLS_CONNECTION_OPENSSL (openssl));
+ 
+-  priv = g_tls_connection_openssl_get_instance_private (openssl);
+-  g_mutex_unlock (&priv->ssl_mutex);
++  g_tls_connection_base_unlock (G_TLS_CONNECTION_BASE (openssl));
+ }
+diff --git a/tls/openssl/gtlsserverconnection-openssl.c b/tls/openssl/gtlsserverconnection-openssl.c
+index 24816d83..ed221992 100644
+--- a/tls/openssl/gtlsserverconnection-openssl.c
++++ b/tls/openssl/gtlsserverconnection-openssl.c
+@@ -134,8 +134,6 @@ g_tls_server_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   GTlsConnectionBaseClass *base_class = G_TLS_CONNECTION_BASE_CLASS (g_tls_server_connection_openssl_parent_class);
+   int req_mode = 0;
+ 
+-  g_tls_connection_openssl_lock (G_TLS_CONNECTION_OPENSSL (tls));
+-
+   switch (openssl->authentication_mode)
+     {
+     case G_TLS_AUTHENTICATION_REQUIRED:
+@@ -154,8 +152,6 @@ g_tls_server_connection_openssl_prepare_handshake (GTlsConnectionBase  *tls,
+   /* FIXME: is this ok? */
+   SSL_set_verify_depth (openssl->ssl, 0);
+ 
+-  g_tls_connection_openssl_unlock (G_TLS_CONNECTION_OPENSSL (tls));
+-
+   if (base_class->prepare_handshake)
+     base_class->prepare_handshake (tls, advertised_protocols);
+ }
+-- 
+GitLab
+
