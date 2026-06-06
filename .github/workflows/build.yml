@@ -1843,12 +1843,14 @@ jobs:
       - name: Download wavpack
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.bz2 || curl ${{env.curl_options}} https://github.com/dbry/WavPack/releases/download/${{env.wavpack_version}}/wavpack-${{env.wavpack_version}}.tar.bz2
+        run: |
+          curl ${{env.curl_options}} https://www.wavpack.com/wavpack-${{env.wavpack_version}}.tar.xz || \
+          curl ${{env.curl_options}} https://github.com/dbry/WavPack/releases/download/${{env.wavpack_version}}/wavpack-${{env.wavpack_version}}.tar.xz
 
       - name: Extract wavpack
         shell: bash
         working-directory: build
-        run: tar -xf ../downloads/wavpack-${{env.wavpack_version}}.tar.bz2
+        run: tar -xf ../downloads/wavpack-${{env.wavpack_version}}.tar.xz
 
       - name: Configure wavpack
         shell: cmd
