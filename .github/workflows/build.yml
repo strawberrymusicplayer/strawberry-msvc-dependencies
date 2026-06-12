@@ -151,6 +151,8 @@ env:
 
   CL: '-MP'
 
+  rust_toolchain_version: '1.87.0'
+
 
 jobs:
 
@@ -322,9 +324,10 @@ jobs:
 
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        if: matrix.arch == 'x86_64'
+        uses: dtolnay/rust-toolchain@${{env.rust_toolchain_version}}
         with:
-          toolchain: stable
+          toolchain: ${{env.rust_toolchain_version}}
           components: rustfmt
 
 
