@@ -3008,7 +3008,7 @@ jobs:
       - name: Install cargo-c
         if: matrix.arch == 'x86_64'
         shell: cmd
-        run: cargo install --locked cargo-c --version 0.10.15+cargo-0.90.0
+        run: cargo install --locked cargo-c --version 0.10.23+cargo-0.97.1
 
       - name: Create build directory
         if: matrix.arch == 'x86_64'
