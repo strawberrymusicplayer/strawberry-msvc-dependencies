@@ -329,7 +329,7 @@ jobs:
 
       - name: Setup Rust
         if: matrix.arch == 'x86_64'
-        uses: dtolnay/rust-toolchain@1.96.0
+        uses: dtolnay/rust-toolchain@1.100.0
         with:
           toolchain: ${{steps.rust_toolchain.outputs.channel}}
           components: rustfmt
