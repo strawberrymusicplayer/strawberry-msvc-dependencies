@@ -323,9 +323,9 @@ jobs:
 
       - name: Setup Rust
         if: matrix.arch == 'x86_64'
-        uses: dtolnay/rust-toolchain@1.87.0
+        uses: dtolnay/rust-toolchain@1.96.0
         with:
-          toolchain: 1.87.0
+          toolchain: 1.96.0
           components: rustfmt
 
 
