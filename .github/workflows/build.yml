@@ -114,7 +114,7 @@ env:
 
   fftw_source_version: '3.3.11'
 
-  fftw_mingw_version: '3.3.11.20'
+  fftw_mingw_version: '3.3.11.23'
 
   ffmpeg_version: '8.1'
 
