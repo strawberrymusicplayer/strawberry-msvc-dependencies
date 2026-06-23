@@ -68,7 +68,7 @@ env:
 
   jasper_version: '4.2.9'
 
-  tiff_version: '4.7.1'
+  tiff_version: '4.7.2'
 
   libwebp_version: '1.6.0'
 
