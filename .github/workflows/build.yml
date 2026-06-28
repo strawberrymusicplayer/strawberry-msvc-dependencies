@@ -1360,7 +1360,7 @@ jobs:
       - name: Configure libpsl
         shell: cmd
         working-directory: build/libpsl-${{env.libpsl_version}}
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Druntime=libicu build
 
       - name: Build libpsl
         shell: cmd
