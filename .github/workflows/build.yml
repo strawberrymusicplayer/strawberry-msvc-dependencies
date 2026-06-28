@@ -8,7 +8,7 @@ env:
 
   win_flex_bison_version: '2.5.25'
 
-  pkgconf_version: '2.9.94'
+  pkgconf_version: '2.9.95'
 
   proxy_libintl_version: '0.5'
 
