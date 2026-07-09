@@ -88,7 +88,7 @@ env:
 
   mpg123_version: '1.33.6'
 
-  lame_version: '3.100'
+  lame_version: '3.101'
 
   twolame_version: '0.4.0'
 
@@ -2061,29 +2061,22 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/lame-${{env.lame_version}}.tar.gz
 
-      - name: Patch lame (x86_64)
-        if: matrix.arch == 'x86_64'
+      - name: Patch lame
         shell: bash
         working-directory: build/lame-${{env.lame_version}}
-        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:X64/g' Makefile.MSVC
-
-      - name: Patch lame (arm64)
-        if: matrix.arch == 'arm64'
-        shell: bash
-        working-directory: build/lame-${{env.lame_version}}
-        run: sed -i 's/MACHINE = \/machine:.*/MACHINE = \/machine:ARM64/g' Makefile.MSVC
-
-      - name: Build lame (x86)
-        if: matrix.arch == 'x86'
-        shell: cmd
-        working-directory: build/lame-${{env.lame_version}}
-        run: nmake -f Makefile.MSVC MSVCVER=X86 libmp3lame.dll
+        run: patch -p1 < ../../patches/lame-msvc.patch
 
       - name: Build lame (x86_64)
-        if: matrix.arch == 'x86_64' || matrix.arch == 'arm64'
+        if: matrix.arch == 'x86_64'
         shell: cmd
         working-directory: build/lame-${{env.lame_version}}
-        run: nmake -f Makefile.MSVC MSVCVER=Win64 libmp3lame.dll
+        run: nmake -f Makefile.MSVC MSVCVER=X64 libmp3lame.dll
+
+      - name: Build lame (arm64)
+        if: matrix.arch == 'arm64'
+        shell: cmd
+        working-directory: build/lame-${{env.lame_version}}
+        run: nmake -f Makefile.MSVC MSVCVER=ARM64 libmp3lame.dll
 
       - name: Install lame
         shell: cmd
