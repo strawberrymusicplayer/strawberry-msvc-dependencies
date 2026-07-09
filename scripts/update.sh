@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-ci_file=".github/workflows/build.yml"
+ci_file=".github/workflows/build.yaml"
 curl_options="-s -f -L"
 
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
@@ -365,9 +365,9 @@ function update_package() {
     if [ $? -ne 0 ]; then
       status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
       git checkout -b "${branch}" || exit 1
-      sed -i "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g" .github/workflows/build.yml || exit 1
-      git commit -m "Update ${package_name}" .github/workflows/build.yml || exit 1
-      git add .github/workflows/build.yml || exit 1
+      sed -i "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g" "${ci_file}" || exit 1
+      git commit -m "Update ${package_name}" "${ci_file}" || exit 1
+      git add "${ci_file}" || exit 1
       git push origin "${branch}" || exit 1
       gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
       git checkout . >/dev/null 2>&1 || exit 1
