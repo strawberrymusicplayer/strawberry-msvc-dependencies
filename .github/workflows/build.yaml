@@ -88,7 +88,7 @@ env:
 
   mpg123_version: '1.33.6'
 
-  lame_version: '3.101'
+  lame_version: '4.0'
 
   twolame_version: '0.4.0'
 
