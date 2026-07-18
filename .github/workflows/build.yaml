@@ -90,8 +90,6 @@ env:
 
   lame_version: '4.0'
 
-  twolame_version: '0.4.0'
-
   musepack_version: '475'
 
   libopenmpt_version: '0.8.7'
@@ -252,7 +250,6 @@ jobs:
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
           echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
-          echo "gst_twolame=enabled" >> $GITHUB_ENV
           echo "opus_disable_intrinsics=OFF" >> $GITHUB_ENV
 
       - name: Set arch variables (arm64)
@@ -269,7 +266,6 @@ jobs:
           echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
           echo "boost_architecture=arm" >> $GITHUB_ENV
           echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
-          echo "gst_twolame=disabled" >> $GITHUB_ENV
           echo "opus_disable_intrinsics=ON" >> $GITHUB_ENV
 
       - name: Set extra version variables
@@ -2113,76 +2109,6 @@ jobs:
           pkg-config libmp3lame --libs --cflags
 
 
-      - name: Download twolame
-        if: matrix.arch != 'arm64'
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror1}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror2}}/project/twolame/twolame/${{env.twolame_version}}/twolame-${{env.twolame_version}}.tar.gz
-
-      - name: Extract twolame
-        if: matrix.arch != 'arm64'
-        shell: bash
-        working-directory: build
-        run: tar -xf ../downloads/twolame-${{env.twolame_version}}.tar.gz
-
-      - name: Patch twolame source
-        if: matrix.arch != 'arm64'
-        shell: bash
-        working-directory: build/twolame-${{env.twolame_version}}
-        run: patch -p1 < ../../patches/twolame.patch
-
-      - name: Upgrade twolame project
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        working-directory: build/twolame-${{env.twolame_version}}/win32
-        run: start /w devenv.exe libtwolame_dll.sln /upgrade
-
-      - name: Patch twolame project for x86_64
-        if: matrix.arch == 'x86_64'
-        shell: bash
-        working-directory: build/twolame-${{env.twolame_version}}/win32
-        run: |
-          sed -i 's/Win32/x64/g' *.sln *.vcproj *.vcxproj
-          sed -i 's/MachineX86/MachineX64/g' *.sln *.vcxproj
-
-      - name: Build twolame
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        working-directory: build/twolame-${{env.twolame_version}}/win32
-        run: msbuild libtwolame_dll.sln /property:Configuration=${{env.buildtype}} /p:platform=${{env.msbuild_platform}}
-
-      - name: Install twolame
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        working-directory: build/twolame-${{env.twolame_version}}/win32
-        run: |
-          copy ..\libtwolame\twolame.h ${{env.prefix_path_backslash}}\include\
-          copy lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\
-          copy lib\*.dll ${{env.prefix_path_backslash}}\bin\
-          copy ${{env.prefix_path_backslash}}\lib\libtwolame_dll.lib ${{env.prefix_path_backslash}}\lib\twolame${{env.lib_postfix}}.lib
-
-      - name: Create twolame.pc
-        if: matrix.arch != 'arm64'
-        shell: bash
-        run: |
-          echo "prefix=${{env.prefix_path_forwardslash}}" >${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "exec_prefix=${{env.prefix_path_forwardslash}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "libdir=${{env.prefix_path_forwardslash}}/lib" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "includedir=${{env.prefix_path_forwardslash}}/include" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Name: lame" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Description: optimised MPEG Audio Layer 2 (MP2) encoder based on tooLAME" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "URL: https://www.twolame.org/" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Version: ${{env.twolame_version}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Libs: -L\${libdir} -ltwolame${{env.lib_postfix}}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-          echo "Cflags: -I\${includedir}" >>${{env.prefix_path_unix}}/lib/pkgconfig/twolame.pc
-
-      - name: Check twolame
-        if: matrix.arch != 'arm64'
-        shell: cmd
-        run: pkg-config twolame --libs --cflags
-
-
       - name: Download musepack
         shell: bash
         working-directory: downloads
@@ -2767,11 +2693,8 @@ jobs:
           -Daudiotestsrc=enabled
           -Ddsd=enabled
           -Dencoding=enabled
-          -Dgio=enabled
-          -Dgio-typefinder=enabled
           -Dpbtypes=enabled
           -Dplayback=enabled
-          -Dtcp=enabled
           -Dtypefind=enabled
           -Dvolume=enabled
           -Dogg=enabled
@@ -2831,6 +2754,7 @@ jobs:
           -Disomp4=enabled
           -Dreplaygain=enabled
           -Drtp=enabled
+          -Drtpmanager=enabled
           -Drtsp=enabled
           -Dspectrum=enabled
           -Dudp=enabled
@@ -2844,7 +2768,6 @@ jobs:
           -Dmpg123=enabled
           -Dspeex=enabled
           -Dtaglib=enabled
-          -Dtwolame=${{env.gst_twolame}}
           -Dwaveform=enabled
           -Dwavpack=enabled
           -Dsoup=enabled
@@ -2897,17 +2820,9 @@ jobs:
           -Dgpl=enabled
           -Daiff=enabled
           -Dasfmux=enabled
-          -Did3tag=enabled
-          -Dmpegdemux=enabled
-          -Dmpegpsmux=enabled
           -Dmpegtsdemux=enabled
-          -Dmpegtsmux=enabled
-          -Dremovesilence=enabled
-          -Daes=enabled
           -Dasio=enabled
-          -Dbluez=enabled
           -Dbs2b=enabled
-          -Dchromaprint=enabled
           -Ddash=enabled
           -Ddirectsound=enabled
           -Dfaac=enabled
@@ -3377,7 +3292,6 @@ jobs:
           echo "* Speex ${{env.speex_version}}" >> "${{env.release_notes_file}}"
           echo "* mpg123 ${{env.mpg123_version}}" >> "${{env.release_notes_file}}"
           echo "* LAME ${{env.lame_version}}" >> "${{env.release_notes_file}}"
-          echo "* TwoLAME ${{env.twolame_version}}" >> "${{env.release_notes_file}}"
           echo "* Musepack ${{env.musepack_version}}" >> "${{env.release_notes_file}}"
           echo "* libopenmpt ${{env.libopenmpt_version}}" >> "${{env.release_notes_file}}"
           echo "* libgme ${{env.libgme_version}}" >> "${{env.release_notes_file}}"
