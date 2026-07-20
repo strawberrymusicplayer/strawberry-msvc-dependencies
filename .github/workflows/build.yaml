@@ -98,7 +98,7 @@ env:
 
   faad2_version: '2.11.2'
 
-  faac_version: '1.50'
+  faac_version: '2.0'
 
   fdk_aac_version: '2.0.3'
 
@@ -2795,6 +2795,11 @@ jobs:
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/gst-plugins-bad-${{env.gstreamer_version}}.tar.xz
+
+      - name: Patch gst-plugins-bad
+        shell: bash
+        working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
+        run: patch -p 3 < ../../patches/gstreamer-faac2.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd
