@@ -442,11 +442,6 @@ jobs:
         working-directory: build
         run: git clone https://github.com/yasm/yasm.git
 
-      - name: Patch yasm
-        shell: bash
-        working-directory: build/yasm
-        run: patch -p1 < ../../patches/yasm-cmake.patch
-
       - name: Configure yasm
         shell: cmd
         working-directory: build/yasm
