@@ -154,15 +154,6 @@ function update_package() {
     "openssl")
       package_version_latest=$(curl ${curl_options} 'https://www.openssl.org/source/' | sed -n 's,.*openssl-\([0-9][0-9a-z.]*\)\.tar.*,\1,p' | sort -V | tail -1)
       ;;
-    "gmp")
-      package_version_latest=$(latest_github_release "ShiftMediaProject" "gmp")
-      ;;
-    "nettle")
-      package_version_latest=$(latest_github_release "ShiftMediaProject" "nettle")
-      ;;
-    "gnutls")
-      package_version_latest=$(latest_github_release "ShiftMediaProject" "gnutls")
-      ;;
     "libpng")
       package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/p/libpng/code/ref/master/tags/' | sed -n 's,.*<a[^>]*>v\([0-9][^<]*\)<.*,\1,p' | grep -v alpha | grep -v beta | grep -v rc | sort -V | tail -1)
       ;;
