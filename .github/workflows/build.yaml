@@ -116,7 +116,7 @@ env:
 
   gstreamer_plugins_rs_version: '0.15.3'
 
-  qt_version: '6.11.1'
+  qt_version: '6.11.2'
 
   kdsingleapplication_version: '1.2.1'
 
@@ -2694,9 +2694,7 @@ jobs:
       - name: Patch qtbase
         shell: bash
         working-directory: build/qtbase-everywhere-src-${{env.qt_version}}
-        run: |
-          patch -p1 < ../../patches/qtbase-qwindowswindow.patch
-          patch -p1 < ../../patches/qtbase-openssl4.patch
+        run: patch -p1 < ../../patches/qtbase-qwindowswindow.patch
 
       - name: Configure qtbase
         shell: cmd
