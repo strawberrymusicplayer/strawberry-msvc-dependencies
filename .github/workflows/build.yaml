@@ -96,7 +96,7 @@ env:
 
   fdk_aac_version: '2.0.3'
 
-  utfcpp_version: '4.1.1'
+  utfcpp_version: '4.2.0'
 
   taglib_version: '2.3.1'
 
