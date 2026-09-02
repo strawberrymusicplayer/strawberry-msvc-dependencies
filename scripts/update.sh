@@ -161,7 +161,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "libjpeg-turbo" "libjpeg-turbo")
       ;;
     "pcre2")
-      package_version_latest=$(latest_github_release "PhilipHazel" "pcre2" | sed 's/^pcre2\-//g' | grep -iv rc | sort -V | tail -1)
+      package_version_latest=$(latest_github_release "PCRE2Project" "pcre2" | sed 's/^pcre2\-//g' | grep -iv rc | sort -V | tail -1)
       ;;
     "bzip2")
       package_version_latest=$(curl ${curl_options} 'https://sourceware.org/pub/bzip2/' | grep 'bzip2-' | sed -n 's,.*bzip2-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
