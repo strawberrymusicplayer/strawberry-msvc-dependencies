@@ -665,7 +665,7 @@ jobs:
       - name: Download pcre2
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2 || curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/pcre2-${{env.pcre2_version}}.tar.bz2
+        run: curl ${{env.curl_options}} https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${{env.pcre2_version}}/pcre2-${{env.pcre2_version}}.tar.bz2 || curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/pcre2-${{env.pcre2_version}}.tar.bz2
 
       - name: Extract pcre2
         shell: bash
