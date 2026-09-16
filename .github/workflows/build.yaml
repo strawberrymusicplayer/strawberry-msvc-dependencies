@@ -108,7 +108,7 @@ env:
 
   fftw_mingw_version: '3.3.11.23'
 
-  ffmpeg_version: '8.1'
+  ffmpeg_version: '9.0'
 
   chromaprint_version: '1.6.1'
 
@@ -2270,7 +2270,7 @@ jobs:
       - name: Configure ffmpeg
         shell: cmd
         working-directory: build/ffmpeg
-        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Dgpl=enabled -Diconv=disabled build
+        run: meson setup --buildtype=${{env.meson_buildtype}} --default-library=shared --prefix=${{env.prefix_path_backslash}} --pkg-config-path=${{env.prefix_path_backslash}}\lib\pkgconfig --wrap-mode=nodownload -Dc_args=-I${{env.prefix_path_backslash}}\include -Dtests=disabled -Dcheckasm=disabled -Dgpl=enabled -Diconv=disabled build
 
       - name: Build ffmpeg
         shell: cmd
