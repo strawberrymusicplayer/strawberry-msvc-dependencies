@@ -2519,7 +2519,9 @@ jobs:
       - name: Patch gst-plugins-bad
         shell: bash
         working-directory: build/gst-plugins-bad-${{env.gstreamer_version}}
-        run: patch -p 3 < ../../patches/gstreamer-faac2.patch
+        run: |
+          patch -p 3 < ../../patches/gstreamer-faac2.patch
+          patch -p 1 < ../../patches/gstreamer-asio.patch
 
       - name: Configure gst-plugins-bad
         shell: cmd
