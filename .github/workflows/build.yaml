@@ -30,6 +30,8 @@ env:
 
   brotli_version: '1.2.0'
 
+  uchardet_version: '0.0.8'
+
   icu4c_version: '78.3'
 
   pixman_version: '0.46.4'
@@ -797,6 +799,41 @@ jobs:
         shell: bash
         working-directory: build
         run: rm -rf *
+
+
+      - name: Download uchardet
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://www.freedesktop.org/software/uchardet/releases/uchardet-${{env.uchardet_version}}.tar.xz || curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/uchardet-${{env.uchardet_version}}.tar.xz
+
+      - name: Extract uchardet
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/uchardet-${{env.uchardet_version}}.tar.xz
+
+      - name: Patch uchardet
+        shell: bash
+        working-directory: build/uchardet-${{env.uchardet_version}}
+        run: sed -i "/^Libs.private.*/d" uchardet.pc.in
+
+      - name: Configure uchardet
+        shell: cmd
+        working-directory: build/uchardet-${{env.uchardet_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX=${{env.prefix_path_backslash}} -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC=OFF -DBUILD_BINARY=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+      - name: Build uchardet
+        shell: cmd
+        working-directory: build/uchardet-${{env.uchardet_version}}/build
+        run: cmake --build .
+
+      - name: Install uchardet
+        shell: cmd
+        working-directory: build/uchardet-${{env.uchardet_version}}/build
+        run: cmake --install .
+
+      - name: Check uchardet
+        shell: cmd
+        run: pkg-config uchardet --libs --cflags
 
 
       - name: Download icu
@@ -2990,6 +3027,7 @@ jobs:
           echo "* bzip2 ${{env.bzip2_version}}" >> "${{env.release_notes_file}}"
           echo "* xz ${{env.xz_version}}" >> "${{env.release_notes_file}}"
           echo "* Brotli ${{env.brotli_version}}" >> "${{env.release_notes_file}}"
+          echo "* uchardet ${{env.uchardet_version}}" >> "${{env.release_notes_file}}"
           echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
           echo "* pixman ${{env.pixman_version}}" >> "${{env.release_notes_file}}"
           echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
