@@ -172,6 +172,9 @@ function update_package() {
     "brotli")
       package_version_latest=$(latest_github_release "google" "brotli")
       ;;
+    "uchardet")
+      package_version_latest=$(curl ${curl_options} 'https://www.freedesktop.org/software/uchardet/releases/' | sed -n 's,.*uchardet-\([0-9][^"]*\)\.tar\.xz.*,\1,p' | sort -V | tail -1)
+      ;;
     "icu4c")
       package_version_latest=$(latest_github_release "unicode-org" "icu" | sed 's/release\-//g' | tr '\-' '\.')
       ;;
