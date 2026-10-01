@@ -4,7 +4,7 @@ on: [push, pull_request]
 env:
   nasm_version: '3.02'
 
-  yasm_version: '1.3.0'
+  yasm_version: '09d1bc90ed53d0ec3e9b074f111058cbf262ed56'
 
   win_flex_bison_version: '2.5.25'
 
@@ -46,6 +46,8 @@ env:
 
   dlfcn_version: '1.4.2'
 
+  libffi_version: '83d0cfd00d7d37af4b4349511d29f1f0512621b3'
+
   libpsl_version: '0.23.3'
 
   orc_version: '0.4.44'
@@ -56,7 +58,7 @@ env:
 
   libsoup_version: '3.8.0'
 
-  glib_networking_version: '2.90.0'
+  glib_networking_version: 'cec3901e7ee31c3eb5e075c45c16389b36ed7d52'
 
   freetype_version: '2.14.3'
 
@@ -122,9 +124,13 @@ env:
 
   kdsingleapplication_version: '1.2.1'
 
+  qtsparkle_version: '7c0a4e44fec9a2018cf9e40c0ea749df080c7e09'
+
   sparsehash_version: '2.0.4'
 
   pe_parse_version: '2.1.1'
+
+  pe_util_version: 'dc5dda5cbf89b6d81becaf9d2ddceedad7988346'
 
   max_releases: '6'
 
@@ -269,7 +275,6 @@ jobs:
         run: |
           echo "boost_version_underscore=$(echo ${{env.boost_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
           echo "glib_version_short=$(echo ${{env.glib_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
-          echo "glib_networking_version_short=$(echo ${{env.glib_networking_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "expat_version_underscore=$(echo ${{env.expat_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
@@ -454,6 +459,11 @@ jobs:
         shell: bash
         working-directory: build
         run: git clone https://github.com/yasm/yasm.git
+
+      - name: Checkout yasm
+        shell: bash
+        working-directory: build/yasm
+        run: git checkout "${{env.yasm_version}}"
 
       - name: Configure yasm
         shell: cmd
@@ -1102,6 +1112,11 @@ jobs:
         working-directory: build
         run: git clone https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi
 
+      - name: Checkout libffi
+        shell: bash
+        working-directory: build/libffi
+        run: git checkout "${{env.libffi_version}}"
+
       - name: Configure libffi
         shell: cmd
         working-directory: build/libffi
@@ -1320,6 +1335,11 @@ jobs:
         shell: bash
         working-directory: build
         run: git clone https://gitlab.gnome.org/GNOME/glib-networking.git
+
+      - name: Checkout glib-networking
+        shell: bash
+        working-directory: build/glib-networking
+        run: git checkout "${{env.glib_networking_version}}"
 
       - name: Patch glib-networking
         shell: bash
@@ -2887,6 +2907,11 @@ jobs:
         working-directory: build
         run: git clone https://github.com/jonaski/qtsparkle.git qtsparkle-git
 
+      - name: Checkout qtsparkle
+        shell: bash
+        working-directory: build/qtsparkle-git
+        run: git checkout "${{env.qtsparkle_version}}"
+
       - name: Configure qtsparkle
         shell: cmd
         working-directory: build/qtsparkle-git
@@ -2993,7 +3018,14 @@ jobs:
       - name: Download pe-util
         shell: bash
         working-directory: build
-        run: git clone --depth 1 --recurse-submodules https://github.com/gsauthof/pe-util
+        run: git clone https://github.com/gsauthof/pe-util
+
+      - name: Checkout pe-util
+        shell: bash
+        working-directory: build/pe-util
+        run: |
+          git checkout "${{env.pe_util_version}}"
+          git submodule update --init --recursive
 
       - name: Configure pe-util
         shell: cmd
@@ -3057,6 +3089,7 @@ jobs:
           echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
           echo "* nghttp2 ${{env.nghttp2_version}}" >> "${{env.release_notes_file}}"
           echo "* dlfcn ${{env.dlfcn_version}}" >> "${{env.release_notes_file}}"
+          echo "* libffi ${{env.libffi_version}}" >> "${{env.release_notes_file}}"
           echo "* libpsl ${{env.libpsl_version}}" >> "${{env.release_notes_file}}"
           echo "* orc ${{env.orc_version}}" >> "${{env.release_notes_file}}"
           echo "* SQLite ${{env.sqlite3_version}}" >> "${{env.release_notes_file}}"
@@ -3093,9 +3126,11 @@ jobs:
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer Rust Plugins ${{env.gstreamer_plugins_rs_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
+          echo "* qtsparkle ${{env.qtsparkle_version}}" >> "${{env.release_notes_file}}"
           echo "* KDSingleApplication ${{env.kdsingleapplication_version}}" >> "${{env.release_notes_file}}"
           echo "* sparsehash ${{env.sparsehash_version}}" >> "${{env.release_notes_file}}"
           echo "* pe-parse ${{env.pe_parse_version}}" >> "${{env.release_notes_file}}"
+          echo "* pe-util ${{env.pe_util_version}}" >> "${{env.release_notes_file}}"
 
       - name: Create new release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'

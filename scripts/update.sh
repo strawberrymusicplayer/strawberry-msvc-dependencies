@@ -30,6 +30,12 @@ function latest_github_release() {
 
 }
 
+function latest_git_commit() {
+
+  git ls-remote "$1" HEAD | cut -f 1
+
+}
+
 function update_repo() {
 
   git fetch >/dev/null 2>&1 || exit 1
@@ -126,8 +132,10 @@ function update_package() {
   local package_name
   local package_version_current
   local package_version_latest
+  local package_git
 
   package_name="${1}"
+  package_git=0
   package_version_current=$(cat "${ci_file}" | sed -n "s,^  ${package_name}_version: \(.*\)\$,\1,p" | tr -d "\'")
 
   if [ "${package_version_current}" = "" ]; then
@@ -140,7 +148,8 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://www.nasm.us/pub/nasm/releasebuilds/?C=M;O=D' | sed -n 's,.*href="\([0-9\.]*[^a-z]\)/".*,\1,p' | sort -V | tail -1)
       ;;
     "yasm")
-      package_version_latest=$(latest_github_release "yasm" "yasm")
+      package_version_latest=$(latest_git_commit "https://github.com/yasm/yasm.git")
+      package_git=1
       ;;
     "win_flex_bison")
       package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/winflexbison/files/' | sed -n 's,.*<a href=".*files\/win_flex_bison-\(.*\)\.zip\/.*,\1,p' | grep -v 'latest' | sort -V | tail -1)
@@ -196,6 +205,10 @@ function update_package() {
     "dlfcn")
       package_version_latest=$(latest_github_release "dlfcn-win32" "dlfcn-win32")
       ;;
+    "libffi")
+      package_version_latest=$(latest_git_commit "https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi.git")
+      package_git=1
+      ;;
     "libpsl")
       package_version_latest=$(latest_github_release "rockdaboot" "libpsl")
       ;;
@@ -212,7 +225,8 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "glib_networking")
-      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/glib-networking/tags' | sed -n "s,.*glib-networking-\([0-9]\+\.[0-9]*[0-9]*\.[^']*\)\.tar.*,\1,p" | grep -v 'alpha' | grep -v 'beta' | grep -v '\.rc' | sort -V | tail -1)
+      package_version_latest=$(latest_git_commit "https://gitlab.gnome.org/GNOME/glib-networking.git")
+      package_git=1
       ;;
     "freetype")
       package_version_latest=$(curl ${curl_options} 'https://sourceforge.net/projects/freetype/files/freetype2/' | sed -n 's,.*/projects/.*/\([0-9][^"]*\)/".*,\1,p' | sort -V | tail -1)
@@ -302,6 +316,10 @@ function update_package() {
     "kdsingleapplication")
       package_version_latest=$(latest_github_release "KDAB" "KDSingleApplication")
       ;;
+    "qtsparkle")
+      package_version_latest=$(latest_git_commit "https://github.com/jonaski/qtsparkle.git")
+      package_git=1
+      ;;
     "abseil_cpp")
       package_version_latest=$(latest_github_release "abseil" "abseil-cpp")
       ;;
@@ -329,6 +347,10 @@ function update_package() {
     "pe_parse")
       package_version_latest=$(latest_github_release "trailofbits" "pe-parse")
       ;;
+    "pe_util")
+      package_version_latest=$(latest_git_commit "https://github.com/gsauthof/pe-util.git")
+      package_git=1
+      ;;
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
@@ -341,7 +363,11 @@ function update_package() {
     return
   fi
 
-  package_version_highest=$(echo "${package_version_current} ${package_version_latest}" | tr ' ' '\n' | sort -V | tail -1)
+  if [ "${package_git}" = "1" ]; then
+    package_version_highest="${package_version_latest}"
+  else
+    package_version_highest=$(echo "${package_version_current} ${package_version_latest}" | tr ' ' '\n' | sort -V | tail -1)
+  fi
 
   if [ "${package_version_highest}" = "" ]; then
     error "Could not get highest version for ${package}."
