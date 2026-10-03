@@ -38,8 +38,6 @@ env:
 
   expat_version: '2.8.5'
 
-  boost_version: '1.92.0'
-
   libxml2_version: '2.15.4'
 
   nghttp2_version: '1.70.0'
@@ -250,7 +248,6 @@ jobs:
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
-          echo "boost_architecture=x86" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
           echo "opus_disable_intrinsics=OFF" >> $GITHUB_ENV
 
@@ -266,14 +263,12 @@ jobs:
           echo "libdir=libARM64" >> $GITHUB_ENV
           echo "bindir=binARM64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
-          echo "boost_architecture=arm" >> $GITHUB_ENV
           echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
           echo "opus_disable_intrinsics=ON" >> $GITHUB_ENV
 
       - name: Set extra version variables
         shell: bash
         run: |
-          echo "boost_version_underscore=$(echo ${{env.boost_version}} | sed 's/\./_/g')" >> $GITHUB_ENV
           echo "glib_version_short=$(echo ${{env.glib_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "libsoup_version_short=$(echo ${{env.libsoup_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
           echo "qt_version_short=$(echo ${{env.qt_version}} | cut -d '.' -f 1-2)" >> $GITHUB_ENV
@@ -1015,27 +1010,6 @@ jobs:
         run: pkg-config expat --libs --cflags
 
 
-      - name: Download Boost
-        shell: bash
-        working-directory: downloads
-        run: curl ${{env.curl_options}} https://archives.boost.io/release/${{env.boost_version}}/source/boost_${{env.boost_version_underscore}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror1}}/project/boost/boost/${{env.boost_version}}/boost_${{env.boost_version_underscore}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror2}}/project/boost/boost/${{env.boost_version}}/boost_${{env.boost_version_underscore}}.tar.gz
-
-      - name: Extract Boost
-        shell: bash
-        working-directory: build
-        run: tar -xf  ../downloads/boost_${{env.boost_version_underscore}}.tar.gz
-
-      - name: Configure Boost
-        shell: cmd
-        working-directory: build/boost_${{env.boost_version_underscore}}
-        run: bootstrap.bat
-
-      - name: Build and install Boost
-        shell: cmd
-        working-directory: build/boost_${{env.boost_version_underscore}}
-        run: b2.exe -a -q -j 4 -d1 --ignore-site-config --stagedir="stage" --layout="tagged" --prefix="${{env.prefix_path_forwardslash}}" --exec-prefix="${{env.prefix_path_forwardslash}}\bin" --libdir="${{env.prefix_path_forwardslash}}\lib" --includedir="${{env.prefix_path_forwardslash}}\include" --with-headers toolset=msvc architecture=${{env.boost_architecture}} link=shared runtime-link=shared threadapi=win32 threading=multi variant=${{env.buildtype}} install
-
-
       - name: Cleanup build directory
         shell: bash
         working-directory: build
@@ -1367,22 +1341,22 @@ jobs:
         working-directory: downloads
         run: curl ${{env.curl_options}} https://${{env.sourceforge_mirror1}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz || curl ${{env.curl_options}} https://${{env.sourceforge_mirror2}}/project/freetype/freetype2/${{env.freetype_version}}/freetype-${{env.freetype_version}}.tar.gz
 
-      - name: Extract freetype (boostrap)
+      - name: Extract freetype (bootstrap)
         shell: bash
         working-directory: build
         run: tar -xf ../downloads/freetype-${{env.freetype_version}}.tar.gz
 
-      - name: Configure freetype (boostrap)
+      - name: Configure freetype (bootstrap)
         shell: cmd
         working-directory: build/freetype-${{env.freetype_version}}
         run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
-      - name: Build freetype (boostrap)
+      - name: Build freetype (bootstrap)
         shell: cmd
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --build .
 
-      - name: Install freetype (boostrap)
+      - name: Install freetype (bootstrap)
         shell: cmd
         working-directory: build/freetype-${{env.freetype_version}}/build
         run: cmake --install .
@@ -3085,7 +3059,6 @@ jobs:
           echo "* ICU4C ${{env.icu4c_version}}" >> "${{env.release_notes_file}}"
           echo "* pixman ${{env.pixman_version}}" >> "${{env.release_notes_file}}"
           echo "* Expat ${{env.expat_version}}" >> "${{env.release_notes_file}}"
-          echo "* Boost ${{env.boost_version}}" >> "${{env.release_notes_file}}"
           echo "* libxml2 ${{env.libxml2_version}}" >> "${{env.release_notes_file}}"
           echo "* nghttp2 ${{env.nghttp2_version}}" >> "${{env.release_notes_file}}"
           echo "* dlfcn ${{env.dlfcn_version}}" >> "${{env.release_notes_file}}"
