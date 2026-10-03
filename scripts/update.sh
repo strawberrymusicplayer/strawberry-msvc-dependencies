@@ -193,9 +193,6 @@ function update_package() {
     "expat")
       package_version_latest=$(latest_github_release "libexpat" "libexpat" | sed 's/R_//g' | tr '_' '.')
       ;;
-    "boost")
-      package_version_latest=$(curl ${curl_options} 'https://www.boost.org/users/download/' | sed -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | grep -v beta | sort -V | tail -1)
-      ;;
     "libxml2")
       package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libxml2/tags' | sed -n "s,.*<a [^>]\+>v\([0-9,\.]\+\)<.*,\\1,p" | head -1)
       ;;
