@@ -96,7 +96,7 @@ env:
 
   faac_version: '2.2'
 
-  fdk_aac_version: '2.0.3'
+  fdk_aac_version: '3.0.0'
 
   utfcpp_version: '4.2.1'
 
