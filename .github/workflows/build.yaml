@@ -112,7 +112,7 @@ env:
 
   ffmpeg_version: '9.0'
 
-  chromaprint_version: '1.6.1'
+  chromaprint_version: '1.6.2'
 
   gstreamer_version: '1.28.8'
 
