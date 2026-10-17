@@ -154,7 +154,7 @@ jobs:
 
   setup:
     name: Setup
-    if: (!contains(github.event.head_commit.message, 'skip ci'))
+
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{steps.set_release_tag.outputs.release_tag}}
@@ -168,8 +168,6 @@ jobs:
     name: Build Windows MSVC
     needs:
       - setup
-
-    if: (!contains(github.event.head_commit.message, 'skip ci'))
 
     strategy:
 
