@@ -219,7 +219,7 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/glib/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9.]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "libsoup")
-      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9]*[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "glib_networking")
       package_version_latest=$(latest_git_commit "https://gitlab.gnome.org/GNOME/glib-networking.git")
@@ -241,7 +241,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "xiph" "flac")
       ;;
     "wavpack")
-      package_version_latest=$(curl ${curl_options} 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
       ;;
     "opus")
       package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
@@ -336,7 +336,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "jasper-software" "jasper")
       ;;
     "tiff")
-      package_version_latest=$(curl ${curl_options} 'http://www.simplesystems.org/libtiff/' | sed -n 's,.*>v\([0-9][^<]*\)<.*,\1,p' | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://download.osgeo.org/libtiff/' | sed -n 's,.*tiff-\([0-9][0-9.]*[0-9]\)\.tar\.gz.*,\1,p' | sort -V | tail -1)
       ;;
     "libwebp")
       package_version_latest=$(curl ${curl_options} 'https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html' | sed -n 's,.*libwebp-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.tar.gz.*,\1,p' | tail -1)
@@ -360,6 +360,12 @@ function update_package() {
     return
   fi
 
+  # The version is used in sed, git and gh commands, so don't allow anything else than a plain version or commit.
+  if ! [[ "${package_version_latest}" =~ ^[0-9A-Za-z][0-9A-Za-z._+-]*$ ]]; then
+    error "Invalid latest version for ${package}: ${package_version_latest}"
+    return
+  fi
+
   if [ "${package_git}" = "1" ]; then
     package_version_highest="${package_version_latest}"
   else
@@ -375,19 +381,28 @@ function update_package() {
     status "${package_name}: ${package_version_current} is the latest"
   else
     branch="${package_name}_$(echo ${package_version_latest} | sed 's/\./_/g')"
-    git branch | tr -d '[:blank:]' | grep "^${branch}\$" >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
+    # Check the remote, a fresh clone in GitHub Actions doesn't have the local branches from earlier runs.
+    if ! git ls-remote --exit-code --heads origin "${branch}" >/dev/null 2>&1; then
       status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
       git checkout -b "${branch}" || exit 1
       sed -i "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g" "${ci_file}" || exit 1
       git commit -m "Update ${package_name}" "${ci_file}" || exit 1
       git add "${ci_file}" || exit 1
       git push origin "${branch}" || exit 1
-      gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
       git checkout . >/dev/null 2>&1 || exit 1
       if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
         git checkout master >/dev/null 2>&1 || exit 1
       fi
+    fi
+    # Create the pull request separately, so a branch pushed by a run where creating the pull request failed still gets one.
+    # Closed pull requests count too, so an update that was closed on purpose isn't opened again.
+    pr_count=$(gh pr list --repo "${repo}" --head "${branch}" --state all --json number --jq 'length')
+    if [ $? -ne 0 ] || [ "${pr_count}" = "" ]; then
+      error "Could not list pull requests for ${branch}."
+      return
+    fi
+    if [ "${pr_count}" = "0" ]; then
+      gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
     fi
   fi
 
@@ -442,7 +457,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-repo=$(git config --get remote.origin.url | cut -d ':' -f 2 | sed 's/\.git$//g')
+repo="${GITHUB_REPOSITORY}"
+if [ "${repo}" = "" ]; then
+  repo=$(git config --get remote.origin.url | sed 's,^https://github\.com/,,g' | sed 's,^git@github\.com:,,g' | sed 's/\.git$//g')
+fi
 if [ "${repo}" = "" ]; then
   error "Could not get repo name."
   exit 1
@@ -454,7 +472,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml)
+gh_username=$(gh api user --jq '.login' 2>/dev/null)
+if [ "${gh_username}" = "" ] && [ -f ~/.config/gh/hosts.yml ]; then
+  gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml | head -1)
+fi
 if [ "${gh_username}" = "" ]; then
   error "Missing GitHub username."
   exit 1
