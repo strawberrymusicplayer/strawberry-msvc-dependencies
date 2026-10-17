@@ -52,6 +52,8 @@ env:
 
   sqlite3_version: '3540100'
 
+  sqlite3_year: '2026'
+
   glib_version: '2.90.1'
 
   libsoup_version: '3.8.1'
@@ -1212,7 +1214,7 @@ jobs:
       - name: Download SQLite
         shell: bash
         working-directory: downloads
-        run: curl ${{env.curl_options}} https://sqlite.org/2026/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
+        run: curl ${{env.curl_options}} https://sqlite.org/${{env.sqlite3_year}}/sqlite-autoconf-${{env.sqlite3_version}}.tar.gz
 
       - name: Extract SQLite
         shell: bash

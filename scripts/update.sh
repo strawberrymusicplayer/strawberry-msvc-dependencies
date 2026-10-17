@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #  STRAWBERRY MSVC GITHUB ACTION UPDATE SCRIPT
-#  Copyright (C) 2022-2025 Jonas Kvinge
+#  Copyright (C) 2022-2026 Jonas Kvinge
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -70,40 +70,83 @@ function merge_prs() {
 
   local prs
   local pr
+  local pr_json
+  local pr_author
+  local pr_head
+  local pr_branch
+  local pr_title
+  local pr_update
+  local package
   local review_decision
   local status_check_rollup
   local status_check_ok
   local status_check_total
 
-  prs=$(gh pr list --json number | jq '.[].number')
+  # gh pr list only returns 30 pull requests by default.
+  prs=$(gh pr list --limit 1000 --json number | jq '.[].number')
   if [ "${prs}" = "" ]; then
     return
   fi
 
   for pr in ${prs}; do
-    pr_author=$(gh pr view "${pr}" --json 'author' | jq -r '.author.login')
-    if ! [ "${pr_author}" = "${gh_username}" ] && ! [ "${pr_author}" = "dependabot" ] && ! [ "${pr_author}" = "jonaski" ] ; then
+    # Get everything in one request, so the checks below are for the same head commit that is merged.
+    pr_json=$(gh pr view "${pr}" --json 'author,baseRefName,headRefName,headRefOid,isDraft,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,title')
+    if [ $? -ne 0 ] || [ "${pr_json}" = "" ]; then
+      error "Could not get pull request ${pr}."
       continue
     fi
-    if ! [ "$(gh pr view "${pr}" --json 'isDraft' | jq '.isDraft')" = "false" ]; then
+    pr_head=$(echo "${pr_json}" | jq -r '.headRefOid')
+    if [ "${pr_head}" = "" ] || [ "${pr_head}" = "null" ]; then
       continue
     fi
-    if ! [ "$(gh pr view "${pr}" --json 'mergeable' | jq -r '.mergeable')" = "MERGEABLE" ]; then
+    if ! [ "$(echo "${pr_json}" | jq -r '.baseRefName')" = "master" ]; then
       continue
     fi
-    if ! [ "$(gh pr view "${pr}" --json 'mergeStateStatus' | jq -r '.mergeStateStatus')" = "CLEAN" ]; then
+    # Only merge dependency updates, from dependabot or created by update_package.
+    pr_author=$(echo "${pr_json}" | jq -r '.author.login')
+    pr_branch=$(echo "${pr_json}" | jq -r '.headRefName')
+    pr_title=$(echo "${pr_json}" | jq -r '.title')
+    pr_update=0
+    # gh reports dependabot as app/dependabot.
+    if [ "${pr_author}" = "app/dependabot" ]; then
+      if [[ "${pr_branch}" == dependabot/* ]]; then
+        pr_update=1
+      fi
+    elif [ "${pr_author}" = "${gh_username}" ] || [ "${pr_author}" = "jonaski" ]; then
+      for package in $(get_packages); do
+        if [[ "${pr_branch}" == "${package}_"* ]] && [[ "${pr_title}" == "Update ${package} to "* ]]; then
+          pr_update=1
+          break
+        fi
+      done
+    fi
+    if ! [ "${pr_update}" = "1" ]; then
       continue
     fi
-    review_decision=$(gh pr view "${pr}" --json 'reviewDecision' | jq -r '.reviewDecision')
+    if ! [ "$(echo "${pr_json}" | jq '.isDraft')" = "false" ]; then
+      continue
+    fi
+    if ! [ "$(echo "${pr_json}" | jq -r '.mergeable')" = "MERGEABLE" ]; then
+      continue
+    fi
+    if ! [ "$(echo "${pr_json}" | jq -r '.mergeStateStatus')" = "CLEAN" ]; then
+      continue
+    fi
+    review_decision=$(echo "${pr_json}" | jq -r '.reviewDecision')
     if [ ! "${review_decision}" = "" ] && [ ! "${review_decision}" = "APPROVED" ] ; then
       continue
     fi
-    status_check_rollup=$(gh pr view "${pr}" --json 'statusCheckRollup')
+    status_check_rollup="${pr_json}"
     status_check_ok="1"
     status_check_total=$(echo "${status_check_rollup}" | jq '.statusCheckRollup | length')
+    # A new pull request can be clean before the checks are registered, so don't merge without any checks.
+    if [ "${status_check_total}" = "" ] || [ "${status_check_total}" = "0" ]; then
+      continue
+    fi
     for ((i = 0; i < status_check_total; i++)); do
-      status_check=$(echo "${status_check_rollup}" | jq -r ".statusCheckRollup[${i}].status")
-      if ! [ "${status_check}" = "COMPLETED" ]; then
+      # Use the conclusion of completed check runs, legacy commit statuses have a state instead.
+      status_check=$(echo "${status_check_rollup}" | jq -r ".statusCheckRollup[${i}] | if .__typename == \"StatusContext\" then .state elif .status == \"COMPLETED\" then .conclusion else .status end")
+      if ! [ "${status_check}" = "SUCCESS" ] && ! [ "${status_check}" = "NEUTRAL" ] && ! [ "${status_check}" = "SKIPPED" ]; then
         status_check_ok=0
         break
       fi
@@ -112,18 +155,28 @@ function merge_prs() {
       continue
     fi
     status "Merging pull request ${pr}."
-    gh pr merge -dr "${pr}"
+    gh pr merge -dr --match-head-commit "${pr_head}" "${pr}"
   done
+
+}
+
+function get_packages() {
+
+  sed -n "s,^  \(.*\)_version: .*$,\1,p" "${ci_file}" | tr '\n' ' '
 
 }
 
 function update_packages() {
 
-  packages=$(cat "${ci_file}" | sed -n "s,^  \(.*\)_version: .*$,\1,p" | tr '\n' ' ')
+  packages=$(get_packages)
+  local failed=0
   for package in ${packages}; do
-    update_package "${package}"
+    update_package "${package}" || failed=1
     update_repo
   done
+
+  # Fail after checking all packages, so a broken version check doesn't go unnoticed.
+  return ${failed}
 
 }
 
@@ -133,14 +186,20 @@ function update_package() {
   local package_version_current
   local package_version_latest
   local package_git
+  local package_year
+  local package_year_variable
+  local package_download
+  local pr_mergeable
+  local branch_head
 
   package_name="${1}"
   package_git=0
+  package_year=
   package_version_current=$(cat "${ci_file}" | sed -n "s,^  ${package_name}_version: \(.*\)\$,\1,p" | tr -d "\'")
 
   if [ "${package_version_current}" = "" ]; then
     error "Could not get current version for ${package}."
-    return
+    return 1
   fi
 
   case ${package_name} in
@@ -213,13 +272,16 @@ function update_package() {
       package_version_latest=$(curl ${curl_options} 'https://gstreamer.freedesktop.org/src/orc' | sed -n "s,.*orc-\([0-9]*\.[0-9]*\.[0-9]*\)\.tar\.xz.*,\\1,p" | sort -V | tail -1)
       ;;
     "sqlite3")
-      package_version_latest=$(curl ${curl_options} 'https://www.sqlite.org/download.html' | sed -n 's,.*sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\1,p' | sort -V | tail -1)
+      # The download is in a directory for the release year, so get the year too.
+      package_download=$(curl ${curl_options} 'https://www.sqlite.org/download.html' | sed -n 's,.*\([0-9]\{4\}\)/sqlite-autoconf-\([0-9][^>]*\)\.tar.*,\2 \1,p' | sort -V | tail -1)
+      package_version_latest=$(echo "${package_download}" | cut -d ' ' -f 1)
+      package_year=$(echo "${package_download}" | cut -d ' ' -f 2)
       ;;
     "glib")
       package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/glib/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9.]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "libsoup")
-      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://gitlab.gnome.org/GNOME/libsoup/tags' | sed -n "s,.*<a [^>]\+>v\?\([0-9]\+\.[0-9]*[02468]\.[0-9]\+\)<.*,\1,p" | sort -V | tail -1)
       ;;
     "glib_networking")
       package_version_latest=$(latest_git_commit "https://gitlab.gnome.org/GNOME/glib-networking.git")
@@ -241,7 +303,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "xiph" "flac")
       ;;
     "wavpack")
-      package_version_latest=$(curl ${curl_options} 'http://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://www.wavpack.com/downloads.html' | sed -n "s,.*\"wavpack-\(.*\)\.tar.*,\1,p" | sort -V | tail -1)
       ;;
     "opus")
       package_version_latest=$(curl ${curl_options} 'https://downloads.xiph.org/releases/opus/?C=M;O=D' | sed -n 's,.*opus-\([0-9][^>]*\)\.tar.*,\1,p' | grep -v 'alpha' | grep -v 'beta' | grep -v 'rc' | sort -V | tail -1)
@@ -336,7 +398,7 @@ function update_package() {
       package_version_latest=$(latest_github_release "jasper-software" "jasper")
       ;;
     "tiff")
-      package_version_latest=$(curl ${curl_options} 'http://www.simplesystems.org/libtiff/' | sed -n 's,.*>v\([0-9][^<]*\)<.*,\1,p' | tail -1)
+      package_version_latest=$(curl ${curl_options} 'https://download.osgeo.org/libtiff/' | sed -n 's,.*tiff-\([0-9][0-9.]*[0-9]\)\.tar\.gz.*,\1,p' | sort -V | tail -1)
       ;;
     "libwebp")
       package_version_latest=$(curl ${curl_options} 'https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html' | sed -n 's,.*libwebp-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.tar.gz.*,\1,p' | tail -1)
@@ -351,13 +413,24 @@ function update_package() {
     *)
       package_version_latest=
       error "No update rule for package: ${package}"
-      return
+      return 1
       ;;
   esac
 
   if [ "${package_version_latest}" = "" ]; then
     error "Could not get latest version for ${package}."
-    return
+    return 1
+  fi
+
+  # The version is used in sed, git and gh commands, so don't allow anything else than a plain version or commit.
+  if ! [[ "${package_version_latest}" =~ ^[0-9A-Za-z][0-9A-Za-z._+-]*$ ]]; then
+    error "Invalid latest version for ${package}: ${package_version_latest}"
+    return 1
+  fi
+
+  if ! [ "${package_year}" = "" ] && ! [[ "${package_year}" =~ ^[0-9]{4}$ ]]; then
+    error "Invalid release year for ${package}: ${package_year}"
+    return 1
   fi
 
   if [ "${package_git}" = "1" ]; then
@@ -368,32 +441,111 @@ function update_package() {
 
   if [ "${package_version_highest}" = "" ]; then
     error "Could not get highest version for ${package}."
-    return
+    return 1
   fi
 
   if [ "${package_version_highest}" = "${package_version_current}" ]; then
     status "${package_name}: ${package_version_current} is the latest"
   else
     branch="${package_name}_$(echo ${package_version_latest} | sed 's/\./_/g')"
-    git branch | tr -d '[:blank:]' | grep "^${branch}\$" >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
-      git checkout -b "${branch}" || exit 1
-      sed -i "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g" "${ci_file}" || exit 1
-      git commit -m "Update ${package_name}" "${ci_file}" || exit 1
-      git add "${ci_file}" || exit 1
-      git push origin "${branch}" || exit 1
+    # Check all pull requests first, closed ones too, so an update that was closed on purpose isn't pushed or opened again.
+    pr_count=$(gh pr list --repo "${repo}" --head "${branch}" --state all --json number --jq 'length')
+    if [ $? -ne 0 ] || [ "${pr_count}" = "" ]; then
+      error "Could not list pull requests for ${branch}."
+      return 1
+    fi
+    if [ "${pr_count}" = "0" ]; then
+      # Check the remote, a fresh clone in GitHub Actions doesn't have the local branches from earlier runs.
+      # The branch can exist without a pull request if creating the pull request failed in an earlier run.
+      if ! git ls-remote --exit-code --heads origin "${branch}" >/dev/null 2>&1; then
+        # A local branch that was never pushed can have commits that would be lost, so leave it alone.
+        if git show-ref --verify --quiet "refs/heads/${branch}"; then
+          error "${branch} exists locally but not on origin, it needs to be pushed or deleted manually."
+          return 1
+        fi
+        status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
+        push_update_branch -b || exit 1
+      fi
       gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
-      git checkout . >/dev/null 2>&1 || exit 1
-      if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
-        git checkout master >/dev/null 2>&1 || exit 1
+    else
+      # An open update pull request conflicts when master changed the same line, for example when an update to an earlier version was merged.
+      # Recreate the branch from master so it can still be merged.
+      pr_mergeable=$(gh pr list --repo "${repo}" --head "${branch}" --state open --json mergeable --jq '.[0].mergeable // ""')
+      if [ "${pr_mergeable}" = "CONFLICTING" ]; then
+        # Only recreate branches with just the generated commit and changes, so commits and edits added by hand aren't lost.
+        git fetch origin "${branch}" >/dev/null 2>&1 || exit 1
+        branch_head=$(git rev-parse "origin/${branch}") || exit 1
+        # The local branch is reset too, so it can't have commits that aren't on origin.
+        if git show-ref --verify --quiet "refs/heads/${branch}" && ! [ "$(git rev-parse "refs/heads/${branch}")" = "${branch_head}" ]; then
+          error "${branch} conflicts with master and differs locally from origin, it needs to be resolved manually."
+        elif update_branch_is_generated "${branch_head}"; then
+          status "${package_name}: recreating ${branch} from master..."
+          # Only overwrite the commit that was checked.
+          push_update_branch -B "--force-with-lease=${branch}:${branch_head}" || exit 1
+        else
+          error "${branch} conflicts with master and has other changes, it needs to be resolved manually."
+        fi
       fi
     fi
   fi
 
 }
 
-cmds="dirname cat head tail cut sort tr grep sed curl jq git gh"
+# Uses the variables from update_package.
+# Updates the version and year in the CI file, the arguments are passed to sed.
+function update_ci_file() {
+
+  local sed_args
+
+  sed_args=(-e "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g")
+  if ! [ "${package_year}" = "" ]; then
+    sed_args+=(-e "s,^  ${package_name}_year: .*,  ${package_name}_year: '${package_year}',g")
+  fi
+  sed "${sed_args[@]}" "$@"
+
+}
+
+# Uses the variables from update_package.
+# Checks that the branch only has the generated commit, and that the CI file is exactly what the update generates from the merge base, so edits added by hand aren't lost when it's recreated.
+function update_branch_is_generated() {
+
+  local branch_head
+  local merge_base
+
+  branch_head="${1}"
+
+  [ "$(git rev-list --count "origin/master..${branch_head}")" = "1" ] || return 1
+  [ "$(git log -1 --format=%s "${branch_head}")" = "Update ${package_name}" ] || return 1
+  [ "$(git diff --name-only "origin/master...${branch_head}")" = "${ci_file}" ] || return 1
+
+  merge_base=$(git merge-base origin/master "${branch_head}") || return 1
+  cmp -s <(git show "${merge_base}:${ci_file}" | update_ci_file) <(git show "${branch_head}:${ci_file}") || return 1
+
+  return 0
+
+}
+
+# Uses the variables from update_package.
+# The first argument is the checkout option, -b for a new branch or -B to recreate a checked branch, the rest are passed to git push.
+function push_update_branch() {
+
+  local checkout_option
+
+  checkout_option="${1}"
+  shift
+
+  git checkout "${checkout_option}" "${branch}" || return 1
+  update_ci_file -i "${ci_file}" || return 1
+  git commit -m "Update ${package_name}" "${ci_file}" || return 1
+  git push "$@" origin "${branch}" || return 1
+  git checkout . >/dev/null 2>&1 || return 1
+  if ! [ "$(git branch | head -1 | cut -d ' ' -f2)" = "master" ]; then
+    git checkout master >/dev/null 2>&1 || return 1
+  fi
+
+}
+
+cmds="dirname cat head tail cut sort tr grep sed cmp curl jq git gh"
 cmds_missing=
 for cmd in ${cmds}; do
   which "${cmd}" >/dev/null 2>&1
@@ -429,7 +581,8 @@ if ! [ -d "${dir}/../.git" ]; then
   exit 1
 fi
 
-repodir="$(dirname "${dir}")"
+# Resolve to an absolute path, dirname of . is still . when run from the scripts directory.
+repodir="$(cd "${dir}/.." && pwd)"
 
 if ! [ -d "${repodir}" ]; then
   error "Missing ${repodir}."
@@ -442,7 +595,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-repo=$(git config --get remote.origin.url | cut -d ':' -f 2 | sed 's/\.git$//g')
+repo="${GITHUB_REPOSITORY}"
+if [ "${repo}" = "" ]; then
+  repo=$(git config --get remote.origin.url | sed 's,^https://github\.com/,,g' | sed 's,^git@github\.com:,,g' | sed 's/\.git$//g')
+fi
 if [ "${repo}" = "" ]; then
   error "Could not get repo name."
   exit 1
@@ -454,7 +610,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml)
+gh_username=$(gh api user --jq '.login' 2>/dev/null)
+if [ "${gh_username}" = "" ] && [ -f ~/.config/gh/hosts.yml ]; then
+  gh_username=$(sed -n 's,^[ ]*user: \(.*\)$,\1,p' ~/.config/gh/hosts.yml | head -1)
+fi
 if [ "${gh_username}" = "" ]; then
   error "Missing GitHub username."
   exit 1
