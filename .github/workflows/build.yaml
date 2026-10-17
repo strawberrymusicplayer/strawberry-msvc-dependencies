@@ -247,7 +247,6 @@ jobs:
           echo "bindir=bin64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
           echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
-          echo "opus_disable_intrinsics=OFF" >> $GITHUB_ENV
 
       - name: Set arch variables (arm64)
         if: matrix.arch == 'arm64'
@@ -262,7 +261,6 @@ jobs:
           echo "bindir=binARM64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
           echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
-          echo "opus_disable_intrinsics=ON" >> $GITHUB_ENV
 
       - name: Set extra version variables
         shell: bash
@@ -1704,10 +1702,15 @@ jobs:
         working-directory: build
         run: tar -xf ../downloads/opus-${{env.opus_version}}.tar.gz
 
+      - name: Patch opus
+        shell: bash
+        working-directory: build/opus-${{env.opus_version}}
+        run: patch -p1 < ../../patches/opus-cmake.patch
+
       - name: Configure opus
         shell: cmd
         working-directory: build/opus-${{env.opus_version}}
-        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON -DOPUS_DISABLE_INTRINSICS=${{env.opus_disable_intrinsics}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
 
       - name: Build opus
         shell: cmd
