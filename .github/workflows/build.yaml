@@ -56,7 +56,7 @@ env:
 
   libsoup_version: '3.8.0'
 
-  glib_networking_version: 'c31d9ca261fdb79061c9b35a1d93c3b5c8b85edf'
+  glib_networking_version: 'c1a01902ffa6d6b01a21577e008e993e4c76b26c'
 
   freetype_version: '2.15.0'
 
