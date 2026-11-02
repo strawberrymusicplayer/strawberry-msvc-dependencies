@@ -36,7 +36,7 @@ env:
 
   pixman_version: '0.46.4'
 
-  expat_version: '2.9.0'
+  expat_version: '2.10.0'
 
   libxml2_version: '2.15.4'
 
