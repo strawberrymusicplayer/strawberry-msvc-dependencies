@@ -242,7 +242,6 @@ jobs:
           echo "libdir=lib64" >> $GITHUB_ENV
           echo "bindir=bin64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=ON" >> $GITHUB_ENV
-          echo "glib_networking_gnutls=enabled" >> $GITHUB_ENV
 
       - name: Set arch variables (arm64)
         if: matrix.arch == 'arm64'
@@ -256,7 +255,6 @@ jobs:
           echo "libdir=libARM64" >> $GITHUB_ENV
           echo "bindir=binARM64" >> $GITHUB_ENV
           echo "libjpeg_turbo_simd=OFF" >> $GITHUB_ENV
-          echo "glib_networking_gnutls=disabled" >> $GITHUB_ENV
 
       - name: Set extra version variables
         shell: bash
