@@ -154,22 +154,8 @@ env:
 
 jobs:
 
-  setup:
-    name: Setup
-
-    runs-on: ubuntu-latest
-    outputs:
-      release_tag: ${{steps.set_release_tag.outputs.release_tag}}
-    steps:
-      - name: Set release tag
-        id: set_release_tag
-        shell: bash
-        run: echo "release_tag=0.1.${{github.run_number}}" >> $GITHUB_OUTPUT
-
   build:
     name: Build Windows MSVC
-    needs:
-      - setup
 
     strategy:
 
@@ -197,7 +183,15 @@ jobs:
 
     runs-on: ${{matrix.runner}}
 
+    outputs:
+      release_tag: ${{steps.set_release_tag.outputs.release_tag}}
+
     steps:
+
+      - name: Set release tag
+        id: set_release_tag
+        shell: bash
+        run: echo "release_tag=0.1.${{github.run_number}}" >> $GITHUB_OUTPUT
 
       - name: Set buildtype
         shell: bash
@@ -3052,7 +3046,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: echo "have_release=$(gh release view "${{needs.setup.outputs.release_tag}}" | grep "${{needs.setup.outputs.release_tag}}" >/dev/null 2>&1 && echo 1 || echo 0)" >> $GITHUB_ENV
+        run: echo "have_release=$(gh release view "${{steps.set_release_tag.outputs.release_tag}}" | grep "${{steps.set_release_tag.outputs.release_tag}}" >/dev/null 2>&1 && echo 1 || echo 0)" >> $GITHUB_ENV
 
       - name: Set release notes file
         shell: bash
@@ -3060,7 +3054,7 @@ jobs:
 
       - name: Create release notes
         run: |
-          echo "Strawberry MSVC Dependencies Release ${{needs.setup.outputs.release_tag}}" > "${{env.release_notes_file}}"
+          echo "Strawberry MSVC Dependencies Release ${{steps.set_release_tag.outputs.release_tag}}" > "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
           echo "Libraries:" >> "${{env.release_notes_file}}"
           echo "" >> "${{env.release_notes_file}}"
@@ -3130,13 +3124,13 @@ jobs:
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release != '1'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release create -d -F "${{env.release_notes_file}}" -t "Strawberry MSVC Dependencies Release ${{needs.setup.outputs.release_tag}}" "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
+        run: gh release create -d -F "${{env.release_notes_file}}" -t "Strawberry MSVC Dependencies Release ${{steps.set_release_tag.outputs.release_tag}}" "${{steps.set_release_tag.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
 
       - name: Update existing release
         if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release') && env.have_release == '1'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release upload "${{needs.setup.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
+        run: gh release upload --clobber "${{steps.set_release_tag.outputs.release_tag}}" "strawberry-msvc-${{matrix.arch}}-${{env.buildtype}}.tar.xz"
 
 
   publish-release:
@@ -3144,7 +3138,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release'
     needs:
-      - setup
       - build
     steps:
       - name: Checkout
@@ -3155,7 +3148,7 @@ jobs:
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release edit --draft=false --latest "${{needs.setup.outputs.release_tag}}"
+        run: gh release edit --draft=false --latest "${{needs.build.outputs.release_tag}}"
 
       - name: Delete old releases
         shell: bash
