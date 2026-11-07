@@ -20,20 +20,30 @@
 ci_file=".github/workflows/build.yaml"
 curl_options="-s -f -L"
 
+# Time limits in seconds for downloading files for checksums, so a stalled download doesn't hit the workflow timeout before the other packages are checked.
+checksum_package_time_limit=600
+checksum_run_time_limit=900
+# Set before updating packages, no limit when empty.
+checksum_run_deadline=
+
+# Directory with the downloaded files for the package being updated.
+package_files_dir=
+trap 'remove_package_files' EXIT
+
+# SSH key and known hosts for uploading to the packages server, installed by the workflow before running this script.
+ssh_key_file="${HOME}/.ssh/packages_key"
+ssh_known_hosts_file="${HOME}/.ssh/packages_known_hosts"
+
 function timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
 function status() { echo "[$(timestamp)] $*"; }
 function error() { echo "[$(timestamp)] ERROR: $*" >&2; }
 
 function latest_github_release() {
-
   curl ${curl_options} -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" -H "Authorization: Bearer ${gh_token}" "https://api.github.com/repos/$1/$2/releases/latest" | jq -r '.tag_name' | sed 's/^version-//g' | sed 's/^v//g' | sed 's/^sparsehash-//g' | sed 's/^faac-//g' | sed 's/^nettle_//g' | sort -V | head -1
-
 }
 
 function latest_git_commit() {
-
   git ls-remote "$1" HEAD | cut -f 1
-
 }
 
 function update_repo() {
@@ -161,17 +171,26 @@ function merge_prs() {
 }
 
 function get_packages() {
-
   sed -n "s,^  \(.*\)_version: .*$,\1,p" "${ci_file}" | tr '\n' ' '
-
 }
 
 function update_packages() {
 
-  packages=$(get_packages)
+  local packages
+  local start
+  local i
   local failed=0
-  for package in ${packages}; do
-    update_package "${package}" || failed=1
+
+  read -r -a packages <<< "$(get_packages)"
+  if [ "${#packages[@]}" -eq 0 ]; then
+    error "No packages."
+    return 1
+  fi
+
+  # Start with a different package for each 15 minute schedule, so packages later in the list also get time to download files for checksums when the downloads for earlier packages keep failing.
+  start=$(( $(date +%s) / 900 % ${#packages[@]} ))
+  for ((i = 0; i < ${#packages[@]}; i++)); do
+    update_package "${packages[$(( (start + i) % ${#packages[@]} ))]}" || failed=1
     update_repo
   done
 
@@ -464,6 +483,12 @@ function update_package() {
           return 1
         fi
         status "${package_name}: updating from ${package_version_current} to ${package_version_latest}..."
+        # Get the checksums first, so an update isn't pushed when the files can't be downloaded yet.
+        get_package_checksums "${package_name}" "${package_version_latest}" "${package_year}" || return 1
+        # Upload the files before the update is pushed, so the packages server has them when the update is merged.
+        # Continue with the update if the upload fails, the packages server is only a fallback.
+        upload_package_files "${package_name}"
+        remove_package_files
         push_update_branch -b || exit 1
       fi
       gh pr create --repo "${repo}" --head "${branch}" --base "master" --title "Update ${package_name} to ${package_version_latest}" --body "Update ${package_name} from ${package_version_current} to ${package_version_latest}" || exit 1
@@ -478,11 +503,17 @@ function update_package() {
         # The local branch is reset too, so it can't have commits that aren't on origin.
         if git show-ref --verify --quiet "refs/heads/${branch}" && ! [ "$(git rev-parse "refs/heads/${branch}")" = "${branch_head}" ]; then
           error "${branch} conflicts with master and differs locally from origin, it needs to be resolved manually."
+        # The generated changes include the checksums, so get them before checking the branch.
+        elif ! get_package_checksums "${package_name}" "${package_version_latest}" "${package_year}"; then
+          return 1
         elif update_branch_is_generated "${branch_head}"; then
           status "${package_name}: recreating ${branch} from master..."
+          upload_package_files "${package_name}"
+          remove_package_files
           # Only overwrite the commit that was checked.
           push_update_branch -B "--force-with-lease=${branch}:${branch_head}" || exit 1
         else
+          remove_package_files
           error "${branch} conflicts with master and has other changes, it needs to be resolved manually."
         fi
       fi
@@ -492,15 +523,23 @@ function update_package() {
 }
 
 # Uses the variables from update_package.
-# Updates the version and year in the CI file, the arguments are passed to sed.
+# Updates the version, year and checksums in the CI file, the arguments are passed to sed.
+# The checksums from get_package_checksums replace the existing ones, and are put right after the version of the package.
 function update_ci_file() {
 
   local sed_args
+  local checksum
 
   sed_args=(-e "s,^  ${package_name}_version: .*,  ${package_name}_version: '${package_version_latest}',g")
   if ! [ "${package_year}" = "" ]; then
     sed_args+=(-e "s,^  ${package_name}_year: .*,  ${package_name}_year: '${package_year}',g")
   fi
+  for checksum in "${package_checksums[@]}"; do
+    sed_args+=(-e "/^  ${checksum%%=*}: /d")
+  done
+  for checksum in "${package_checksums[@]}"; do
+    sed_args+=(-e "/^  ${package_name}_version: /a\\  ${checksum%%=*}: '${checksum#*=}'")
+  done
   sed "${sed_args[@]}" "$@"
 
 }
@@ -525,6 +564,286 @@ function update_branch_is_generated() {
 
 }
 
+# Prints the checksum variable and download URL for each file downloaded for a package version, one per line.
+# The URLs must be for the same files as the first URL for each package in the download steps in the CI file, the checksum variable is the package name with _sha256 added.
+function package_downloads() {
+
+  local package_name="${1}"
+  local v="${2}"
+  local year="${3}"
+  local v_short
+  local mirror="downloads.sourceforge.net"
+
+  v_short=$(echo "${v}" | cut -d '.' -f 1-2)
+
+  case ${package_name} in
+    "nasm") echo "nasm_sha256 https://www.nasm.us/pub/nasm/releasebuilds/${v}/win64/nasm-${v}-installer-x64.exe" ;;
+    "win_flex_bison") echo "win_flex_bison_sha256 https://github.com/lexxmark/winflexbison/releases/download/v${v}/win_flex_bison-${v}.zip" ;;
+    "pkgconf") echo "pkgconf_sha256 https://github.com/pkgconf/pkgconf/archive/refs/tags/pkgconf-${v}.tar.gz" ;;
+    "proxy_libintl") echo "proxy_libintl_sha256 https://github.com/frida/proxy-libintl/archive/refs/tags/${v}/proxy-libintl-${v}.tar.gz" ;;
+    "getopt_win") echo "getopt_win_sha256 https://github.com/ludvikjerabek/getopt-win/archive/refs/tags/v${v}/getopt-win-${v}.tar.gz" ;;
+    "zlib") echo "zlib_sha256 https://github.com/madler/zlib/releases/download/v${v}/zlib-${v}.tar.gz" ;;
+    "openssl") echo "openssl_sha256 https://github.com/openssl/openssl/releases/download/openssl-${v}/openssl-${v}.tar.gz" ;;
+    "libpng") echo "libpng_sha256 https://${mirror}/project/libpng/libpng16/${v}/libpng-${v}.tar.xz" ;;
+    "libjpeg_turbo") echo "libjpeg_turbo_sha256 https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${v}/libjpeg-turbo-${v}.tar.gz" ;;
+    "pcre2") echo "pcre2_sha256 https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${v}/pcre2-${v}.tar.bz2" ;;
+    "bzip2") echo "bzip2_sha256 https://sourceware.org/pub/bzip2/bzip2-${v}.tar.gz" ;;
+    "xz") echo "xz_sha256 https://github.com/tukaani-project/xz/releases/download/v${v}/xz-${v}.tar.xz" ;;
+    "brotli") echo "brotli_sha256 https://github.com/google/brotli/archive/refs/tags/v${v}/brotli-${v}.tar.gz" ;;
+    "uchardet") echo "uchardet_sha256 https://www.freedesktop.org/software/uchardet/releases/uchardet-${v}.tar.xz" ;;
+    "icu4c") echo "icu4c_sha256 https://github.com/unicode-org/icu/releases/download/release-${v}/icu4c-${v}-sources.tgz" ;;
+    "pixman") echo "pixman_sha256 https://www.cairographics.org/releases/pixman-${v}.tar.gz" ;;
+    "expat") echo "expat_sha256 https://github.com/libexpat/libexpat/releases/download/R_${v//./_}/expat-${v}.tar.xz" ;;
+    "libxml2") echo "libxml2_sha256 https://download.gnome.org/sources/libxml2/${v_short}/libxml2-${v}.tar.xz" ;;
+    "nghttp2") echo "nghttp2_sha256 https://github.com/nghttp2/nghttp2/releases/download/v${v}/nghttp2-${v}.tar.xz" ;;
+    "dlfcn") echo "dlfcn_sha256 https://github.com/dlfcn-win32/dlfcn-win32/archive/refs/tags/v${v}/dlfcn-win32-${v}.tar.gz" ;;
+    "libpsl") echo "libpsl_sha256 https://github.com/rockdaboot/libpsl/releases/download/${v}/libpsl-${v}.tar.gz" ;;
+    "orc") echo "orc_sha256 https://gstreamer.freedesktop.org/src/orc/orc-${v}.tar.xz" ;;
+    "sqlite3") echo "sqlite3_sha256 https://sqlite.org/${year}/sqlite-autoconf-${v}.tar.gz" ;;
+    "glib") echo "glib_sha256 https://download.gnome.org/sources/glib/${v_short}/glib-${v}.tar.xz" ;;
+    "libsoup") echo "libsoup_sha256 https://download.gnome.org/sources/libsoup/${v_short}/libsoup-${v}.tar.xz" ;;
+    "freetype") echo "freetype_sha256 https://${mirror}/project/freetype/freetype2/${v}/freetype-${v}.tar.gz" ;;
+    "harfbuzz") echo "harfbuzz_sha256 https://github.com/harfbuzz/harfbuzz/releases/download/${v}/harfbuzz-${v}.tar.xz" ;;
+    "jasper") echo "jasper_sha256 https://github.com/jasper-software/jasper/releases/download/version-${v}/jasper-${v}.tar.gz" ;;
+    "tiff") echo "tiff_sha256 https://download.osgeo.org/libtiff/tiff-${v}.tar.gz" ;;
+    "libwebp") echo "libwebp_sha256 https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${v}.tar.gz" ;;
+    "libogg") echo "libogg_sha256 https://downloads.xiph.org/releases/ogg/libogg-${v}.tar.xz" ;;
+    "libvorbis") echo "libvorbis_sha256 https://downloads.xiph.org/releases/vorbis/libvorbis-${v}.tar.xz" ;;
+    "flac") echo "flac_sha256 https://github.com/xiph/flac/releases/download/${v}/flac-${v}.tar.xz" ;;
+    "wavpack") echo "wavpack_sha256 https://github.com/dbry/WavPack/releases/download/${v}/wavpack-${v}.tar.xz" ;;
+    "opus") echo "opus_sha256 https://downloads.xiph.org/releases/opus/opus-${v}.tar.gz" ;;
+    "opusfile") echo "opusfile_sha256 https://downloads.xiph.org/releases/opus/opusfile-${v}.tar.gz" ;;
+    "speex") echo "speex_sha256 https://gitlab.xiph.org/xiph/speex/-/archive/Speex-${v}/speex-Speex-${v}.tar.gz" ;;
+    "mpg123") echo "mpg123_sha256 https://${mirror}/project/mpg123/mpg123/${v}/mpg123-${v}.tar.bz2" ;;
+    "lame") echo "lame_sha256 https://${mirror}/project/lame/lame/${v}/lame-${v}.tar.gz" ;;
+    "musepack") echo "musepack_sha256 https://files.musepack.net/source/musepack_src_r${v}.tar.gz" ;;
+    "libopenmpt") echo "libopenmpt_sha256 https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${v}+release.msvc.zip" ;;
+    "libgme") echo "libgme_sha256 https://github.com/libgme/game-music-emu/releases/download/${v}/libgme-${v}-src.tar.gz" ;;
+    "faad2") echo "faad2_sha256 https://github.com/knik0/faad2/tarball/${v}/faad2-${v}.tar.gz" ;;
+    "faac") echo "faac_sha256 https://github.com/knik0/faac/archive/refs/tags/faac-${v}.tar.gz" ;;
+    "fdk_aac") echo "fdk_aac_sha256 https://${mirror}/project/opencore-amr/fdk-aac/fdk-aac-${v}.tar.gz" ;;
+    "utfcpp") echo "utfcpp_sha256 https://github.com/nemtrif/utfcpp/archive/refs/tags/v${v}/utfcpp-${v}.tar.gz" ;;
+    "taglib") echo "taglib_sha256 https://taglib.org/releases/taglib-${v}.tar.gz" ;;
+    "libbs2b") echo "libbs2b_sha256 https://${mirror}/project/bs2b/libbs2b/${v}/libbs2b-${v}.tar.bz2" ;;
+    "libebur128") echo "libebur128_sha256 https://github.com/jiixyj/libebur128/archive/refs/tags/v${v}/libebur128-${v}.tar.gz" ;;
+    "fftw_source") echo "fftw_source_sha256 https://www.fftw.org/fftw-${v}.tar.gz" ;;
+    "fftw_mingw")
+      # Only x86_64 uses the MinGW binary package, arm64 builds FFTW from source.
+      echo "fftw_mingw_debug_sha256 https://github.com/strawberrymusicplayer/fftw3-mingw-cross/releases/download/${v}/fftw-x86_64-w64-mingw32-debug-${v}.tar.xz"
+      echo "fftw_mingw_release_sha256 https://github.com/strawberrymusicplayer/fftw3-mingw-cross/releases/download/${v}/fftw-x86_64-w64-mingw32-release-${v}.tar.xz"
+      ;;
+    "chromaprint") echo "chromaprint_sha256 https://github.com/acoustid/chromaprint/releases/download/v${v}/chromaprint-${v}.tar.gz" ;;
+    "gstreamer")
+      echo "gstreamer_sha256 https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${v}.tar.xz"
+      echo "gst_plugins_base_sha256 https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${v}.tar.xz"
+      echo "gst_plugins_good_sha256 https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${v}.tar.xz"
+      echo "gst_plugins_bad_sha256 https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${v}.tar.xz"
+      echo "gst_plugins_ugly_sha256 https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${v}.tar.xz"
+      echo "gst_libav_sha256 https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-${v}.tar.xz"
+      ;;
+    "qt")
+      # Use the main Qt download server, the mirror used first in the CI file can lag behind.
+      echo "qtbase_sha256 https://download.qt.io/official_releases/qt/${v_short}/${v}/submodules/qtbase-everywhere-src-${v}.tar.xz"
+      echo "qttools_sha256 https://download.qt.io/official_releases/qt/${v_short}/${v}/submodules/qttools-everywhere-src-${v}.tar.xz"
+      echo "qtimageformats_sha256 https://download.qt.io/official_releases/qt/${v_short}/${v}/submodules/qtimageformats-everywhere-src-${v}.tar.xz"
+      ;;
+    "kdsingleapplication") echo "kdsingleapplication_sha256 https://github.com/KDAB/KDSingleApplication/releases/download/v${v}/kdsingleapplication-${v}.tar.gz" ;;
+    "sparsehash") echo "sparsehash_sha256 https://github.com/sparsehash/sparsehash/archive/refs/tags/sparsehash-${v}.tar.gz" ;;
+    "pe_parse") echo "pe_parse_sha256 https://github.com/trailofbits/pe-parse/archive/refs/tags/v${v}/pe-parse-${v}.tar.gz" ;;
+    # Git repositories don't have checksums.
+    *) ;;
+  esac
+
+}
+
+# Downloads a file, retrying until the deadline in seconds since the script started.
+# A 404 isn't retried, since the file doesn't exist.
+function download_file() {
+
+  local url="${1}"
+  local output="${2}"
+  local deadline="${3}"
+  local attempt
+  local remaining
+  local http_code
+
+  for ((attempt = 1; attempt <= 10; attempt++)); do
+    remaining=$((deadline - SECONDS))
+    if [ "${remaining}" -le 0 ]; then
+      return 1
+    fi
+    # timeout makes sure the remaining time isn't exceeded.
+    # Abort a stalled transfer instead of limiting the time for each attempt, so a slow download of a large file can still finish.
+    # Keep the time of the file from the server, it's kept when uploading to the packages server.
+    http_code=$(timeout "${remaining}" curl -s -f -L -R --connect-timeout 60 --speed-limit 1024 --speed-time 60 -w '%{http_code}' -o "${output}" "${url}") && return 0
+    if [ "${http_code}" = "404" ]; then
+      error "${url} returned 404."
+      return 1
+    fi
+    if [ "${attempt}" -lt 10 ]; then
+      sleep 10
+    fi
+  done
+
+  return 1
+
+}
+
+# Downloads the files for a package version and sets package_checksums to a list of variable=sha256.
+# The files are kept in package_files_dir with the filename from the URL, so they can be uploaded to the packages server, remove them with remove_package_files.
+function get_package_checksums() {
+
+  local package_name="${1}"
+  local package_version="${2}"
+  local package_year="${3}"
+  local key
+  local url
+  local file
+  local sha256
+  local deadline
+  local remaining
+
+  # Limit the time for all files of the package together, and for all packages in this run.
+  deadline=$((SECONDS + checksum_package_time_limit))
+  if ! [ "${checksum_run_deadline}" = "" ] && [ "${checksum_run_deadline}" -lt "${deadline}" ]; then
+    deadline="${checksum_run_deadline}"
+  fi
+
+  package_checksums=()
+  remove_package_files
+  package_files_dir=$(mktemp -d) || return 1
+  while read -r key url; do
+    [ "${key}" = "" ] && continue
+    remaining=$((deadline - SECONDS))
+    if [ "${remaining}" -le 0 ]; then
+      error "No time left to download ${url} for checksum, trying again in the next run."
+      remove_package_files
+      return 1
+    fi
+    status "${package_name}: downloading ${url} for checksum..."
+    file="${package_files_dir}/${url##*/}"
+    if ! download_file "${url}" "${file}" "${deadline}"; then
+      error "Could not download ${url} for checksum."
+      remove_package_files
+      return 1
+    fi
+    if ! [ -s "${file}" ]; then
+      error "Got an empty file for ${url}."
+      remove_package_files
+      return 1
+    fi
+    # Don't set a checksum for a HTML page served instead of the file.
+    if head -c 1024 "${file}" | grep -qi '<html\|<!doctype'; then
+      error "Got a HTML page instead of a file for ${url}."
+      remove_package_files
+      return 1
+    fi
+    sha256=$(sha256sum "${file}" | cut -d ' ' -f 1)
+    if ! [[ "${sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+      error "Could not get checksum for ${url}."
+      remove_package_files
+      return 1
+    fi
+    package_checksums+=("${key}=${sha256}")
+  done < <(package_downloads "${package_name}" "${package_version}" "${package_year}")
+
+}
+
+function remove_package_files() {
+
+  if ! [ "${package_files_dir}" = "" ]; then
+    rm -rf "${package_files_dir}"
+    package_files_dir=
+  fi
+
+}
+
+# Uploads the files from get_package_checksums to the packages server with rsync.
+# The SSH settings are from the SSH_HOST, SSH_PORT and PACKAGES_PATH environment variables, and the SSH key and known hosts files installed by the workflow.
+# SSH_HOST can include the user as user@host, or the user can be set in SSH_USER.
+function upload_package_files() {
+
+  local package_name="${1}"
+  local variable
+  local missing=
+  local ssh_command
+  local files=()
+  local file
+
+  # Packages from git repositories don't have any files.
+  if ! [ "${package_files_dir}" = "" ]; then
+    for file in "${package_files_dir}"/*; do
+      if [ -f "${file}" ]; then
+        files+=("${file}")
+      fi
+    done
+  fi
+  if [ "${#files[@]}" -eq 0 ]; then
+    status "${package_name}: no files to upload to the packages server."
+    return 0
+  fi
+
+  if [ "${SSH_HOST}" = "" ] && [ "${SSH_PORT}" = "" ] && [ "${PACKAGES_PATH}" = "" ] && ! [ -f "${ssh_key_file}" ]; then
+    status "${package_name}: not uploading to the packages server, the SSH settings are not set."
+    return 0
+  fi
+
+  for variable in SSH_HOST SSH_PORT PACKAGES_PATH; do
+    if [ "${!variable}" = "" ]; then
+      missing="${missing} ${variable}"
+    fi
+  done
+  for variable in ssh_key_file ssh_known_hosts_file; do
+    if ! [ -f "${!variable}" ]; then
+      missing="${missing} ${!variable}"
+    fi
+  done
+  if ! [ "${missing}" = "" ]; then
+    error "Missing${missing} for uploading to the packages server."
+    return 1
+  fi
+
+  if ! [[ "${SSH_PORT}" =~ ^[0-9]+$ ]]; then
+    error "Invalid SSH_PORT."
+    return 1
+  fi
+
+  ssh_command="ssh -p ${SSH_PORT} -i ${ssh_key_file} -o IdentitiesOnly=yes -o UserKnownHostsFile=${ssh_known_hosts_file} -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=60"
+
+  status "${package_name}: uploading ${files[*]##*/} to the packages server..."
+  # Keep the times of the files, and make them readable by the web server.
+  if ! timeout 600 rsync -t --chmod=F644 -e "${ssh_command}" "${files[@]}" "${SSH_USER:+${SSH_USER}@}${SSH_HOST}:${PACKAGES_PATH%/}/"; then
+    error "Could not upload the files for ${package_name} to the packages server."
+    return 1
+  fi
+
+}
+
+# Sets the checksums for the current version of all packages in the CI file, used when checksums are missing.
+function update_all_checksums() {
+
+  local package
+  local package_name
+  local package_version_latest
+  local package_year
+  local failed=0
+
+  for package in $(get_packages); do
+    package_name="${package}"
+    package_version_latest=$(sed -n "s,^  ${package_name}_version: \(.*\)\$,\1,p" "${ci_file}" | tr -d "\'")
+    package_year=$(sed -n "s,^  ${package_name}_year: \(.*\)\$,\1,p" "${ci_file}" | tr -d "\'")
+    if get_package_checksums "${package_name}" "${package_version_latest}" "${package_year}"; then
+      remove_package_files
+      update_ci_file -i "${ci_file}" || failed=1
+    else
+      failed=1
+    fi
+  done
+
+  return ${failed}
+
+}
+
 # Uses the variables from update_package.
 # The first argument is the checkout option, -b for a new branch or -B to recreate a checked branch, the rest are passed to git push.
 function push_update_branch() {
@@ -545,7 +864,7 @@ function push_update_branch() {
 
 }
 
-cmds="dirname cat head tail cut sort tr grep sed cmp curl jq git gh"
+cmds="dirname cat head tail cut sort tr grep sed cmp curl jq git gh sha256sum mktemp timeout"
 cmds_missing=
 for cmd in ${cmds}; do
   which "${cmd}" >/dev/null 2>&1
@@ -595,6 +914,12 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Set the checksums for the current versions, used when checksums are missing.
+if [ "${1}" = "--checksums" ]; then
+  update_all_checksums
+  exit $?
+fi
+
 repo="${GITHUB_REPOSITORY}"
 if [ "${repo}" = "" ]; then
   repo=$(git config --get remote.origin.url | sed 's,^https://github\.com/,,g' | sed 's,^git@github\.com:,,g' | sed 's/\.git$//g')
@@ -629,4 +954,5 @@ update_repo
 merge_prs
 
 update_repo
+checksum_run_deadline=$((SECONDS + checksum_run_time_limit))
 update_packages
