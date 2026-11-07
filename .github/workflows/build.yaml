@@ -3,197 +3,197 @@ on: [push, pull_request]
 
 env:
   nasm_version: '3.02'
-  nasm_sha256: '0ddb40310861eb29f4d649feb9466779982a2d251c0db2b9cf0d21cf591171f3'
+  nasm_sha256sum: '0ddb40310861eb29f4d649feb9466779982a2d251c0db2b9cf0d21cf591171f3'
 
   yasm_version: '09d1bc90ed53d0ec3e9b074f111058cbf262ed56'
 
   win_flex_bison_version: '2.5.25'
-  win_flex_bison_sha256: '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'
+  win_flex_bison_sha256sum: '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'
 
   pkgconf_version: '3.0.10'
-  pkgconf_sha256: '11818a25f2730132f3b258ac8be4e82f83b9db03a1a99a6c29cd01b94fc9d310'
+  pkgconf_sha256sum: '11818a25f2730132f3b258ac8be4e82f83b9db03a1a99a6c29cd01b94fc9d310'
 
   proxy_libintl_version: '0.5'
-  proxy_libintl_sha256: 'f7a1cbd7579baaf575c66f9d99fb6295e9b0684a28b095967cfda17857595303'
+  proxy_libintl_sha256sum: 'f7a1cbd7579baaf575c66f9d99fb6295e9b0684a28b095967cfda17857595303'
 
   getopt_win_version: '2.42.0'
-  getopt_win_sha256: '3d6ae295260b62af0e2bf2b0287d88e6beeb7a1f7c1f85738c6db4b33e7df13c'
+  getopt_win_sha256sum: '3d6ae295260b62af0e2bf2b0287d88e6beeb7a1f7c1f85738c6db4b33e7df13c'
 
   zlib_version: '1.4'
-  zlib_sha256: '02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584'
+  zlib_sha256sum: '02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584'
 
   openssl_version: '4.1.0'
-  openssl_sha256: '50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd'
+  openssl_sha256sum: '50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd'
 
   libpng_version: '1.6.59'
-  libpng_sha256: 'd80dd2a38a37f803cb9b6ac7b14bd6e74ddc3b654780a8380bdf93523fdb4389'
+  libpng_sha256sum: 'd80dd2a38a37f803cb9b6ac7b14bd6e74ddc3b654780a8380bdf93523fdb4389'
 
   libjpeg_turbo_version: '3.2.1'
-  libjpeg_turbo_sha256: 'c27ad72a68da151177929aa969ae773a2da5ac2af9ce946079314fdac8cece7f'
+  libjpeg_turbo_sha256sum: 'c27ad72a68da151177929aa969ae773a2da5ac2af9ce946079314fdac8cece7f'
 
   pcre2_version: '10.49'
-  pcre2_sha256: '53c156e1ba416a20da8e65395daa132da0d80e76910424caca3fcdae7831d384'
+  pcre2_sha256sum: '53c156e1ba416a20da8e65395daa132da0d80e76910424caca3fcdae7831d384'
 
   bzip2_version: '1.0.8'
-  bzip2_sha256: 'ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269'
+  bzip2_sha256sum: 'ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269'
 
   xz_version: '5.8.4'
-  xz_sha256: '4ce24038fd4221e0d13bc1a2de7a4db56e90b92b3bf75321f6c14be73f65de4b'
+  xz_sha256sum: '4ce24038fd4221e0d13bc1a2de7a4db56e90b92b3bf75321f6c14be73f65de4b'
 
   brotli_version: '1.2.1'
-  brotli_sha256: '98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f'
+  brotli_sha256sum: '98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f'
 
   uchardet_version: '0.0.8'
-  uchardet_sha256: 'e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0'
+  uchardet_sha256sum: 'e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0'
 
   icu4c_version: '79.1'
-  icu4c_sha256: '06fa63ecb521048f8082f12ad988f6b678d90cbd88aafce24cbc94902b191d99'
+  icu4c_sha256sum: '06fa63ecb521048f8082f12ad988f6b678d90cbd88aafce24cbc94902b191d99'
 
   pixman_version: '0.46.4'
-  pixman_sha256: 'd09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c'
+  pixman_sha256sum: 'd09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c'
 
   expat_version: '2.10.0'
-  expat_sha256: 'c624ba2998fc65df1163a49641ff3f9ab73138b11641d92c86bee0fb01b1bc7f'
+  expat_sha256sum: 'c624ba2998fc65df1163a49641ff3f9ab73138b11641d92c86bee0fb01b1bc7f'
 
   libxml2_version: '2.15.4'
-  libxml2_sha256: '98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821'
+  libxml2_sha256sum: '98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821'
 
   nghttp2_version: '1.71.0'
-  nghttp2_sha256: 'c0f55121d88650e4b9227aec28cebaf664d2417ca60fe70be0f8d38829f52116'
+  nghttp2_sha256sum: 'c0f55121d88650e4b9227aec28cebaf664d2417ca60fe70be0f8d38829f52116'
 
   dlfcn_version: '1.4.2'
-  dlfcn_sha256: 'f61a874bc9163ab488accb364fd681d109870c86e8071f4710cbcdcbaf9f2565'
+  dlfcn_sha256sum: 'f61a874bc9163ab488accb364fd681d109870c86e8071f4710cbcdcbaf9f2565'
 
   libffi_version: '83d0cfd00d7d37af4b4349511d29f1f0512621b3'
 
   libpsl_version: '0.23.3'
-  libpsl_sha256: '93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be'
+  libpsl_sha256sum: '93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be'
 
   orc_version: '0.4.44'
-  orc_sha256: '4aeb97aea2b58224029dc2b23d7d064cfa990cb4fb8c4da440bcbe9c95bc5d2d'
+  orc_sha256sum: '4aeb97aea2b58224029dc2b23d7d064cfa990cb4fb8c4da440bcbe9c95bc5d2d'
 
   sqlite3_version: '3540100'
-  sqlite3_sha256: '926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e'
+  sqlite3_sha256sum: '926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e'
 
   sqlite3_year: '2026'
 
   glib_version: '2.90.1'
-  glib_sha256: '93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396'
+  glib_sha256sum: '93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396'
 
   libsoup_version: '3.8.1'
-  libsoup_sha256: '5013dcef9136f6f861e6529fca578af50c1f52a39219027fb5aff652d1371a04'
+  libsoup_sha256sum: '5013dcef9136f6f861e6529fca578af50c1f52a39219027fb5aff652d1371a04'
 
   glib_networking_version: '66c888f74f4b1fda0b0a53038d13d643be27492f'
 
   freetype_version: '2.15.0'
-  freetype_sha256: '9186627467a616d9a9e3e574748ac0c45fa77398e6364edef3041a8ba8d92f64'
+  freetype_sha256sum: '9186627467a616d9a9e3e574748ac0c45fa77398e6364edef3041a8ba8d92f64'
 
   harfbuzz_version: '15.1.0'
-  harfbuzz_sha256: '0fc7c565443a5f4be7da65ac5ee5bd737d9b158dc908708b7689a0a5796b0c8d'
+  harfbuzz_sha256sum: '0fc7c565443a5f4be7da65ac5ee5bd737d9b158dc908708b7689a0a5796b0c8d'
 
   jasper_version: '4.2.9'
-  jasper_sha256: 'f71cf643937a5fcaedcfeb30a22ba406912948ad4413148214df280afc425454'
+  jasper_sha256sum: 'f71cf643937a5fcaedcfeb30a22ba406912948ad4413148214df280afc425454'
 
   tiff_version: '4.7.2'
-  tiff_sha256: '672bd7d10aee4606171afb864f3570b83340f6a33e2c186dc0512f7145ffdf6a'
+  tiff_sha256sum: '672bd7d10aee4606171afb864f3570b83340f6a33e2c186dc0512f7145ffdf6a'
 
   libwebp_version: '1.6.0'
-  libwebp_sha256: 'e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564'
+  libwebp_sha256sum: 'e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564'
 
   libogg_version: '1.3.6'
-  libogg_sha256: '5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061'
+  libogg_sha256sum: '5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061'
 
   libvorbis_version: '1.3.7'
-  libvorbis_sha256: 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
+  libvorbis_sha256sum: 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
 
   flac_version: '1.5.0'
-  flac_sha256: 'f2c1c76592a82ffff8413ba3c4a1299b6c7ab06c734dee03fd88630485c2b920'
+  flac_sha256sum: 'f2c1c76592a82ffff8413ba3c4a1299b6c7ab06c734dee03fd88630485c2b920'
 
   wavpack_version: '5.9.0'
-  wavpack_sha256: 'b5291bc4e6d69ebbd3da3800c5bf4a70f19bb92679b23e09b3b612c1e648d1ff'
+  wavpack_sha256sum: 'b5291bc4e6d69ebbd3da3800c5bf4a70f19bb92679b23e09b3b612c1e648d1ff'
 
   opus_version: '1.6.1'
-  opus_sha256: '6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1'
+  opus_sha256sum: '6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1'
 
   opusfile_version: '0.12'
-  opusfile_sha256: '118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b'
+  opusfile_sha256sum: '118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b'
 
   speex_version: '1.2.1'
-  speex_sha256: 'beaf2642e81a822eaade4d9ebf92e1678f301abfc74a29159c4e721ee70fdce0'
+  speex_sha256sum: 'beaf2642e81a822eaade4d9ebf92e1678f301abfc74a29159c4e721ee70fdce0'
 
   mpg123_version: '1.33.7'
-  mpg123_sha256: '31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee'
+  mpg123_sha256sum: '31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee'
 
   lame_version: '4.0'
-  lame_sha256: '3df5124d5ad3a98312ffd7ba6a9b36230e4f8a3e66d3ce0f425e336c32d216eb'
+  lame_sha256sum: '3df5124d5ad3a98312ffd7ba6a9b36230e4f8a3e66d3ce0f425e336c32d216eb'
 
   musepack_version: '475'
-  musepack_sha256: 'a4b1742f997f83e1056142d556a8c20845ba764b70365ff9ccf2e3f81c427b2b'
+  musepack_sha256sum: 'a4b1742f997f83e1056142d556a8c20845ba764b70365ff9ccf2e3f81c427b2b'
 
   libopenmpt_version: '0.8.10'
-  libopenmpt_sha256: 'ffa62a4ac10e59d6abb59470306f54d6576ea10ac480c5b9d0e793b4d4616eb7'
+  libopenmpt_sha256sum: 'ffa62a4ac10e59d6abb59470306f54d6576ea10ac480c5b9d0e793b4d4616eb7'
 
   libgme_version: '0.6.5'
-  libgme_sha256: 'a133f19278222136ba0d8c27b64a07987ba05fec9d2e6d293ccd8cabdd97ddbb'
+  libgme_sha256sum: 'a133f19278222136ba0d8c27b64a07987ba05fec9d2e6d293ccd8cabdd97ddbb'
 
   faad2_version: '2.11.4'
-  faad2_sha256: '2783ea0f06ccdf553fee6d6558d457e9e1458ec977e306d6d0a1bfed90a8d040'
+  faad2_sha256sum: '2783ea0f06ccdf553fee6d6558d457e9e1458ec977e306d6d0a1bfed90a8d040'
 
   faac_version: '2.2'
-  faac_sha256: 'a93963573907c83e26e8cfabbf80d3a9c360f06ea4ecf1ea6cb74a202494d8d9'
+  faac_sha256sum: 'a93963573907c83e26e8cfabbf80d3a9c360f06ea4ecf1ea6cb74a202494d8d9'
 
   fdk_aac_version: '3.0.0'
-  fdk_aac_sha256: '70b95857b958fb8f794489307a87845dde4cc1fcea060f3f29f40e4b2fe16c82'
+  fdk_aac_sha256sum: '70b95857b958fb8f794489307a87845dde4cc1fcea060f3f29f40e4b2fe16c82'
 
   utfcpp_version: '4.2.1'
-  utfcpp_sha256: '6d6a5493a111884cc085ee31babfe6d9960c8fb08fc80a64852eaeea8323dbc1'
+  utfcpp_sha256sum: '6d6a5493a111884cc085ee31babfe6d9960c8fb08fc80a64852eaeea8323dbc1'
 
   taglib_version: '2.3.2'
-  taglib_sha256: '3ca2d8afaa7f1cf7f6ed10e511ebc368bfacd6dcaa3dbfa690b89e502e8963dc'
+  taglib_sha256sum: '3ca2d8afaa7f1cf7f6ed10e511ebc368bfacd6dcaa3dbfa690b89e502e8963dc'
 
   libbs2b_version: '3.1.0'
-  libbs2b_sha256: '4799974becdeeedf0db00115bc63f60ea3fe4b25f1dfdb6903505839a720e46f'
+  libbs2b_sha256sum: '4799974becdeeedf0db00115bc63f60ea3fe4b25f1dfdb6903505839a720e46f'
 
   libebur128_version: '1.2.6'
-  libebur128_sha256: 'baa7fc293a3d4651e244d8022ad03ab797ca3c2ad8442c43199afe8059faa613'
+  libebur128_sha256sum: 'baa7fc293a3d4651e244d8022ad03ab797ca3c2ad8442c43199afe8059faa613'
 
   fftw_source_version: '3.3.11'
-  fftw_source_sha256: '5630c24cdeb33b131612f7eb4b1a9934234754f9f388ff8617458d0be6f239a1'
+  fftw_source_sha256sum: '5630c24cdeb33b131612f7eb4b1a9934234754f9f388ff8617458d0be6f239a1'
 
   fftw_mingw_version: '3.3.11.23'
-  fftw_mingw_debug_sha256: '2b3a8796b1b0aa19c0fcded8b04a68d3cf4514610588cc7c0214d96d099e6667'
-  fftw_mingw_release_sha256: 'd77ff70e6785d917a8de1781116e355f0bae140429d86c4c9b29cafbd5e364a5'
+  fftw_mingw_debug_sha256sum: '2b3a8796b1b0aa19c0fcded8b04a68d3cf4514610588cc7c0214d96d099e6667'
+  fftw_mingw_release_sha256sum: 'd77ff70e6785d917a8de1781116e355f0bae140429d86c4c9b29cafbd5e364a5'
 
   ffmpeg_version: '9.0'
 
   chromaprint_version: '1.6.2'
-  chromaprint_sha256: 'd54ada62c16b2db396d3251ec54fc7a58909c163131a1cfcf7fa6407dbc14360'
+  chromaprint_sha256sum: 'd54ada62c16b2db396d3251ec54fc7a58909c163131a1cfcf7fa6407dbc14360'
 
   gstreamer_version: '1.28.9'
-  gstreamer_sha256: '6dbf744f583131a34845cc641e803843766a9ba80ce00378a9043fd6d8d5fb38'
-  gst_plugins_base_sha256: 'c1fda668b520e6aef763c0eb962c032c9fe52bce322e8b00c69b4e9e847bddc1'
-  gst_plugins_good_sha256: 'e518cd97483706a252e95e60312a22d23dec6f5e7673af6f5bde719c3a9ca7f4'
-  gst_plugins_bad_sha256: '4a4e0b7bf84f868378c48f143a7ac3a98923b488a5b74f1a35ba46bc3c43f6b1'
-  gst_plugins_ugly_sha256: '550a52536962186f5488e06b5c08f31ae0f18400aee32a3385156d31cb4b1189'
-  gst_libav_sha256: '4b3df21fa70972a80891d2298cf32c14a62c3db4483d545c7ac018230399186b'
+  gstreamer_sha256sum: '6dbf744f583131a34845cc641e803843766a9ba80ce00378a9043fd6d8d5fb38'
+  gst_plugins_base_sha256sum: 'c1fda668b520e6aef763c0eb962c032c9fe52bce322e8b00c69b4e9e847bddc1'
+  gst_plugins_good_sha256sum: 'e518cd97483706a252e95e60312a22d23dec6f5e7673af6f5bde719c3a9ca7f4'
+  gst_plugins_bad_sha256sum: '4a4e0b7bf84f868378c48f143a7ac3a98923b488a5b74f1a35ba46bc3c43f6b1'
+  gst_plugins_ugly_sha256sum: '550a52536962186f5488e06b5c08f31ae0f18400aee32a3385156d31cb4b1189'
+  gst_libav_sha256sum: '4b3df21fa70972a80891d2298cf32c14a62c3db4483d545c7ac018230399186b'
 
   gstreamer_plugins_rs_version: '0.15.4'
 
   qt_version: '6.12.0'
-  qtbase_sha256: 'a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307'
-  qttools_sha256: '8dab8f3611496486a470ad5f115ceea584f36bc22a2b8b6f6ebdbafbb8160693'
-  qtimageformats_sha256: '0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762'
+  qtbase_sha256sum: 'a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307'
+  qttools_sha256sum: '8dab8f3611496486a470ad5f115ceea584f36bc22a2b8b6f6ebdbafbb8160693'
+  qtimageformats_sha256sum: '0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762'
 
   kdsingleapplication_version: '1.2.1'
-  kdsingleapplication_sha256: 'e3254ce9dc5ecf6d61ef83264bc61d486a307f0e3c9ed1bb2176f068cdbcbe09'
+  kdsingleapplication_sha256sum: 'e3254ce9dc5ecf6d61ef83264bc61d486a307f0e3c9ed1bb2176f068cdbcbe09'
 
   qtsparkle_version: '1318e5b065bcd53a11fc5bc5a07498c85d274ee6'
 
   sparsehash_version: '2.0.4'
-  sparsehash_sha256: '8cd1a95827dfd8270927894eb77f62b4087735cbede953884647f16c521c7e58'
+  sparsehash_sha256sum: '8cd1a95827dfd8270927894eb77f62b4087735cbede953884647f16c521c7e58'
 
   pe_parse_version: '2.1.1'
-  pe_parse_sha256: '74c4012274e6e15128a8cf4453f63bb11155bcc14ad56ca7594a259ae8ae0202'
+  pe_parse_sha256sum: '74c4012274e6e15128a8cf4453f63bb11155bcc14ad56ca7594a259ae8ae0202'
 
   pe_util_version: 'dc5dda5cbf89b6d81becaf9d2ddceedad7988346'
 
@@ -458,7 +458,7 @@ jobs:
       - name: Verify nasm
         shell: bash
         working-directory: downloads
-        run: echo "${{env.nasm_sha256}} *${{steps.set-nasm-filename.outputs.nasm-filename}}" | sha256sum -c -
+        run: echo "${{env.nasm_sha256sum}} *${{steps.set-nasm-filename.outputs.nasm-filename}}" | sha256sum -c -
 
       - name: Create nasm directory
         shell: cmd
@@ -486,7 +486,7 @@ jobs:
       - name: Verify win_flex_bison
         shell: bash
         working-directory: downloads
-        run: echo "${{env.win_flex_bison_sha256}} *win_flex_bison-${{env.win_flex_bison_version}}.zip" | sha256sum -c -
+        run: echo "${{env.win_flex_bison_sha256sum}} *win_flex_bison-${{env.win_flex_bison_version}}.zip" | sha256sum -c -
 
       - name: Create win_flex_bison directory
         shell: cmd
@@ -510,7 +510,7 @@ jobs:
       - name: Verify pkgconf
         shell: bash
         working-directory: downloads
-        run: echo "${{env.pkgconf_sha256}} *pkgconf-${{env.pkgconf_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.pkgconf_sha256sum}} *pkgconf-${{env.pkgconf_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract pkgconf
         shell: bash
@@ -571,7 +571,7 @@ jobs:
       - name: Verify proxy-libintl
         shell: bash
         working-directory: downloads
-        run: echo "${{env.proxy_libintl_sha256}} *proxy-libintl-${{env.proxy_libintl_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.proxy_libintl_sha256sum}} *proxy-libintl-${{env.proxy_libintl_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract proxy-libintl
         shell: bash
@@ -602,7 +602,7 @@ jobs:
       - name: Verify getopt-win
         shell: bash
         working-directory: downloads
-        run: echo "${{env.getopt_win_sha256}} *getopt-win-${{env.getopt_win_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.getopt_win_sha256sum}} *getopt-win-${{env.getopt_win_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract getopt-win
         shell: bash
@@ -633,7 +633,7 @@ jobs:
       - name: Verify zlib
         shell: bash
         working-directory: downloads
-        run: echo "${{env.zlib_sha256}} *zlib-${{env.zlib_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.zlib_sha256sum}} *zlib-${{env.zlib_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract zlib
         shell: bash
@@ -673,7 +673,7 @@ jobs:
       - name: Verify openssl
         shell: bash
         working-directory: downloads
-        run: echo "${{env.openssl_sha256}} *openssl-${{env.openssl_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.openssl_sha256sum}} *openssl-${{env.openssl_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract openssl
         shell: bash
@@ -730,7 +730,7 @@ jobs:
       - name: Verify libpng
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libpng_sha256}} *libpng-${{env.libpng_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.libpng_sha256sum}} *libpng-${{env.libpng_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract libpng
         shell: bash
@@ -775,7 +775,7 @@ jobs:
       - name: Verify libjpeg-turbo
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libjpeg_turbo_sha256}} *libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.libjpeg_turbo_sha256sum}} *libjpeg-turbo-${{env.libjpeg_turbo_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract libjpeg-turbo
         shell: bash
@@ -810,7 +810,7 @@ jobs:
       - name: Verify pcre2
         shell: bash
         working-directory: downloads
-        run: echo "${{env.pcre2_sha256}} *pcre2-${{env.pcre2_version}}.tar.bz2" | sha256sum -c -
+        run: echo "${{env.pcre2_sha256sum}} *pcre2-${{env.pcre2_version}}.tar.bz2" | sha256sum -c -
 
       - name: Extract pcre2
         shell: bash
@@ -849,7 +849,7 @@ jobs:
       - name: Verify bzip2
         shell: bash
         working-directory: downloads
-        run: echo "${{env.bzip2_sha256}} *bzip2-${{env.bzip2_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.bzip2_sha256sum}} *bzip2-${{env.bzip2_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract bzip2
         shell: bash
@@ -889,7 +889,7 @@ jobs:
       - name: Verify xz
         shell: bash
         working-directory: downloads
-        run: echo "${{env.xz_sha256}} *xz-${{env.xz_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.xz_sha256sum}} *xz-${{env.xz_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract xz
         shell: bash
@@ -924,7 +924,7 @@ jobs:
       - name: Verify brotli
         shell: bash
         working-directory: downloads
-        run: echo "${{env.brotli_sha256}} *brotli-${{env.brotli_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.brotli_sha256sum}} *brotli-${{env.brotli_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract brotli
         shell: bash
@@ -967,7 +967,7 @@ jobs:
       - name: Verify uchardet
         shell: bash
         working-directory: downloads
-        run: echo "${{env.uchardet_sha256}} *uchardet-${{env.uchardet_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.uchardet_sha256sum}} *uchardet-${{env.uchardet_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract uchardet
         shell: bash
@@ -1007,7 +1007,7 @@ jobs:
       - name: Verify icu
         shell: bash
         working-directory: downloads
-        run: echo "${{env.icu4c_sha256}} *icu4c-${{env.icu4c_version}}-sources.tgz" | sha256sum -c -
+        run: echo "${{env.icu4c_sha256sum}} *icu4c-${{env.icu4c_version}}-sources.tgz" | sha256sum -c -
 
       - name: Extract icu
         shell: bash
@@ -1100,7 +1100,7 @@ jobs:
         if: matrix.arch != 'arm64'
         shell: bash
         working-directory: downloads
-        run: echo "${{env.pixman_sha256}} *pixman-${{env.pixman_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.pixman_sha256sum}} *pixman-${{env.pixman_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract pixman
         if: matrix.arch != 'arm64'
@@ -1140,7 +1140,7 @@ jobs:
       - name: Verify expat
         shell: bash
         working-directory: downloads
-        run: echo "${{env.expat_sha256}} *expat-${{env.expat_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.expat_sha256sum}} *expat-${{env.expat_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract expat
         shell: bash
@@ -1181,7 +1181,7 @@ jobs:
       - name: Verify libxml2
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libxml2_sha256}} *libxml2-${{env.libxml2_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.libxml2_sha256sum}} *libxml2-${{env.libxml2_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract libxml2
         shell: bash
@@ -1221,7 +1221,7 @@ jobs:
       - name: Verify nghttp2
         shell: bash
         working-directory: downloads
-        run: echo "${{env.nghttp2_sha256}} *nghttp2-${{env.nghttp2_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.nghttp2_sha256sum}} *nghttp2-${{env.nghttp2_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract nghttp2
         shell: bash
@@ -1286,7 +1286,7 @@ jobs:
       - name: Verify dlfcn-win32
         shell: bash
         working-directory: downloads
-        run: echo "${{env.dlfcn_sha256}} *dlfcn-win32-${{env.dlfcn_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.dlfcn_sha256sum}} *dlfcn-win32-${{env.dlfcn_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract dlfcn-win32
         shell: bash
@@ -1317,7 +1317,7 @@ jobs:
       - name: Verify libpsl
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libpsl_sha256}} *libpsl-${{env.libpsl_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.libpsl_sha256sum}} *libpsl-${{env.libpsl_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract libpsl
         shell: bash
@@ -1354,7 +1354,7 @@ jobs:
       - name: Verify orc
         shell: bash
         working-directory: downloads
-        run: echo "${{env.orc_sha256}} *orc-${{env.orc_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.orc_sha256sum}} *orc-${{env.orc_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract orc
         shell: bash
@@ -1385,7 +1385,7 @@ jobs:
       - name: Verify SQLite
         shell: bash
         working-directory: downloads
-        run: echo "${{env.sqlite3_sha256}} *sqlite-autoconf-${{env.sqlite3_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.sqlite3_sha256sum}} *sqlite-autoconf-${{env.sqlite3_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract SQLite
         shell: bash
@@ -1437,7 +1437,7 @@ jobs:
       - name: Verify GLib
         shell: bash
         working-directory: downloads
-        run: echo "${{env.glib_sha256}} *glib-${{env.glib_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.glib_sha256sum}} *glib-${{env.glib_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract GLib
         shell: bash
@@ -1475,7 +1475,7 @@ jobs:
       - name: Verify libsoup
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libsoup_sha256}} *libsoup-${{env.libsoup_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.libsoup_sha256sum}} *libsoup-${{env.libsoup_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract libsoup
         shell: bash
@@ -1541,7 +1541,7 @@ jobs:
       - name: Verify freetype
         shell: bash
         working-directory: downloads
-        run: echo "${{env.freetype_sha256}} *freetype-${{env.freetype_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.freetype_sha256sum}} *freetype-${{env.freetype_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract freetype (bootstrap)
         shell: bash
@@ -1581,7 +1581,7 @@ jobs:
       - name: Verify harfbuzz
         shell: bash
         working-directory: downloads
-        run: echo "${{env.harfbuzz_sha256}} *harfbuzz-${{env.harfbuzz_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.harfbuzz_sha256sum}} *harfbuzz-${{env.harfbuzz_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract harfbuzz
         shell: bash
@@ -1653,7 +1653,7 @@ jobs:
       - name: Verify jasper
         shell: bash
         working-directory: downloads
-        run: echo "${{env.jasper_sha256}} *jasper-${{env.jasper_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.jasper_sha256sum}} *jasper-${{env.jasper_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract jasper
         shell: bash
@@ -1694,7 +1694,7 @@ jobs:
       - name: Verify tiff
         shell: bash
         working-directory: downloads
-        run: echo "${{env.tiff_sha256}} *tiff-${{env.tiff_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.tiff_sha256sum}} *tiff-${{env.tiff_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract tiff
         shell: bash
@@ -1729,7 +1729,7 @@ jobs:
       - name: Verify libwebp
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libwebp_sha256}} *libwebp-${{env.libwebp_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.libwebp_sha256sum}} *libwebp-${{env.libwebp_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract libwebp
         shell: bash
@@ -1773,7 +1773,7 @@ jobs:
       - name: Verify libogg
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libogg_sha256}} *libogg-${{env.libogg_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.libogg_sha256sum}} *libogg-${{env.libogg_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract libogg
         shell: bash
@@ -1811,7 +1811,7 @@ jobs:
       - name: Verify libvorbis
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libvorbis_sha256}} *libvorbis-${{env.libvorbis_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.libvorbis_sha256sum}} *libvorbis-${{env.libvorbis_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract libvorbis
         shell: bash
@@ -1849,7 +1849,7 @@ jobs:
       - name: Verify flac
         shell: bash
         working-directory: downloads
-        run: echo "${{env.flac_sha256}} *flac-${{env.flac_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.flac_sha256sum}} *flac-${{env.flac_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract flac
         shell: bash
@@ -1886,7 +1886,7 @@ jobs:
       - name: Verify wavpack
         shell: bash
         working-directory: downloads
-        run: echo "${{env.wavpack_sha256}} *wavpack-${{env.wavpack_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.wavpack_sha256sum}} *wavpack-${{env.wavpack_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract wavpack
         shell: bash
@@ -1928,7 +1928,7 @@ jobs:
       - name: Verify opus
         shell: bash
         working-directory: downloads
-        run: echo "${{env.opus_sha256}} *opus-${{env.opus_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.opus_sha256sum}} *opus-${{env.opus_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract opus
         shell: bash
@@ -1971,7 +1971,7 @@ jobs:
       - name: Verify opusfile
         shell: bash
         working-directory: downloads
-        run: echo "${{env.opusfile_sha256}} *opusfile-${{env.opusfile_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.opusfile_sha256sum}} *opusfile-${{env.opusfile_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract opusfile
         shell: bash
@@ -2007,7 +2007,7 @@ jobs:
       - name: Verify speex
         shell: bash
         working-directory: downloads
-        run: echo "${{env.speex_sha256}} *speex-Speex-${{env.speex_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.speex_sha256sum}} *speex-Speex-${{env.speex_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract speex
         shell: bash
@@ -2057,7 +2057,7 @@ jobs:
       - name: Verify mpg123
         shell: bash
         working-directory: downloads
-        run: echo "${{env.mpg123_sha256}} *mpg123-${{env.mpg123_version}}.tar.bz2" | sha256sum -c -
+        run: echo "${{env.mpg123_sha256sum}} *mpg123-${{env.mpg123_version}}.tar.bz2" | sha256sum -c -
 
       - name: Extract mpg123
         shell: bash
@@ -2092,7 +2092,7 @@ jobs:
       - name: Verify lame
         shell: bash
         working-directory: downloads
-        run: echo "${{env.lame_sha256}} *lame-${{env.lame_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.lame_sha256sum}} *lame-${{env.lame_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract lame
         shell: bash
@@ -2157,7 +2157,7 @@ jobs:
       - name: Verify musepack
         shell: bash
         working-directory: downloads
-        run: echo "${{env.musepack_sha256}} *musepack_src_r${{env.musepack_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.musepack_sha256sum}} *musepack_src_r${{env.musepack_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract musepack
         shell: bash
@@ -2211,7 +2211,7 @@ jobs:
       - name: Verify libopenmpt
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libopenmpt_sha256}} *libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip" | sha256sum -c -
+        run: echo "${{env.libopenmpt_sha256sum}} *libopenmpt-${{env.libopenmpt_version}}+release.msvc.zip" | sha256sum -c -
 
       - name: Create libopenmpt directory
         shell: cmd
@@ -2256,7 +2256,7 @@ jobs:
       - name: Verify libgme
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libgme_sha256}} *libgme-${{env.libgme_version}}-src.tar.gz" | sha256sum -c -
+        run: echo "${{env.libgme_sha256sum}} *libgme-${{env.libgme_version}}-src.tar.gz" | sha256sum -c -
 
       - name: Extract libgme
         shell: bash
@@ -2291,7 +2291,7 @@ jobs:
       - name: Verify faad2
         shell: bash
         working-directory: downloads
-        run: echo "${{env.faad2_sha256}} *faad2-${{env.faad2_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.faad2_sha256sum}} *faad2-${{env.faad2_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract faad2
         shell: bash
@@ -2328,7 +2328,7 @@ jobs:
       - name: Verify faac
         shell: bash
         working-directory: downloads
-        run: echo "${{env.faac_sha256}} *faac-${{env.faac_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.faac_sha256sum}} *faac-${{env.faac_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract faac
         shell: bash
@@ -2363,7 +2363,7 @@ jobs:
       - name: Verify fdk-aac
         shell: bash
         working-directory: downloads
-        run: echo "${{env.fdk_aac_sha256}} *fdk-aac-${{env.fdk_aac_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.fdk_aac_sha256sum}} *fdk-aac-${{env.fdk_aac_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract fdk-aac
         shell: bash
@@ -2398,7 +2398,7 @@ jobs:
       - name: Verify utfcpp
         shell: bash
         working-directory: downloads
-        run: echo "${{env.utfcpp_sha256}} *utfcpp-${{env.utfcpp_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.utfcpp_sha256sum}} *utfcpp-${{env.utfcpp_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract utfcpp
         shell: bash
@@ -2429,7 +2429,7 @@ jobs:
       - name: Verify TagLib
         shell: bash
         working-directory: downloads
-        run: echo "${{env.taglib_sha256}} *taglib-${{env.taglib_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.taglib_sha256sum}} *taglib-${{env.taglib_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract TagLib
         shell: bash
@@ -2464,7 +2464,7 @@ jobs:
       - name: Verify libbs2b
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libbs2b_sha256}} *libbs2b-${{env.libbs2b_version}}.tar.bz2" | sha256sum -c -
+        run: echo "${{env.libbs2b_sha256sum}} *libbs2b-${{env.libbs2b_version}}.tar.bz2" | sha256sum -c -
 
       - name: Extract libbs2b
         shell: bash
@@ -2509,7 +2509,7 @@ jobs:
       - name: Verify libebur128
         shell: bash
         working-directory: downloads
-        run: echo "${{env.libebur128_sha256}} *libebur128-${{env.libebur128_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.libebur128_sha256sum}} *libebur128-${{env.libebur128_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract libebur128
         shell: bash
@@ -2557,7 +2557,7 @@ jobs:
         if: matrix.arch == 'x86_64'
         shell: bash
         working-directory: downloads
-        run: echo "${{env[format('fftw_mingw_{0}_sha256', env.buildtype)]}} *fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env[format('fftw_mingw_{0}_sha256sum', env.buildtype)]}} *fftw-x86_64-w64-mingw32-${{env.buildtype}}-${{env.fftw_mingw_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract FFTW (x86_64)
         if: matrix.arch == 'x86_64'
@@ -2607,7 +2607,7 @@ jobs:
         if: matrix.arch == 'arm64'
         shell: bash
         working-directory: downloads
-        run: echo "${{env.fftw_source_sha256}} *fftw-${{env.fftw_source_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.fftw_source_sha256sum}} *fftw-${{env.fftw_source_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract FFTW (arm64)
         if: matrix.arch == 'arm64'
@@ -2673,7 +2673,7 @@ jobs:
       - name: Verify Chromaprint
         shell: bash
         working-directory: downloads
-        run: echo "${{env.chromaprint_sha256}} *chromaprint-${{env.chromaprint_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.chromaprint_sha256sum}} *chromaprint-${{env.chromaprint_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract Chromaprint
         shell: bash
@@ -2714,7 +2714,7 @@ jobs:
       - name: Verify GStreamer
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gstreamer_sha256}} *gstreamer-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gstreamer_sha256sum}} *gstreamer-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract GStreamer
         shell: bash
@@ -2772,7 +2772,7 @@ jobs:
       - name: Verify gst-plugins-base
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gst_plugins_base_sha256}} *gst-plugins-base-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gst_plugins_base_sha256sum}} *gst-plugins-base-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract gst-plugins-base
         shell: bash
@@ -2838,7 +2838,7 @@ jobs:
       - name: Verify gst-plugins-good
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gst_plugins_good_sha256}} *gst-plugins-good-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gst_plugins_good_sha256sum}} *gst-plugins-good-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract gst-plugins-good
         shell: bash
@@ -2916,7 +2916,7 @@ jobs:
       - name: Verify gst-plugins-bad
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gst_plugins_bad_sha256}} *gst-plugins-bad-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gst_plugins_bad_sha256sum}} *gst-plugins-bad-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract gst-plugins-bad
         shell: bash
@@ -2988,7 +2988,7 @@ jobs:
       - name: Verify gst-plugins-ugly
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gst_plugins_ugly_sha256}} *gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gst_plugins_ugly_sha256sum}} *gst-plugins-ugly-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract gst-plugins-ugly
         shell: bash
@@ -3034,7 +3034,7 @@ jobs:
       - name: Verify gst-libav
         shell: bash
         working-directory: downloads
-        run: echo "${{env.gst_libav_sha256}} *gst-libav-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.gst_libav_sha256sum}} *gst-libav-${{env.gstreamer_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract gst-libav
         shell: bash
@@ -3106,7 +3106,7 @@ jobs:
       - name: Verify qtbase
         shell: bash
         working-directory: downloads
-        run: echo "${{env.qtbase_sha256}} *qtbase-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.qtbase_sha256sum}} *qtbase-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract qtbase
         shell: bash
@@ -3190,7 +3190,7 @@ jobs:
       - name: Verify qttools
         shell: bash
         working-directory: downloads
-        run: echo "${{env.qttools_sha256}} *qttools-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.qttools_sha256sum}} *qttools-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract qttools
         shell: bash
@@ -3224,7 +3224,7 @@ jobs:
       - name: Verify qtimageformats
         shell: bash
         working-directory: downloads
-        run: echo "${{env.qtimageformats_sha256}} *qtimageformats-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
+        run: echo "${{env.qtimageformats_sha256sum}} *qtimageformats-everywhere-src-${{env.qt_version}}.tar.xz" | sha256sum -c -
 
       - name: Extract qtimageformats
         shell: bash
@@ -3292,7 +3292,7 @@ jobs:
       - name: Verify KDSingleApplication
         shell: bash
         working-directory: downloads
-        run: echo "${{env.kdsingleapplication_sha256}} *kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.kdsingleapplication_sha256sum}} *kdsingleapplication-${{env.kdsingleapplication_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract KDSingleApplication
         shell: bash
@@ -3320,7 +3320,7 @@ jobs:
       - name: Verify sparsehash
         shell: bash
         working-directory: downloads
-        run: echo "${{env.sparsehash_sha256}} *sparsehash-${{env.sparsehash_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.sparsehash_sha256sum}} *sparsehash-${{env.sparsehash_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract sparsehash
         shell: bash
@@ -3363,7 +3363,7 @@ jobs:
       - name: Verify pe-parse
         shell: bash
         working-directory: downloads
-        run: echo "${{env.pe_parse_sha256}} *pe-parse-${{env.pe_parse_version}}.tar.gz" | sha256sum -c -
+        run: echo "${{env.pe_parse_sha256sum}} *pe-parse-${{env.pe_parse_version}}.tar.gz" | sha256sum -c -
 
       - name: Extract pe-parse
         shell: bash
