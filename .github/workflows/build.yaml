@@ -83,7 +83,7 @@ env:
   libsoup_version: '3.8.1'
   libsoup_sha256sum: '5013dcef9136f6f861e6529fca578af50c1f52a39219027fb5aff652d1371a04'
 
-  glib_networking_version: '66c888f74f4b1fda0b0a53038d13d643be27492f'
+  glib_networking_version: 'f8f3c42032e70067ab03ae16f407b1cde7c8f4f7'
 
   freetype_version: '2.15.0'
   freetype_sha256sum: '9186627467a616d9a9e3e574748ac0c45fa77398e6364edef3041a8ba8d92f64'
