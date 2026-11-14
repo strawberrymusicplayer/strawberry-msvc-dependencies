@@ -10,8 +10,8 @@ env:
   win_flex_bison_version: '2.5.25'
   win_flex_bison_sha256sum: '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'
 
-  pkgconf_version: '3.0.10'
-  pkgconf_sha256sum: '11818a25f2730132f3b258ac8be4e82f83b9db03a1a99a6c29cd01b94fc9d310'
+  pkgconf_version: '3.0.11'
+  pkgconf_sha256sum: 'd2c8a0965d5b80dcc454cc999ad5edb8bfbc4d8e65cde7a6f19a5cb7ecaf3377'
 
   proxy_libintl_version: '0.5'
   proxy_libintl_sha256sum: 'f7a1cbd7579baaf575c66f9d99fb6295e9b0684a28b095967cfda17857595303'
