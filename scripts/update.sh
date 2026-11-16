@@ -381,6 +381,9 @@ function update_package() {
     "chromaprint")
       package_version_latest=$(latest_github_release "acoustid" "chromaprint")
       ;;
+    "libcdio")
+      package_version_latest=$(latest_github_release "libcdio" "libcdio-C")
+      ;;
     "gstreamer")
       package_version_latest=$(curl ${curl_options} 'https://gstreamer.freedesktop.org/src/gstreamer' | sed -n "s,.*gstreamer-\([0-9]\.[0-9][02468]\.[0-9]*\)\.tar\.xz.*,\\1,p" | sort -V | tail -1)
       ;;
@@ -633,6 +636,7 @@ function package_downloads() {
       echo "fftw_mingw_release_sha256sum https://github.com/strawberrymusicplayer/fftw3-mingw-cross/releases/download/${v}/fftw-x86_64-w64-mingw32-release-${v}.tar.xz"
       ;;
     "chromaprint") echo "chromaprint_sha256sum https://github.com/acoustid/chromaprint/releases/download/v${v}/chromaprint-${v}.tar.gz" ;;
+    "libcdio") echo "libcdio_sha256sum https://github.com/libcdio/libcdio-C/releases/download/${v}/libcdio-${v}.tar.bz2" ;;
     "gstreamer")
       echo "gstreamer_sha256sum https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-${v}.tar.xz"
       echo "gst_plugins_base_sha256sum https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${v}.tar.xz"
