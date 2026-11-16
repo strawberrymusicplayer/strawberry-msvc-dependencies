@@ -169,6 +169,9 @@ env:
   chromaprint_version: '1.6.2'
   chromaprint_sha256sum: 'd54ada62c16b2db396d3251ec54fc7a58909c163131a1cfcf7fa6407dbc14360'
 
+  libcdio_version: '2.4.0'
+  libcdio_sha256sum: '8e6a305f81e45a78b41ce696d34497cc208d97075469d7304c11a6d44bf006ac'
+
   gstreamer_version: '1.28.9'
   gstreamer_sha256sum: '6dbf744f583131a34845cc641e803843766a9ba80ce00378a9043fd6d8d5fb38'
   gst_plugins_base_sha256sum: 'c1fda668b520e6aef763c0eb962c032c9fe52bce322e8b00c69b4e9e847bddc1'
@@ -2700,6 +2703,48 @@ jobs:
         run: pkg-config libchromaprint --libs --cflags
 
 
+      - name: Download libcdio
+        shell: bash
+        working-directory: downloads
+        run: curl ${{env.curl_options}} https://github.com/libcdio/libcdio-C/releases/download/${{env.libcdio_version}}/libcdio-${{env.libcdio_version}}.tar.bz2 || curl ${{env.curl_options}} https://ftp.gnu.org/gnu/libcdio/libcdio-${{env.libcdio_version}}.tar.bz2 || curl ${{env.curl_options}} https://packages.strawberrymusicplayer.org/libcdio-${{env.libcdio_version}}.tar.bz2
+
+      - name: Verify libcdio
+        shell: bash
+        working-directory: downloads
+        run: echo "${{env.libcdio_sha256sum}} *libcdio-${{env.libcdio_version}}.tar.bz2" | sha256sum -c -
+
+      - name: Extract libcdio
+        shell: bash
+        working-directory: build
+        run: tar -xf ../downloads/libcdio-${{env.libcdio_version}}.tar.bz2
+
+      - name: Patch libcdio
+        shell: bash
+        working-directory: build/libcdio-${{env.libcdio_version}}
+        run: |
+          patch -p1 < ../../patches/libcdio-cmake.patch
+          patch -p1 < ../../patches/libcdio-discmode.patch
+
+      - name: Configure libcdio
+        shell: cmd
+        working-directory: build/libcdio-${{env.libcdio_version}}
+        run: cmake --log-level="${{env.cmake_loglevel}}" -S . -B build -G "${{env.cmake_generator}}" -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}" -DCMAKE_INSTALL_PREFIX="${{env.prefix_path_backslash}}" -DBUILD_SHARED_LIBS=ON
+
+      - name: Build libcdio
+        shell: cmd
+        working-directory: build/libcdio-${{env.libcdio_version}}/build
+        run: cmake --build .
+
+      - name: Install libcdio
+        shell: cmd
+        working-directory: build/libcdio-${{env.libcdio_version}}/build
+        run: cmake --install .
+
+      - name: Check libcdio
+        shell: cmd
+        run: pkg-config libcdio --libs --cflags
+
+
       - name: Cleanup build directory
         shell: bash
         working-directory: build
@@ -3015,6 +3060,7 @@ jobs:
           -Ddoc=disabled
           -Dgpl=enabled
           -Dasfdemux=enabled
+          -Dcdio=enabled
           build
 
       - name: Build gst-plugins-ugly
@@ -3495,6 +3541,7 @@ jobs:
           echo "* FFTW ${{env.fftw_source_version}}" >> "${{env.release_notes_file}}"
           echo "* FFmpeg ${{env.ffmpeg_version}}" >> "${{env.release_notes_file}}"
           echo "* Chromaprint ${{env.chromaprint_version}}" >> "${{env.release_notes_file}}"
+          echo "* libcdio ${{env.libcdio_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer ${{env.gstreamer_version}}" >> "${{env.release_notes_file}}"
           echo "* GStreamer Rust Plugins ${{env.gstreamer_plugins_rs_version}}" >> "${{env.release_notes_file}}"
           echo "* Qt ${{env.qt_version}}" >> "${{env.release_notes_file}}"
