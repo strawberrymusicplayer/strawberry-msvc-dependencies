@@ -52,8 +52,8 @@ env:
   pixman_version: '0.46.4'
   pixman_sha256sum: 'd09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c'
 
-  expat_version: '2.10.0'
-  expat_sha256sum: 'c624ba2998fc65df1163a49641ff3f9ab73138b11641d92c86bee0fb01b1bc7f'
+  expat_version: '2.11.0'
+  expat_sha256sum: '61e7614b602201c28a189dafee78f5bceaee192bbde46a930752ff09cf5542fa'
 
   libxml2_version: '2.15.4'
   libxml2_sha256sum: '98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821'
