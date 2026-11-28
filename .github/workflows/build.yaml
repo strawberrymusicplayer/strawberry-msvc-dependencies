@@ -182,10 +182,10 @@ env:
 
   gstreamer_plugins_rs_version: '0.15.4'
 
-  qt_version: '6.12.0'
-  qtbase_sha256sum: 'a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307'
-  qttools_sha256sum: '8dab8f3611496486a470ad5f115ceea584f36bc22a2b8b6f6ebdbafbb8160693'
-  qtimageformats_sha256sum: '0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762'
+  qt_version: '6.12.1'
+  qtbase_sha256sum: 'cd837bb9fd631e20439a04eaa0c2f252f19ad92fdf5adf10229d0fbc2fab2d53'
+  qttools_sha256sum: '0d3d1a7eba32d1477f36211fb527c2c75f60cb10f3ddc41fdb804fd94147b640'
+  qtimageformats_sha256sum: '20a40732228cf0734c5b2335d4a816c1cab97dcdcc6d13073c0b1065e1c6c608'
 
   kdsingleapplication_version: '1.2.1'
   kdsingleapplication_sha256sum: 'e3254ce9dc5ecf6d61ef83264bc61d486a307f0e3c9ed1bb2176f068cdbcbe09'
