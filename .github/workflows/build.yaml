@@ -7,8 +7,8 @@ env:
 
   yasm_version: '09d1bc90ed53d0ec3e9b074f111058cbf262ed56'
 
-  win_flex_bison_version: '2.5.25'
-  win_flex_bison_sha256sum: '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'
+  win_flex_bison_version: '2.5.26'
+  win_flex_bison_sha256sum: 'd6b348e63ef2a1101298ace92f70db4ce917af9ac85afd4e822bea9aa7f9e18a'
 
   pkgconf_version: '3.0.11'
   pkgconf_sha256sum: 'd2c8a0965d5b80dcc454cc999ad5edb8bfbc4d8e65cde7a6f19a5cb7ecaf3377'
